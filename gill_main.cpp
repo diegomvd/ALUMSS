@@ -1,4 +1,4 @@
-// to compile: c++ gill_main.cpp gill_functions.cpp cokus3.c -o gillespie-ses -lgsl -lgslcblas -lm -Wall -Weffc++
+// to compile: c++ gill_main.cpp gill_functions.cpp cokus3.c -o gillespie-ses -lgsl -lgslcblas -lm -Wall -Weffc++ --std=c++17 -lstdc++fs
 
 #include "gill_functions.h"
 
@@ -13,7 +13,8 @@
 #include <sstream>
 #include <stdlib.h> //Allows DOS Commands (I only use "CLS" to clear the screen)
 #include <iterator>
-
+#include <filesystem>
+#include <ctime>
 #include <math.h>
 #include <chrono>
 
@@ -21,6 +22,8 @@
 #include <gsl/gsl_randist.h>
 
 using namespace std;
+
+namespace fs = std::filesystem;
 
 extern double ranMT(void);
 extern void seedMT(unsigned long int);
@@ -56,7 +59,7 @@ int main(int argc, const char * argv[]){
   double cg0,r0,y0; // per capita consumption, population growth rate and baseline agricultural yield
   double a; // likelihood of restoring/converting
   double w; // agricultural clustering parameter
-  double m; // maintenance cost of a cropped patch
+  double m; // maintenance cost relative to production of a cropped patch
   double g; // growth coefficient of action probability in function of consumption deficit
   double Ta; // mean abandonment time
   double phi; // relative contribution of natural land to agriculture
@@ -92,55 +95,72 @@ int main(int argc, const char * argv[]){
   // CREATION OF DATA FILES
   /////////////////////////////////////////////////////////////////////////////
 
-  char filename[200];
-  if(argc>1){
-
-              strcpy(filename,"_T_"); strcat(filename, argv[1]);
-              strcat(filename,"_dtp_"); strcat(filename, argv[2]);
-              strcat(filename,"_n_"); strcat(filename, argv[3]);
-              strcat(filename,"_a0_"); strcat(filename, argv[4]);
-              strcat(filename,"_cg0_"); strcat(filename, argv[5]);
-              strcat(filename,"_r0_"); strcat(filename, argv[6]);
-              strcat(filename,"_y0_"); strcat(filename, argv[7]);
-              strcat(filename,"_a_"); strcat(filename, argv[8]);
-              strcat(filename,"_w_"); strcat(filename, argv[9]);
-              strcat(filename,"_m_"); strcat(filename, argv[10]);
-              strcat(filename,"_g_"); strcat(filename, argv[11]);
-              strcat(filename,"_Ta_"); strcat(filename, argv[12]);
-              strcat(filename,"_phi_"); strcat(filename, argv[13]);
-              strcat(filename,"_Tr_"); strcat(filename, argv[14]);
-              strcat(filename,"_Td_"); strcat(filename, argv[15]);
-              strcat(filename,"_dtsave_"); strcat(filename, argv[16]);
-
-              strcat(filename,".dat");
+  //creating data directory with today's date
+  auto tt = time(nullptr);
+  auto tm = *localtime(&tt);
+  ostringstream oss;
+  oss << put_time(&tm, "%d-%m-%Y");
+  string str_date = oss.str();
+  string dirname = "DATA_"+str_date;
+  // not using this: adding a count if several simulation runs on the same day
+  // unsigned int count=0;
+  // string temp_dirname = dirname+"_"+to_string(count);
+  // while (fs::exists(temp_dirname)){
+  //   count+=1;
+  //   temp_dirname=dirname+to_string(count);
+  // }
+  // dirname=temp_dirname;
+  if (fs::exists(dirname)){
+    // don't need to create it
+  }
+  else{
+    fs::create_directory(dirname);
   }
 
-  char filename_POPU[200];
-  strcpy(filename_POPU,"DATA_POPU"); strcat(filename_POPU,filename);
+  //creating vector of strings to store all the input arguments
+  vector<string> allArgs(argv,argv+argc);
+  string filename;
+  if(argc>1){
+    filename = "_T_"+allArgs[1];
+    filename += "_dtp_"+allArgs[2];
+    filename += "_n_"+allArgs[3];
+    filename += "_a0_"+allArgs[4];
+    filename += "_cg0_"+allArgs[5];
+    filename += "_r0_"+allArgs[6];
+    filename += "_y0_"+allArgs[7];
+    filename += "_a_"+allArgs[8];
+    filename += "_w_"+allArgs[9];
+    filename += "_m_"+allArgs[10];
+    filename += "_g_"+allArgs[11];
+    filename += "_Ta_"+allArgs[12];
+    filename += "_phi_"+allArgs[13];
+    filename += "_Tr_"+allArgs[14];
+    filename += "_Td_"+allArgs[15];
+    filename += "_dtsave_"+allArgs[16];
+    filename+=".dat";
+  }
+
+  string filename_POPU=dirname+"/"+"DATA_POPU"+filename;
   ofstream tofile_popu(filename_POPU);
   tofile_popu.precision(5);
   tofile_popu.setf(ios::scientific,ios::floatfield);
 
-  char filename_LAND[200];
-  strcpy(filename_LAND,"DATA_LAND"); strcat(filename_LAND,filename);
+  string filename_LAND=dirname+"/"+"DATA_LAND"+filename;
   ofstream tofile_land(filename_LAND);
   tofile_land.precision(5);
   tofile_land.setf(ios::scientific,ios::floatfield);
 
-  char filename_EVNT[200];
-  strcpy(filename_EVNT,"DATA_EVNT"); strcat(filename_EVNT,filename);
+  string filename_EVNT=dirname+"/"+"DATA_EVNT"+filename;
   ofstream tofile_evnt(filename_EVNT);
   tofile_evnt.precision(5);
   tofile_evnt.setf(ios::scientific,ios::floatfield);
 
-  char filename_CLUS[200];
-  strcpy(filename_CLUS,"DATA_CLUS"); strcat(filename_CLUS,filename);
+  string filename_CLUS=dirname+"/"+"DATA_CLUS"+filename;
   ofstream tofile_clus(filename_CLUS);
   tofile_clus.precision(5);
   tofile_clus.setf(ios::scientific,ios::floatfield);
 
-  char filename_CONF[200];
-  strcpy(filename_CONF,"DATA_CONF"); strcat(filename_CONF,filename);
+  string filename_CONF=dirname+"/"+"DATA_CONF"+filename;
   ofstream tofile_conf(filename_CONF);
   tofile_conf.precision(5);
   tofile_conf.setf(ios::scientific,ios::floatfield);
@@ -192,9 +212,11 @@ int main(int argc, const char * argv[]){
   }
   else{
     initializeLandscape(n,a0,r,landscape);
-    initializeProduction(n,y0,phi,landscape,agricultural_production);
+    getNaturalCluster(n, landscape, natural_components);
+    initializeProduction(n,y0,phi,landscape,natural_components,agricultural_production);
     population=initializePopulation(cg0,agricultural_production);
   }
+
   /////////////////////////////////////////////////////////////////////////////
   // BEGIN OF SIMULATION
   /////////////////////////////////////////////////////////////////////////////
@@ -215,7 +237,6 @@ int main(int argc, const char * argv[]){
   j=0;
   // entering the time loop
   while(t<SimTime){
-
     /*
     if (t>SimTime/5*j){
       auto stop1 = chrono::high_resolution_clock::now();
@@ -237,7 +258,7 @@ int main(int argc, const char * argv[]){
     consumption_deficit = population*cg0 - total_agricultural_production;
 
     // calculating the propensity vector
-    getPropensityVector(n, Tr, Td, w, a, g, m, Ta,consumption_deficit, landscape, natural_components, agricultural_production, propensity_vector);
+    getPropensityVector(n, Tr, Td, w, a, g, m, y0, Ta,consumption_deficit, landscape, natural_components, agricultural_production, propensity_vector);
 
     // calculating the time until next reaction
     dtg=-1/propensity_vector.back()*log(ranMT());

@@ -34,10 +34,9 @@ void getNeighbours(unsigned int i, unsigned int n, vector<unsigned int> &list){
   else if(i==n*(n-1)) {list={n*n-1,n*(n-2),n*(n-1)+1,0}; }
   else if(i<n) {list={i-1,i+(n-1)*n,i+1,i+n}; }
   else if(i%n==0) {list={i+n-1,i-n,i+1,i+n}; }
-  else if(i>(n-1)*n-1) {list={i-1,i-n,i+1,i-n*(n-1)}; }
-  else if( (i+1)%n==0 ) {list={i-1,i-n,i-(n-1),i+n}; }
-  else {list={i-1,i-n,i+1,i+n}; }
-
+  else if(i>(n-1)*n-1) {list={i-1,i-n,i+1,i-n*(n-1)};}
+  else if( (i+1)%n==0 ) {list={i-1,i-n,i-(n-1),i+n};}
+  else {list={i-1,i-n,i+1,i+n};}
   return;
 }
 
@@ -368,7 +367,7 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void getAbandonmentPropensity(unsigned int n, double m, double Ta, const vector<double> &agricultural_production, vector<double> &abandonment_propensity){
+void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, const vector<double> &agricultural_production, vector<double> &abandonment_propensity){
   /*
   fills the abandonment_propensity vector. the probability per unit time is
   proportional to the maintenance deficit, which is the difference between
@@ -379,7 +378,7 @@ void getAbandonmentPropensity(unsigned int n, double m, double Ta, const vector<
   double maintenance_deficit;
   for (ix=0; ix<agricultural_production.size(); ++ix){
     if (agricultural_production[ix]>0){ // this means patch ix is cropped
-      maintenance_deficit=m-agricultural_production[ix];
+      maintenance_deficit=m*y0 - agricultural_production[ix];
       if (maintenance_deficit>0){
         abandonment_propensity.push_back(maintenance_deficit/Ta);
       }
@@ -397,7 +396,7 @@ void getAbandonmentPropensity(unsigned int n, double m, double Ta, const vector<
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void getPropensityVector(unsigned int n, double Tr, double Td, double w, double a, double g, double m, double Ta, double consumption_deficit, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, const vector<double> &agricultural_production, vector<double> &propensity_vector){
+void getPropensityVector(unsigned int n, double Tr, double Td, double w, double a, double g, double m, double y0, double Ta, double consumption_deficit, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, const vector<double> &agricultural_production, vector<double> &propensity_vector){
   /*
   calls all the functions to calculate the propensity of each event and merges
   them in a single propensity vector that can be used to run the gillespie algo
@@ -412,7 +411,7 @@ void getPropensityVector(unsigned int n, double Tr, double Td, double w, double 
   getRecoveryPropensity(n,Tr,landscape,natural_components,recovery_propensity);
   getDegradationPropensity(n,Td,landscape,natural_components,degradation_propensity);
   getActionPropensity(n, w, a, g,consumption_deficit,landscape,cropping_propensity, restoring_propensity);
-  getAbandonmentPropensity(n,m,Ta,agricultural_production,abandonment_propensity);
+  getAbandonmentPropensity(n,m,y0,Ta,agricultural_production,abandonment_propensity);
 
   // clearing the previous propensity vector to refill it
   propensity_vector.clear();
@@ -461,7 +460,7 @@ void initializeLandscape(unsigned int n, double a0, gsl_rng  *r, vector<unsigned
     land4crop.push_back(ix);
   }
 
-  unsigned int na0=(unsigned int)a0*n*n;
+  unsigned int na0=(unsigned int) (a0*n*n);
   for (ix=0 ; ix<na0 ; ++ix){
     // selecting random location for initial cropped patches
     ix_land4crop = gsl_rng_uniform_int(r, land4crop.size() );
@@ -475,7 +474,7 @@ void initializeLandscape(unsigned int n, double a0, gsl_rng  *r, vector<unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void initializeProduction(unsigned int n, double y0, double phi, const vector<unsigned int> &landscape, vector<double> &agricultural_production){
+void initializeProduction(unsigned int n, double y0, double phi, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, vector<double> &agricultural_production){
   /*given a landscape structure this initializes agricultural production vector
   */
 
@@ -536,7 +535,6 @@ double populationEquation(double r0, double cg0, double population, double agric
   /*
   returns the expression of the population ODE
   */
-
 
   return r0*population*(1-cg0*population/agricultural_production);
 }

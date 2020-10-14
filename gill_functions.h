@@ -20,13 +20,13 @@ void getDegradationPropensity(unsigned int n, double Td, const vector<unsigned i
 // calculates the action probability per unit time for each patch
 void getActionPropensity(unsigned int n, double w, double a, double g, double consumption_deficit,const vector<unsigned int> &landscape, vector<double> &cropping_propensity, vector<double> &restoring_propensity);
 // calculates the abandonment probabilty per unit time of each patch
-void getAbandonmentPropensity(unsigned int n, double m, double Ta, const vector<double> &agricultural_production, vector<double> &abandonment_propensity);
+void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, const vector<double> &agricultural_production, vector<double> &abandonment_propensity);
 // merges all the probabilites per unit time in a single vector with a cummulative sum
-void getPropensityVector(unsigned int n, double Tr, double Td, double w, double a, double g, double m, double Ta, double consumption_deficit, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, const vector<double> &agricultural_production, vector<double> &propensity_vector);
+void getPropensityVector(unsigned int n, double Tr, double Td, double w, double a, double g, double m, double y0, double Ta, double consumption_deficit, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, const vector<double> &agricultural_production, vector<double> &propensity_vector);
 // initializes the landscape vector
 void initializeLandscape(unsigned int n, double a0, gsl_rng  *r, vector<unsigned int> &landscape);
 // initializes the agricultural production vector
-void initializeProduction(unsigned int n, double y0, double phi, const vector<unsigned int> &landscape, vector<double> &agricultural_production);
+void initializeProduction(unsigned int n, double y0, double phi, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, vector<double> &agricultural_production);
 // initializes the population density
 double initializePopulation(double cg0, const vector<double> &agricultural_production);
 // calculates the agricultural production
