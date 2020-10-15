@@ -13,7 +13,7 @@ filesland=[]
 filesevnt=[]
 filesclus=[]
 filesclux=[]
-for file in glob.glob("*.dat"):
+for file in glob.glob("DATA_14-10-2020/*.dat"):
     if "DATA_POPU" in file:
         filespop.append(file)
         count+=1
@@ -90,10 +90,10 @@ for ix in range(count):
 
     a=filespop[ix][ix1:ix2]
 
-    ix1=filespop[ix].find("_phi_")+5
-    ix2=filespop[ix].find("_Tr_")
+    ix1=filespop[ix].find("_m_")+3
+    ix2=filespop[ix].find("_g_")
 
-    w=filespop[ix][ix1:ix2]
+    m=filespop[ix][ix1:ix2]
 
     datapop=np.loadtxt(filespop[ix])
     dataland=np.loadtxt(filesland[ix])
@@ -117,7 +117,7 @@ for ix in range(count):
     axs[1].set_xlabel("Time")
 
     axs[1].legend()
-    axs[0].set_title("Socio-ecological dynamics" + str(a))
+    axs[0].set_title("a="+str(a)+", m="+str(m))
     plt.savefig("time_dynamics.jpg", dpi=500)
     plt.show()
 
