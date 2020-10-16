@@ -10,14 +10,14 @@
 
 COMMENT1
 
-# threshold on sustainability of cropped patch at 0.5 exposure to nature
-./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.0 0 2.2 0.1 1 3 1.5 50 1 &
-./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.1 0 2.2 0.1 1 3 1.5 50 1 &
-./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.2 0 2.2 0.1 1 3 1.5 50 1 &
-
-# threshold on sustainability of cropped patch at 0.75 exposure to nature
+# test for effect of global maintenance
+./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.0 0 1.1 0.1 1 3 1.5 50 1 &
 ./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.0 0 1.6 0.1 1 3 1.5 50 1 &
-./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.1 0 1.6 0.1 1 3 1.5 50 1 &
-./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.2 0 1.6 0.1 1 3 1.5 50 1 &
+./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.0 0 2.0 0.1 1 3 1.5 50 1 &
+
+# # threshold on sustainability of cropped patch at 0.75 exposure to nature
+# ./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.0 0 1.6 0.1 1 3 1.5 50 1 &
+# ./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.1 0 1.6 0.1 1 3 1.5 50 1 &
+# ./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.2 0 1.6 0.1 1 3 1.5 50 1 &
 
 # ./gillespie-ses 3000 0.1 40 1 1 1 5 4.0 0 1 0.1 1 3 1.5 50 1 &

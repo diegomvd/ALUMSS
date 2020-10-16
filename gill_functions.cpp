@@ -374,23 +374,46 @@ void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, co
   a patch's maintenance cost and its production
   */
 
+  unsigned int local=0;
   unsigned int ix;
-  double maintenance_deficit;
-  for (ix=0; ix<agricultural_production.size(); ++ix){
-    if (agricultural_production[ix]>0){ // this means patch ix is cropped
-      maintenance_deficit=m*y0 - agricultural_production[ix];
-      if (maintenance_deficit>0){
-        abandonment_propensity.push_back(maintenance_deficit/Ta);
+  double maintenance_deficit=0;
+  if (local==1){
+    for (ix=0; ix<agricultural_production.size(); ++ix){
+      if (agricultural_production[ix]>0){ // this means patch ix is cropped
+        maintenance_deficit=m*y0 - agricultural_production[ix];
+        if (maintenance_deficit>0){
+          abandonment_propensity.push_back(maintenance_deficit/Ta);
+        }
+        else{
+          abandonment_propensity.push_back(0);
+        }
       }
-      else{
+      else{ // this means patch ix is not cropped
         abandonment_propensity.push_back(0);
       }
     }
-    else{ // this means patch ix is not cropped
+  }
+  else{
+    // calculate global maintenance deficit
+    for (ix=0; ix<agricultural_production.size(); ++ix){
+      if (agricultural_production[ix]>0){ // this means patch ix is cropped
+        maintenance_deficit+=mc*y0-agricultural_production[ix]; // getting the total deficit
+      }
+    }
+    if (maintenance_deficit>0){
+      for(ix=0; ix<agricultural_production.size(); ++ix){
+        if (agricultural_production[ix]>0){
+          abandonment_propensity.push_back(m*y0/maintenance_deficit/Ta);
+        }
+        else{
+          abandonment_propensity.push_back(0);
+        }
+      }
+    }
+    else{
       abandonment_propensity.push_back(0);
     }
   }
-
   return;
 }
 
