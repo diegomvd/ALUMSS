@@ -13,7 +13,7 @@ filesland=[]
 filesevnt=[]
 filesclus=[]
 filesclux=[]
-for file in glob.glob("DATA_14-10-2020/*.dat"):
+for file in glob.glob("*.dat"):
     if "DATA_POPU" in file:
         filespop.append(file)
         count+=1
