@@ -377,6 +377,7 @@ void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, co
   unsigned int local=0;
   unsigned int ix;
   double maintenance_deficit=0;
+  double maintenance_cost=0;
   if (local==1){
     for (ix=0; ix<agricultural_production.size(); ++ix){
       if (agricultural_production[ix]>0){ // this means patch ix is cropped
@@ -397,13 +398,14 @@ void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, co
     // calculate global maintenance deficit
     for (ix=0; ix<agricultural_production.size(); ++ix){
       if (agricultural_production[ix]>0){ // this means patch ix is cropped
-        maintenance_deficit+=mc*y0-agricultural_production[ix]; // getting the total deficit
+        maintenance_deficit+=m*y0-agricultural_production[ix]; // getting the total deficit
+        maintenance_cost+=m*y0;
       }
     }
     if (maintenance_deficit>0){
       for(ix=0; ix<agricultural_production.size(); ++ix){
         if (agricultural_production[ix]>0){
-          abandonment_propensity.push_back(m*y0/maintenance_deficit/Ta);
+          abandonment_propensity.push_back(m/maintenance_cost/Ta);
         }
         else{
           abandonment_propensity.push_back(0);
