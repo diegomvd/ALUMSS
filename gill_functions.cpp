@@ -329,20 +329,20 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
     probability per unit time of action given the consumption deficit
     */
     // getting natural area to estimate cropping probability
-    double natural_area=0;
-    for (ix=0; ix<landscape.size(); ++ix){
-      if (landscape[ix]==0){
-        natural_area+=1;
-      }
-    }
-    natural_area=natural_area/landscape.size();
+    // double natural_area=0;
+    // for (ix=0; ix<landscape.size(); ++ix){
+    //   if (landscape[ix]==0){
+    //     natural_area+=1;
+    //   }
+    // }
+    // natural_area=natural_area/landscape.size();
 
     if (psum_crop>0 && psum_rest>0){ // this is to avoid dividing by zero
       for (ix=0; ix<cropping_propensity.size() ; ++ix){
-        cropping_propensity[ix]=cropping_propensity[ix]/psum_crop*g*consumption_deficit*pow(natural_area,a);
+        cropping_propensity[ix]=cropping_propensity[ix]/psum_crop*g*consumption_deficit*a;
       }
       for (ix=0; ix<restoring_propensity.size() ; ++ix){
-        restoring_propensity[ix]=restoring_propensity[ix]/psum_rest*g*consumption_deficit*(1-pow(natural_area,a));
+        restoring_propensity[ix]=restoring_propensity[ix]/psum_rest*g*consumption_deficit*(1-a);
       }
     }
     else{
@@ -374,7 +374,7 @@ void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, co
   a patch's maintenance cost and its production
   */
 
-  unsigned int local=0;
+  unsigned int local=1;
   unsigned int ix;
   double maintenance_deficit=0;
   double maintenance_cost=0;

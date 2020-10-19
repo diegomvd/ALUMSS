@@ -57,7 +57,7 @@ int main(int argc, const char * argv[]){
   double dtp; // timestep for population dynamics
   double a0; //number of agricultural patches at beggining
   double cg0,r0,y0; // per capita consumption, population growth rate and baseline agricultural yield
-  double a; // likelihood of restoring/converting
+  double a; // likelihood of converting
   double w; // agricultural clustering parameter
   double m; // maintenance cost relative to production of a cropped patch
   double g; // growth coefficient of action probability in function of consumption deficit
@@ -288,7 +288,7 @@ int main(int argc, const char * argv[]){
       else if(reaction==1) {landscape[patch]=2;count_events[1]+=1;}
       else if(reaction==2) {landscape[patch]=1;count_events[2]+=1;}
       else if(reaction==3) {landscape[patch]=0;count_events[3]+=1;}
-      else if(reaction==4) {landscape[patch]=2;count_events[4]+=1;}
+      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1;}
       else {cout << "Error: gill_main.cpp this reaction does not exist.";}
 
       // update the time and timestep for population
