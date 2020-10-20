@@ -259,14 +259,14 @@ void getDegradationPropensity(unsigned int n, double Td, const vector<unsigned i
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void getActionPropensity(unsigned int n, double w, double a, double g, double consumption_deficit,const vector<unsigned int> &landscape, vector<double> &cropping_propensity, vector<double> &restoring_propensity){
+void getActionPropensity(unsigned int n, double w, double a, double g, double consumption_deficit,const vector<unsigned int> &landscape, vector<double> &cropping_propensity, vector<double> &intense_propensity){
   /*
   fills the cropping_propensity and restoring_propensity vector
   */
 
   // use them to store the accumulated probability in order to normalize afterwards
   int psum_crop = 0;
-  int psum_rest = 0;
+  int psum_int = 0;
 
   /*
   first checking if there is a consumption deficit that justifys human action
@@ -277,7 +277,7 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
       cropping_propensity.push_back( 0 ); // ... they do not transform the landscape
     }
     for(ix=0 ; ix<landscape.size() ; ++ix){
-      restoring_propensity.push_back( 0 ); // ... they do not transform the landscape
+      intense_propensity.push_back( 0 ); // ... they do not transform the landscape
     }
   }
   else{ // if humans are not happy with they current resource access ...
@@ -289,8 +289,6 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
     is uniform over space.
     */
     unsigned int ix;
-    psum_crop = 0;
-    psum_rest = 0;
 
     for (ix=0 ; ix<landscape.size() ; ++ix){
 
@@ -303,22 +301,22 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
         // cropping probability expression is taken from bart's and dani's paper
         cropping_propensity.push_back( pow( max(0.1 , (double)cropped_neighbours.size() ) , w ) );
         // restoring propensity is 0 because the patch is already natural
-        restoring_propensity.push_back( 0 );
+        intense_propensity.push_back( 0 );
 
         psum_crop+=cropping_propensity.back();
       }
-      else if (landscape[ix] == 2){ // if patch is degraded, hance can be restored...
+      else if (landscape[ix] == 1){ // if patch is organic it can be intensifyed
 
         cropping_propensity.push_back( 0 ); // a degraded patch cannot be cropped
         /* probability is spatially uniform for restoration, hence we could push
         back whathever number as long as we normalize afterwards */
-        restoring_propensity.push_back( 1 );
+        intense_propensity.push_back( 1 );
 
-        psum_rest+=1;
+        psum_int+=1;
       }
-      else if (landscape[ix] == 1){ // if patch is cropped no action can be taken
+      else if (landscape[ix] == 2 || landscape[ix] == 3){ // if patch is degraded or intense nothing can be done
         cropping_propensity.push_back( 0 );
-        restoring_propensity.push_back( 0 );
+        intense_propensity.push_back( 0 );
       }
       else cout << "Error: getActionPropensity: landscape contains an unrecognized value\n";
 
@@ -328,36 +326,28 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
     now we normalize the previously obtained probabilities and get calculate the
     probability per unit time of action given the consumption deficit
     */
-    // getting natural area to estimate cropping probability
-    // double natural_area=0;
-    // for (ix=0; ix<landscape.size(); ++ix){
-    //   if (landscape[ix]==0){
-    //     natural_area+=1;
-    //   }
-    // }
-    // natural_area=natural_area/landscape.size();
 
-    if (psum_crop>0 && psum_rest>0){ // this is to avoid dividing by zero
+    if (psum_crop>0 && psum_int>0){ // this is to avoid dividing by zero
       for (ix=0; ix<cropping_propensity.size() ; ++ix){
         cropping_propensity[ix]=cropping_propensity[ix]/psum_crop*g*consumption_deficit*a;
       }
-      for (ix=0; ix<restoring_propensity.size() ; ++ix){
-        restoring_propensity[ix]=restoring_propensity[ix]/psum_rest*g*consumption_deficit*(1-a);
+      for (ix=0; ix<intense_propensity.size() ; ++ix){
+        intense_propensity[ix]=intense_propensity[ix]/psum_int*g*consumption_deficit*(1-a);
       }
     }
     else{
       /*
       we now handle the extreme cases where there is either no natural land, nor
-      degraded land
+      organic land
       */
       if(psum_crop>0){
         for (ix=0; ix<cropping_propensity.size() ; ++ix){
           cropping_propensity[ix]=cropping_propensity[ix]/psum_crop*g*consumption_deficit;
         }
       }
-      if(psum_rest>0){
-        for (ix=0; ix<restoring_propensity.size() ; ++ix){
-          restoring_propensity[ix]=restoring_propensity[ix]/psum_rest*g*consumption_deficit;
+      if(psum_int>0){
+        for (ix=0; ix<intense_propensity.size() ; ++ix){
+          intense_propensity[ix]=intense_propensity[ix]/psum_int*g*consumption_deficit;
         }
       }
     }
@@ -367,7 +357,7 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, const vector<double> &agricultural_production, vector<double> &abandonment_propensity){
+void getAbandonmentPropensity(double Ta, const vector<unsigned int> &landscape, const vector<double> &agricultural_production, const vector<double> &maintenance_costs, vector<double> &abandonmentO_propensity, vector<double> &abandonmentI_propensity){
   /*
   fills the abandonment_propensity vector. the probability per unit time is
   proportional to the maintenance deficit, which is the difference between
@@ -375,45 +365,68 @@ void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, co
   */
 
   unsigned int local=1;
+
   unsigned int ix;
   double maintenance_deficit=0;
-  double maintenance_cost=0;
+
   if (local==1){
-    for (ix=0; ix<agricultural_production.size(); ++ix){
-      if (agricultural_production[ix]>0){ // this means patch ix is cropped
-        maintenance_deficit=m*y0 - agricultural_production[ix];
+
+    for (ix=0; ix<landscape.size(); ++ix){
+      maintenance_deficit=maintenance_costs[ix] - agricultural_production[ix];
+      if (landscape[ix]==1){ // organic patch
+        abandonmentI_propensity.push_back(0);
         if (maintenance_deficit>0){
-          abandonment_propensity.push_back(maintenance_deficit/Ta);
+          abandonmentO_propensity.push_back(maintenance_deficit/Ta);
         }
         else{
-          abandonment_propensity.push_back(0);
+          abandonmentO_propensity.push_back(0);
         }
       }
-      else{ // this means patch ix is not cropped
-        abandonment_propensity.push_back(0);
+      else if(landscape[ix]==3){ //intensive patch
+        abandonmentO_propensity.push_back(0);
+        if (maintenance_deficit>0){
+          abandonmentI_propensity.push_back(maintenance_deficit/Ta);
+        }
+        else{
+          abandonmentI_propensity.push_back(0);
+        }
+      }
+      else{ // non cropped patches
+        abandonmentO_propensity.push_back(0);
+        abandonmentI_propensity.push_back(0);
       }
     }
   }
   else{
+
+    double total_maintenance_cost=0;
+    double total_agricultural_production=0;
+
     // calculate global maintenance deficit
-    for (ix=0; ix<agricultural_production.size(); ++ix){
-      if (agricultural_production[ix]>0){ // this means patch ix is cropped
-        maintenance_deficit+=m*y0-agricultural_production[ix]; // getting the total deficit
-        maintenance_cost+=m*y0;
-      }
+    for (ix=0; ix<landscape.size(); ++ix){
+      total_maintenance_cost+=maintenance_costs[ix];
+      total_agricultural_production+=agricultural_production[ix];
     }
+    maintenance_deficit=total_maintenance_cost-total_agricultural_production;
     if (maintenance_deficit>0){
-      for(ix=0; ix<agricultural_production.size(); ++ix){
-        if (agricultural_production[ix]>0){
-          abandonment_propensity.push_back(m/maintenance_cost/Ta);
+      for(ix=0; ix<landscape.size(); ++ix){
+        if (landscape[ix]==1){ // organic
+          abandonmentO_propensity.push_back(maintenance_costs[ix]/total_maintenance_cost*maintenance_deficit/Ta);
+          abandonmentI_propensity.push_back(0);
         }
-        else{
-          abandonment_propensity.push_back(0);
+        else if (landscape[ix]==3){//intense
+          abandonmentO_propensity.push_back(0);
+          abandonmentI_propensity.push_back(maintenance_costs[ix]/total_maintenance_cost*maintenance_deficit/Ta);
+        }
+        else{//non cropped
+          abandonmentO_propensity.push_back(0);
+          abandonmentI_propensity.push_back(0);
         }
       }
     }
-    else{
-      abandonment_propensity.push_back(0);
+    else{ // no maintenance deficit
+      abandonmentO_propensity.push_back(0);
+      abandonmentI_propensity.push_back(0);
     }
   }
   return;
@@ -421,7 +434,7 @@ void getAbandonmentPropensity(unsigned int n, double m, double y0, double Ta, co
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void getPropensityVector(unsigned int n, double Tr, double Td, double w, double a, double g, double m, double y0, double Ta, double consumption_deficit, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, const vector<double> &agricultural_production, vector<double> &propensity_vector){
+void getPropensityVector(unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double consumption_deficit, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, const vector<double> &agricultural_production, const vector<double> &maintenance_costs, vector<double> &propensity_vector){
   /*
   calls all the functions to calculate the propensity of each event and merges
   them in a single propensity vector that can be used to run the gillespie algo
@@ -430,13 +443,14 @@ void getPropensityVector(unsigned int n, double Tr, double Td, double w, double 
   vector<double> recovery_propensity;
   vector<double> degradation_propensity;
   vector<double> cropping_propensity;
-  vector<double> restoring_propensity;
-  vector<double> abandonment_propensity;
+  vector<double> intense_propensity;
+  vector<double> abandonmentO_propensity;
+  vector<double> abandonmentI_propensity;
 
   getRecoveryPropensity(n,Tr,landscape,natural_components,recovery_propensity);
   getDegradationPropensity(n,Td,landscape,natural_components,degradation_propensity);
-  getActionPropensity(n, w, a, g,consumption_deficit,landscape,cropping_propensity, restoring_propensity);
-  getAbandonmentPropensity(n,m,y0,Ta,agricultural_production,abandonment_propensity);
+  getActionPropensity(n, w, a, g,consumption_deficit,landscape,cropping_propensity, intense_propensity);
+  getAbandonmentPropensity(Ta,landscape,agricultural_production,maintenance_costs,abandonmentO_propensity,abandonmentI_propensity);
 
   // clearing the previous propensity vector to refill it
   propensity_vector.clear();
@@ -455,11 +469,14 @@ void getPropensityVector(unsigned int n, double Tr, double Td, double w, double 
   for (ix=0 ; ix<cropping_propensity.size() ; ++ix){
     propensity_vector.push_back(propensity_vector.back()+cropping_propensity[ix]);
   }
-  for (ix=0 ; ix<restoring_propensity.size() ; ++ix){
-    propensity_vector.push_back(propensity_vector.back()+restoring_propensity[ix]);
+  for (ix=0 ; ix<intense_propensity.size() ; ++ix){
+    propensity_vector.push_back(propensity_vector.back()+intense_propensity[ix]);
   }
-  for (ix=0 ; ix<abandonment_propensity.size() ; ++ix){
-    propensity_vector.push_back(propensity_vector.back()+abandonment_propensity[ix]);
+  for (ix=0 ; ix<abandonmentO_propensity.size() ; ++ix){
+    propensity_vector.push_back(propensity_vector.back()+abandonmentO_propensity[ix]);
+  }
+  for (ix=0 ; ix<abandonmentI_propensity.size() ; ++ix){
+    propensity_vector.push_back(propensity_vector.back()+abandonmentI_propensity[ix]);
   }
 
   return;
@@ -534,7 +551,21 @@ double initializePopulation(double cg0, const vector<double> &agricultural_produ
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void getAgriculturalProduction(unsigned int n, double y0, double phi, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, vector<double> &agricultural_production){
+void initializeMaintenanceCosts(vector<double> &maintenance_costs, double y0, double m, const vector<unsigned int> &landscape){
+  unsigned long ix;
+  for (ix=0 ; ix<landscape.size() ; ++ix){
+    if (landscape[ix]==1 || landscape[ix]==3){ //cropped patches
+      maintenance_costs.push_back(m*y0);
+    }
+    else{
+      maintenance_costs.push_back(0);
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void getAgriculturalProduction(unsigned int n, double y0, double phi, double k, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, vector<double> &agricultural_production){
   /*
   returns the total agricultural production for a given "landscape" and
   minimum yield "y". the minimum yield is for a cropped patch with only
@@ -546,11 +577,30 @@ void getAgriculturalProduction(unsigned int n, double y0, double phi, const vect
     if(landscape[ix]==1){ // cropped patches
       agricultural_production[ix]=y0*(1+phi*getExposure2Nature(ix,n,landscape,natural_components));
     }
+    else if(landscape[ix]==3){ //intense
+      agricultural_production[ix]=y0*k;
+    }
     else{
       agricultural_production[ix]=0;
     }
   }
 
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void updateMaintenanceIntense(vector<double> &maintenance_costs, double dtp, double y0, double m, double k, double Ti, const vector<unsigned int> &landscape){
+  /*
+  the maintenance cost of intense patches is incremented
+  */
+
+  unsigned long ix;
+  for (ix=0 ; ix<landscape.size() ; ++ix){
+    if(landscape[ix]==3){ // intense
+      maintenance_costs[ix]+= y0*(k-m)/Ti*dtp;
+    }
+  }
   return;
 }
 
