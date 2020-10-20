@@ -11,13 +11,19 @@
 COMMENT1
 
 # test local maintenance in new degradation model
-./gillespie-ses 2000 0.1 40 0.1 1 1 5 0 0 1.5 0.1 0.5 3 2 50 1 &
-./gillespie-ses 2000 0.1 40 0.1 1 1 5 0 0 1.5 0.1 1.0 3 2 50 1 &
-./gillespie-ses 2000 0.1 40 0.1 1 1 5 0 0 1.5 0.1 2.0 3 2 50 1 &
-./gillespie-ses 2000 0.1 40 0.1 1 1 5 0 0 1.5 0.1 4.0 3 2 50 1 &
-./gillespie-ses 2000 0.1 40 0.1 1 1 5 0 0 1.5 0.1 8.0 3 2 50 1 &
-./gillespie-ses 2000 0.1 40 0.1 1 1 5 0 0 1.5 0.1 16 3 2 50 1 &
-./gillespie-ses 2000 0.1 40 0.1 1 1 5 0 0 1.5 0.1 32 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.10 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.15 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.20 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.25 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.30 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.35 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.40 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.45 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.50 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.55 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.60 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.65 1 1 5 0 0 1.1 1 2 3 2 50 1 &
+./gillespie-ses 2000 0.1 40 0.70 1 1 5 0 0 1.1 1 2 3 2 50 1 &
 
 # # threshold on sustainability of cropped patch at 0.75 exposure to nature
 # ./gillespie-ses 3000 0.1 40 0.1 1 1 5 0.0 0 1.6 0.1 1 3 1.5 50 1 &
