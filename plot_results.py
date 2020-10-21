@@ -13,7 +13,7 @@ filesland=[]
 filesevnt=[]
 filesclus=[]
 filesclux=[]
-for file in glob.glob("../../eukaryote-mountdir/DATA_20-10-2020-2/*.dat"):
+for file in glob.glob("../../eukaryote-mountdir/DATA_20-10-2020/*.dat"):
     if "DATA_POPU" in file:
         filespop.append(file)
         count+=1
@@ -85,15 +85,15 @@ style.use('seaborn-paper')
 
 for ix in range(count):
 
-    ix1=filespop[ix].find("_a0_")+4
-    ix2=filespop[ix].find("_cg0_")
+    ix1=filespop[ix].find("_a_")+3
+    ix2=filespop[ix].find("_w_")
 
     a=filespop[ix][ix1:ix2]
 
-    ix1=filespop[ix].find("_m_")+3
-    ix2=filespop[ix].find("_g_")
+    ix1=filespop[ix].find("_Ti_")+4
+    ix2=filespop[ix].find(".dat")
 
-    m=filespop[ix][ix1:ix2]
+    Ti=filespop[ix][ix1:ix2]
 
     datapop=np.loadtxt(filespop[ix])
     dataland=np.loadtxt(filesland[ix])
@@ -105,9 +105,9 @@ for ix in range(count):
 
     axs[0].plot(datapop[:,0],datapop[:,1])
 
-    colors=['tab:green','tab:orange','tab:red']
-    land_type=['N','A','D']
-    for type in [0,1,2]:
+    colors=['tab:green','tab:orange','tab:red','tab:purple']
+    land_type=['N','Ao','D','Ai']
+    for type in [0,1,2,3]:
 
         area=np.count_nonzero(dataland[:,1:]==type,axis=1).transpose()
         axs[1].plot(dataland[:,0],area,color=colors[type], label=land_type[type])
@@ -117,7 +117,7 @@ for ix in range(count):
     axs[1].set_xlabel("Time")
 
     axs[1].legend()
-    axs[0].set_title("a="+str(a)+", m="+str(m))
+    axs[0].set_title("a="+str(a)+", Ti="+str(Ti))
     plt.savefig("time_dynamics.jpg", dpi=500)
     plt.show()
 
