@@ -7,7 +7,7 @@
 
       1    2   3  4    5    6  7   8  9  10  11  12   13   14  15   16		17	18
       T   dtp  n  a0  cg0  r0  y0  a  w  m   g   Ta   phi  Tr  Td  dtsave  k  Ti
-
+bla
 COMMENT1
 
 # test local maintenance in new degradation model
