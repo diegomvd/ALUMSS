@@ -105,7 +105,7 @@ int main(int argc, const char * argv[]){
   ostringstream oss;
   oss << put_time(&tm, "%d-%m-%Y");
   string str_date = oss.str();
-  string dirname = "DATA_"+str_date;
+  string dirname = "DATA_convint"+str_date;
   // not using this: adding a count if several simulation runs on the same day
   // unsigned int count=0;
   // string temp_dirname = dirname+"_"+to_string(count);

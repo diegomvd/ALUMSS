@@ -364,7 +364,7 @@ void getAbandonmentPropensity(double Ta, const vector<unsigned int> &landscape, 
   a patch's maintenance cost and its production
   */
 
-  unsigned int local=1;
+  unsigned int local=0;
 
   unsigned int ix;
   double maintenance_deficit=0;
