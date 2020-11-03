@@ -13,11 +13,6 @@
 
 COMMENT1
 
-#compile
-c++ gill_main.cpp gill_functions.cpp cokus3.c -o gillespie-ses -lgsl -lgslcblas -lm -Wall -Weffc++ --std=c++17 -lstdc++fs &
-
-clear
-
 #run
 
 ./gillespie-ses 4000 0.1 40 0.10 0.05 1 1 0 0 0.5 5 10 3 0.0 0 0.5 1.1 20 2 2 50 1 vara&
