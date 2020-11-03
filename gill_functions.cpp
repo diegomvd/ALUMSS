@@ -69,7 +69,7 @@ void getStateNeighbours(unsigned int i, unsigned int state, unsigned int n, cons
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void getNaturalCluster(unsigned int n, const vector<unsigned int> &landscape, vector<vector<int>> &natural_components){
+void getNaturalCluster(vector<vector<int>> &natural_components, unsigned int n, const vector<unsigned int> &landscape){
   /*
   fills a vector where each member is a vector containing the indexes of all the
   natural patches belonging to the same cluster
@@ -265,8 +265,7 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
   */
 
   // use them to store the accumulated probability in order to normalize afterwards
-  int psum_crop = 0;
-  int psum_int = 0;
+  int cum_sum = 0;
 
   /*
   first checking if there is a consumption deficit that justifys human action
@@ -274,7 +273,7 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
   if (consumption_deficit<0){ // if humans are satisfied...
     unsigned long ix;
     for(ix=0 ; ix<landscape.size() ; ++ix){
-      cropping_propensity.push_back( 0 ); // ... they do not transform the landscape
+      organic_propensity.push_back( 0 ); // ... they do not transform the landscape
     }
     for(ix=0 ; ix<landscape.size() ; ++ix){
       intense_propensity.push_back( 0 ); // ... they do not transform the landscape
@@ -299,27 +298,18 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
         getStateNeighbours(ix, 1, n, landscape, cropped_neighbours); // state 1 is agricultural
 
         // cropping probability expression is taken from bart's and dani's paper
-        cropping_propensity.push_back( pow( max(0.1 , (double)cropped_neighbours.size() ) , w ) );
+        organic_propensity.push_back( pow( max(0.1 , (double)cropped_neighbours.size() ) , w ) );
         // restoring propensity is 0 because the patch is already natural
-        intense_propensity.push_back( 0 );
+        intense_propensity.push_back( pow( max(0.1 , (double)cropped_neighbours.size() ) , w ) );
 
-        psum_crop+=cropping_propensity.back();
+        cum_sum=pow( max(0.1 , (double)cropped_neighbours.size() ) , w );
+
       }
-      else if (landscape[ix] == 1){ // if patch is organic it can be intensifyed
-
-        cropping_propensity.push_back( 0 ); // a degraded patch cannot be cropped
-        /* probability is spatially uniform for restoration, hence we could push
-        back whathever number as long as we normalize afterwards */
-        intense_propensity.push_back( 1 );
-
-        psum_int+=1;
-      }
-      else if (landscape[ix] == 2 || landscape[ix] == 3){ // if patch is degraded or intense nothing can be done
-        cropping_propensity.push_back( 0 );
+      else if (landscape[ix]==1 || landscape[ix] == 2 || landscape[ix] == 3){ // if patch is organic, degraded or intense nothing can be done
+        organic_propensity.push_back( 0 );
         intense_propensity.push_back( 0 );
       }
       else cout << "Error: getActionPropensity: landscape contains an unrecognized value\n";
-
     }
 
     /*
@@ -327,28 +317,10 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
     probability per unit time of action given the consumption deficit
     */
 
-    if (psum_crop>0 && psum_int>0){ // this is to avoid dividing by zero
-      for (ix=0; ix<cropping_propensity.size() ; ++ix){
-        cropping_propensity[ix]=cropping_propensity[ix]/psum_crop*g*consumption_deficit*a;
-      }
-      for (ix=0; ix<intense_propensity.size() ; ++ix){
-        intense_propensity[ix]=intense_propensity[ix]/psum_int*g*consumption_deficit*(1-a);
-      }
-    }
-    else{
-      /*
-      we now handle the extreme cases where there is either no natural land, nor
-      organic land
-      */
-      if(psum_crop>0){
-        for (ix=0; ix<cropping_propensity.size() ; ++ix){
-          cropping_propensity[ix]=cropping_propensity[ix]/psum_crop*g*consumption_deficit;
-        }
-      }
-      if(psum_int>0){
-        for (ix=0; ix<intense_propensity.size() ; ++ix){
-          intense_propensity[ix]=intense_propensity[ix]/psum_int*g*consumption_deficit;
-        }
+    if (cum_sum>0){ // this is to avoid dividing by zero
+      for (ix=0; ix<landscape.size() ; ++ix){
+        organic_propensity[ix]=organic_propensity[ix]/cum_sum*g*consumption_deficit*a;
+        intense_propensity[ix]=intense_propensity[ix]/cum_sum*g*consumption_deficit*(1-a);
       }
     }
   }
@@ -484,7 +456,7 @@ void getPropensityVector(unsigned int n, double Tr, double Td, double w, double 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void initializeLandscape(unsigned int n, double a0, gsl_rng  *r, vector<unsigned int> &landscape){
+void initializeLandscape( vector<unsigned int> &landscape, unsigned int n, double ao0, double ai0, gsl_rng  *r){
   /*
   initializes the landscape given a fraction of initial agricultural patches a0
   */
@@ -502,12 +474,20 @@ void initializeLandscape(unsigned int n, double a0, gsl_rng  *r, vector<unsigned
     land4crop.push_back(ix);
   }
 
-  unsigned int na0=(unsigned int) (a0*n*n);
-  for (ix=0 ; ix<na0 ; ++ix){
+  unsigned int nao0=(unsigned int) (ao0*n*n);
+  unsigned int nai0=(unsigned int) (ai0*n*n);
+  for (ix=0 ; ix<nao0 ; ++ix){
     // selecting random location for initial cropped patches
     ix_land4crop = gsl_rng_uniform_int(r, land4crop.size() );
     ix_landscape = land4crop[ix_land4crop];
-    landscape[ix_landscape]=1; // cropping selected patch
+    landscape[ix_landscape]=1; // cropping selected patch with organic agriculture
+    land4crop.erase(land4crop.begin()+ix_land4crop); // removing the selected patch so it cannot be selected again
+  }
+  for (ix=0 ; ix<nai0 ; ++ix){
+    // selecting random location for initial cropped patches
+    ix_land4crop = gsl_rng_uniform_int(r, land4crop.size() );
+    ix_landscape = land4crop[ix_land4crop];
+    landscape[ix_landscape]=3; // cropping selected patch with intense agriculture
     land4crop.erase(land4crop.begin()+ix_land4crop); // removing the selected patch so it cannot be selected again
   }
 
@@ -606,37 +586,70 @@ void updateMaintenanceIntense(vector<double> &maintenance_costs, double dtp, dou
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double populationEquation(double r0, double cg0, double population, double agricultural_production){
+double populationEquation(double r0, double agricultural_production, double population, double consumption){
   /*
   returns the expression of the population ODE
   */
 
-  return r0*population*(1-cg0*population/agricultural_production);
+  return r0*population[0]*(1-consumption*population/agricultural_production);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double RungeKutta4(double r0, double cg0, double dt, double population, double agricultural_production){
+double consumptionEquation(double kg, double kd, double minimum_consumption, double agricultural_production, double population, double consumption){
+  /*
+  returns the expression of the consumption ODE, the growing and decreasing rates
+  are different.
+  */
+  double res;
+
+  if( consumption < agricultural_production/population){
+    res = (agricultural_production/population - consumption)*kg ;
+  }
+  else if(consumption> agricultural_production/population && consumption>minimum_consumption){
+    res = (agricultural_production/population - consumption)*kd ;
+  }
+  else{
+    res = 0;
+  }
+
+  return res;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void RungeKutta4(double r0, double kg, double kd, double minimum_consumption, double dt, double agricultural_production, vector<double> &population, vector<double> &consumption){
   /*
   returns the actualized population after solving the ODE with runge kutta 4 method
   */
 
-  double k1p,k2p,k3p,k4p;
-  double p1,p2,p3;
-  double deltaP;
+  double k1p,k2p,k3p,k4p,k1c,k2c,k3c,k4c;
+  double p1,p2,p3,c1,c2,c3;
+  double deltaP, deltaC;
 
-  k1p=dt*populationEquation(r0,cg0,population,agricultural_production);
-  p1=population+0.5*k1p;
+  k1p=populationEquation(r0,agricultural_production,population[0],consumption[0]);
+  k1c=consumptionEquation(kg,kd,agricultural_production,population[0],consumption[0]);
+  p1=population[0]+0.5*k1p*dt;
+  c1=consumption[0]+0.5*k1c*dt;
 
-  k2p=dt*populationEquation(r0,cg0,p1,agricultural_production);
-  p2=population+0.5*k2p;
+  k2p=populationEquation(r0,agricultural_production,p1,c1);
+  k2c=consumptionEquation(kg,kd,agricultural_production,p1,c1);
+  p2=population[0]+0.5*k2p*dt;
+  c2=consumption[0]+0.5*k2c*dt;
 
-  k3p=dt*populationEquation(r0,cg0,p2,agricultural_production);
-  p3=population+k3p;
+  k3p=populationEquation(r0,agricultural_production,p2,c2);
+  k3c=consumptionEquation(kg,kd,agricultural_production,p2,c2);
+  p3=population[0]+k3p*dt;
+  c3=population[0]+k3c*dt;
 
-  k4p=dt*populationEquation(r0,cg0,p3,agricultural_production);
+  k4p=populationEquation(r0,agricultural_production,p3,c3);
+  k4c=consumptionEquation(kg,kd,agricultural_production,p3,c3);
 
   deltaP=(k1p+2*k2p+2*k3p+k4p)/6;
+  deltaC=(k1c+2*k2c+2*k3c+k4c)/6;
 
-  return population+deltaP;
+  population[0]+=deltaP;
+  consumption[0]+=deltaC;
+
+  return;
 }

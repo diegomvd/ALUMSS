@@ -55,8 +55,8 @@ int main(int argc, const char * argv[]){
   int n;  // lenght of the sides of the square landscape: number of cells=n*n
   int SimTime; // total simulation time
   double dtp; // timestep for population dynamics
-  double a0; //number of agricultural patches at beggining
-  double cg0,r0,y0; // per capita consumption, population growth rate and baseline agricultural yield
+  double ao0, ai0; //number of agricultural patches at beggining
+  double c0,r0,y0; // per capita consumption, population growth rate and baseline agricultural yield
   double a; // likelihood of converting
   double w; // agricultural clustering parameter
   double m; // maintenance cost relative to production of a cropped patch
@@ -67,6 +67,7 @@ int main(int argc, const char * argv[]){
   double dtsave; // timestep for saving data
   double k; // relative yield of intense againt baseline for organic
   double Ti; // time during wich maintenance deficit of intense patches is negative
+  double kg,kd; // growth and decrease rates of per capita consumption
 
   ///////////////////////////////////////////////////////////////////////////////
   // IMPORT PARAMETER VALUES
@@ -75,24 +76,45 @@ int main(int argc, const char * argv[]){
   if (argc>1) {
         char * pEnd;
 
+        // time and space specifications for the simulation
         SimTime = atoi(argv[1]);
         dtp = strtod(argv[2], &pEnd);
         n = atoi(argv[3]);
-        a0 = strtod(argv[4],&pEnd);
-        cg0 = strtod(argv[5], &pEnd);
-        r0 = strtod(argv[6], &pEnd);
-        y0 = strtod(argv[7], &pEnd);
-        a = strtod(argv[8], &pEnd);
-        w = strtod(argv[9], &pEnd);
-        m = strtod(argv[10], &pEnd);
-        g = strtod(argv[11], &pEnd);
-        Ta = strtod(argv[12], &pEnd);
-        phi = strtod(argv[13], &pEnd);
-        Tr = strtod(argv[14], &pEnd);
-        Td = strtod(argv[15], &pEnd);
-        dtsave = strtod(argv[16], &pEnd);
-        k = strtod(argv[17], &pEnd);
-        Ti = strtod(argv[18], &pEnd);
+
+        // initial values of agricultural land use and consumption
+        ao0 = strtod(argv[4],&pEnd);
+        ai0 = strtod(argv[5],&pEnd);
+        c0 = strtod(argv[6], &pEnd);
+
+        // population growth rate
+        r0 = strtod(argv[7], &pEnd);
+
+        // consumption growth and decrease rates
+        kg = strtod(argv[8], &pEnd);
+        kd = strtod(argv[9], &pEnd);
+
+        // agricultural production parameters
+        y0 = strtod(argv[10], &pEnd);
+        k = strtod(argv[11], &pEnd);
+        phi = strtod(argv[12], &pEnd);
+
+        // human action parameters
+        a = strtod(argv[13], &pEnd);
+        w = strtod(argv[14], &pEnd);
+        g = strtod(argv[15], &pEnd);
+
+        // abandonment parameters
+        m = strtod(argv[16], &pEnd);
+        Ti = strtod(argv[17], &pEnd);
+        Ta = strtod(argv[18], &pEnd);
+
+        // spontaneous evolution parameters
+        Tr = strtod(argv[19], &pEnd);
+        Td = strtod(argv[20], &pEnd);
+
+        // save timespace just in case
+        dtsave = strtod(argv[21], &pEnd);
+
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -105,7 +127,7 @@ int main(int argc, const char * argv[]){
   ostringstream oss;
   oss << put_time(&tm, "%d-%m-%Y");
   string str_date = oss.str();
-  string dirname = "DATA_convint"+str_date;
+  string dirname = "DATA_"+str_date;
   // not using this: adding a count if several simulation runs on the same day
   // unsigned int count=0;
   // string temp_dirname = dirname+"_"+to_string(count);
@@ -128,21 +150,24 @@ int main(int argc, const char * argv[]){
     filename = "_T_"+allArgs[1];
     filename += "_dtp_"+allArgs[2];
     filename += "_n_"+allArgs[3];
-    filename += "_a0_"+allArgs[4];
-    filename += "_cg0_"+allArgs[5];
-    filename += "_r0_"+allArgs[6];
-    filename += "_y0_"+allArgs[7];
-    filename += "_a_"+allArgs[8];
-    filename += "_w_"+allArgs[9];
-    filename += "_m_"+allArgs[10];
-    filename += "_g_"+allArgs[11];
-    filename += "_Ta_"+allArgs[12];
-    filename += "_phi_"+allArgs[13];
-    filename += "_Tr_"+allArgs[14];
-    filename += "_Td_"+allArgs[15];
-    filename += "_dtsave_"+allArgs[16];
-    filename += "_k_"+allArgs[17];
-    filename += "_Ti_"+allArgs[18];
+    filename += "_ao0_"+allArgs[4];
+    filename += "_ai0_"+allArgs[5];
+    filename += "_c0_"+allArgs[6];
+    filename += "_r0_"+allArgs[7];
+    filename += "_kg_"+allArgs[8];
+    filename += "_kd_"+allArgs[9];
+    filename += "_y0_"+allArgs[10];
+    filename += "_k_"+allArgs[11];
+    filename += "_phi_"+allArgs[12];
+    filename += "_a_"+allArgs[13];
+    filename += "_w_"+allArgs[14];
+    filename += "_g_"+allArgs[15];
+    filename += "_m_"+allArgs[16];
+    filename += "_Ti_"+allArgs[17];
+    filename += "_Ta_"+allArgs[18];
+    filename += "_Tr_"+allArgs[18];
+    filename += "_Td_"+allArgs[18];
+    filename += "_dtsave_"+allArgs[18];
     filename+=".dat";
   }
 
@@ -184,7 +209,13 @@ int main(int argc, const char * argv[]){
   unsigned int i,j;
   double total_agricultural_production;
   double consumption_deficit;
-  double population;
+
+  // this vector has only one member and it is the population
+  vector<double> population;
+  population.push_back(0);
+  // this vector only has one member and it is the per capita consumption
+  vector<double> consumption;
+  consumption.push_back(c0);
   // vector containing the landscape state
   vector<unsigned int> landscape;
   // vector containing the production of each patch
@@ -219,10 +250,10 @@ int main(int argc, const char * argv[]){
     }
   }
   else{
-    initializeLandscape(n,a0,r,landscape);
-    getNaturalCluster(n, landscape, natural_components);
-    initializeProduction(n,y0,phi,landscape,natural_components,agricultural_production);
-    population=initializePopulation(cg0,agricultural_production);
+    initializeLandscape(landscape,n,ao0,ai0,r);
+    getNaturalCluster(natural_components, n, landscape);
+    initializeProduction(n,y0,phi,k,landscape,natural_components,agricultural_production);
+    population[0]=initializePopulation(consumption[0],agricultural_production);
   }
   initializeMaintenanceCosts(maintenance_costs,y0,m,landscape);
 
@@ -254,7 +285,7 @@ int main(int argc, const char * argv[]){
       j+=1;
     }*/
     // identifying all the natural connected components
-    getNaturalCluster(n, landscape, natural_components);
+    getNaturalCluster(natural_components, n, landscape);
 
     // calculating the agricultural production
     getAgriculturalProduction(n,y0,phi,k,landscape,natural_components,agricultural_production);
@@ -264,7 +295,7 @@ int main(int argc, const char * argv[]){
     for(j=0; j<agricultural_production.size(); ++j){
       total_agricultural_production+=agricultural_production[j];
     }
-    consumption_deficit = population*cg0 - total_agricultural_production;
+    consumption_deficit = population[0]*cg0 - total_agricultural_production;
 
     // calculating the propensity vector
     getPropensityVector(n, Tr, Td, w, a, g, Ta, consumption_deficit, landscape, natural_components, agricultural_production, maintenance_costs, propensity_vector);
@@ -273,9 +304,11 @@ int main(int argc, const char * argv[]){
     dtg=-1/propensity_vector.back()*log(ranMT());
 
     // checking whether population or the landscape changes
-    if (dtg>dt && population>0){
+    if (dtg>dt){
       // update the population value
-      population=RungeKutta4(r0,cg0,dtp,population,total_agricultural_production);
+      if (population[0]>0){
+        RungeKutta4(r0,kg,kd,minimum_consumption,dtp,total_agricultural_production,population,consumption);
+      }
       //update maintenance costs for cropped patches
       updateMaintenanceIntense(maintenance_costs, dtp, y0, m, k, Ti, landscape);
       // update the time and the timestep for population
