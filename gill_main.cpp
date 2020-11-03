@@ -67,7 +67,7 @@ int main(int argc, const char * argv[]){
   double dtsave; // timestep for saving data
   double k; // relative yield of intense againt baseline for organic
   double Ti; // time during wich maintenance deficit of intense patches is negative
-  double kg,kd; // growth and decrease rates of per capita consumption
+  double kg,kd,cmin; // growth and decrease rates of per capita consumption
 
   ///////////////////////////////////////////////////////////////////////////////
   // IMPORT PARAMETER VALUES
@@ -92,28 +92,29 @@ int main(int argc, const char * argv[]){
         // consumption growth and decrease rates
         kg = strtod(argv[8], &pEnd);
         kd = strtod(argv[9], &pEnd);
+        cmin = strtod(argv[10], &pEnd);
 
         // agricultural production parameters
-        y0 = strtod(argv[10], &pEnd);
-        k = strtod(argv[11], &pEnd);
-        phi = strtod(argv[12], &pEnd);
+        y0 = strtod(argv[11], &pEnd);
+        k = strtod(argv[12], &pEnd);
+        phi = strtod(argv[13], &pEnd);
 
         // human action parameters
-        a = strtod(argv[13], &pEnd);
-        w = strtod(argv[14], &pEnd);
-        g = strtod(argv[15], &pEnd);
+        a = strtod(argv[14], &pEnd);
+        w = strtod(argv[15], &pEnd);
+        g = strtod(argv[16], &pEnd);
 
         // abandonment parameters
-        m = strtod(argv[16], &pEnd);
-        Ti = strtod(argv[17], &pEnd);
-        Ta = strtod(argv[18], &pEnd);
+        m = strtod(argv[17], &pEnd);
+        Ti = strtod(argv[18], &pEnd);
+        Ta = strtod(argv[19], &pEnd);
 
         // spontaneous evolution parameters
-        Tr = strtod(argv[19], &pEnd);
-        Td = strtod(argv[20], &pEnd);
+        Tr = strtod(argv[20], &pEnd);
+        Td = strtod(argv[21], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[21], &pEnd);
+        dtsave = strtod(argv[22], &pEnd);
 
   }
 
@@ -156,18 +157,19 @@ int main(int argc, const char * argv[]){
     filename += "_r0_"+allArgs[7];
     filename += "_kg_"+allArgs[8];
     filename += "_kd_"+allArgs[9];
-    filename += "_y0_"+allArgs[10];
-    filename += "_k_"+allArgs[11];
-    filename += "_phi_"+allArgs[12];
-    filename += "_a_"+allArgs[13];
-    filename += "_w_"+allArgs[14];
-    filename += "_g_"+allArgs[15];
-    filename += "_m_"+allArgs[16];
-    filename += "_Ti_"+allArgs[17];
-    filename += "_Ta_"+allArgs[18];
-    filename += "_Tr_"+allArgs[18];
-    filename += "_Td_"+allArgs[18];
-    filename += "_dtsave_"+allArgs[18];
+    filename += "_cmin_"+allArgs[10];
+    filename += "_y0_"+allArgs[11];
+    filename += "_k_"+allArgs[12];
+    filename += "_phi_"+allArgs[13];
+    filename += "_a_"+allArgs[14];
+    filename += "_w_"+allArgs[15];
+    filename += "_g_"+allArgs[16];
+    filename += "_m_"+allArgs[17];
+    filename += "_Ti_"+allArgs[18];
+    filename += "_Ta_"+allArgs[19];
+    filename += "_Tr_"+allArgs[20];
+    filename += "_Td_"+allArgs[21];
+    filename += "_dtsave_"+allArgs[22];
     filename+=".dat";
   }
 
@@ -212,7 +214,6 @@ int main(int argc, const char * argv[]){
 
   // this vector has only one member and it is the population
   vector<double> population;
-  population.push_back(0);
   // this vector only has one member and it is the per capita consumption
   vector<double> consumption;
   consumption.push_back(c0);
@@ -235,9 +236,11 @@ int main(int argc, const char * argv[]){
     if(conf_file.is_open()) {
 
       // first extract the time and population
-      if (!(conf_file >> t >> population)){
+      double pop;
+      if (!(conf_file >> t >> pop)){
         cout << "Error: gill_main.cpp: time and population could not be loaded from CONF file. \n";
       }
+      population.push_back(pop);
       SimTime+=t;
       // extracting by token moves forward the pointer in the file
       // now extract the landscape
@@ -252,8 +255,8 @@ int main(int argc, const char * argv[]){
   else{
     initializeLandscape(landscape,n,ao0,ai0,r);
     getNaturalCluster(natural_components, n, landscape);
-    initializeProduction(n,y0,phi,k,landscape,natural_components,agricultural_production);
-    population[0]=initializePopulation(consumption[0],agricultural_production);
+    getAgriculturalProduction(agricultural_production,n,y0,k,phi,landscape,natural_components);
+    initializePopulation(population,consumption,agricultural_production);
   }
   initializeMaintenanceCosts(maintenance_costs,y0,m,landscape);
 
@@ -288,17 +291,17 @@ int main(int argc, const char * argv[]){
     getNaturalCluster(natural_components, n, landscape);
 
     // calculating the agricultural production
-    getAgriculturalProduction(n,y0,phi,k,landscape,natural_components,agricultural_production);
+    getAgriculturalProduction(agricultural_production,n,y0,k,phi,landscape,natural_components);
 
     // calculating the consumption deficit
     total_agricultural_production=0;
     for(j=0; j<agricultural_production.size(); ++j){
       total_agricultural_production+=agricultural_production[j];
     }
-    consumption_deficit = population[0]*cg0 - total_agricultural_production;
+    consumption_deficit = population[0]*consumption[0] - total_agricultural_production;
 
     // calculating the propensity vector
-    getPropensityVector(n, Tr, Td, w, a, g, Ta, consumption_deficit, landscape, natural_components, agricultural_production, maintenance_costs, propensity_vector);
+    getPropensityVector(propensity_vector, n, Tr, Td, w, a, g, Ta, consumption_deficit, landscape, natural_components, agricultural_production, maintenance_costs);
 
     // calculating the time until next reaction
     dtg=-1/propensity_vector.back()*log(ranMT());
@@ -307,7 +310,7 @@ int main(int argc, const char * argv[]){
     if (dtg>dt){
       // update the population value
       if (population[0]>0){
-        RungeKutta4(r0,kg,kd,minimum_consumption,dtp,total_agricultural_production,population,consumption);
+        RungeKutta4(r0,kg,kd,cmin,dtp,total_agricultural_production,population,consumption);
       }
       //update maintenance costs for cropped patches
       updateMaintenanceIntense(maintenance_costs, dtp, y0, m, k, Ti, landscape);
@@ -331,7 +334,7 @@ int main(int argc, const char * argv[]){
       if (reaction==0){landscape[patch]=0;count_events[0]+=1;} //recovery
       else if(reaction==1) {landscape[patch]=2;count_events[1]+=1;} //degradation
       else if(reaction==2) {landscape[patch]=1;maintenance_costs[patch]=m*y0;count_events[2]+=1;} //expansion
-      else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
+      else if(reaction==3) {landscape[patch]=3;maintenance_costs[patch]=m*y0;count_events[3]+=1;} //intensification
       else if(reaction==4) {landscape[patch]=0;maintenance_costs[patch]=0;count_events[4]+=1;} //abandonment organic
       else if(reaction==5) {landscape[patch]=2;maintenance_costs[patch]=0;count_events[5]+=1;} //abandonment intense
       else {cout << "Error: gill_main.cpp this reaction does not exist.";}
@@ -344,7 +347,7 @@ int main(int argc, const char * argv[]){
     // save the data
     if(t>=t_save){
 
-      tofile_popu << t << " " << population << "\n";
+      tofile_popu << t << " " << population[0] << consumption[0] << "\n";
       tofile_land << t << " ";
       tofile_evnt << t << " ";
       tofile_clus << t << "\n";
@@ -367,7 +370,7 @@ int main(int argc, const char * argv[]){
   }
 
   // saving CONF file to re start other simulations from this point
-  tofile_conf << t << " " << population;
+  tofile_conf << t << " " << population[0] << consumption[0];
   for(i=0 ; i<landscape.size() ; i++){
     tofile_conf << " " << landscape[i];
   }
