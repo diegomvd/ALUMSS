@@ -170,6 +170,7 @@ int main(int argc, const char * argv[]){
     filename += "_Tr_"+allArgs[20];
     filename += "_Td_"+allArgs[21];
     filename += "_dtsave_"+allArgs[22];
+    filename += "_expid_"+allArgs[23]
     filename+=".dat";
   }
 
@@ -347,10 +348,10 @@ int main(int argc, const char * argv[]){
     // save the data
     if(t>=t_save){
 
-      tofile_popu << t << " " << population[0] << consumption[0] << "\n";
+      tofile_popu << t << " " << population[0] << " " << consumption[0] << "\n";
       tofile_land << t << " ";
       tofile_evnt << t << " ";
-      tofile_clus << t << "\n";
+      tofile_clus << -1 << " " << t << "\n";
 
       for(i=0 ; i<landscape.size() ; i++){
         tofile_land << landscape[i] << " ";

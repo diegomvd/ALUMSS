@@ -13,7 +13,7 @@ filesland=[]
 filesevnt=[]
 filesclus=[]
 filesclux=[]
-for file in glob.glob("../../eukaryote-mountdir/DATA_21-10-2020/*.dat"):
+for file in glob.glob("../../Eukaryote-mountdir/DATA_03-11-2020/*.dat"):
     if "DATA_POPU" in file:
         filespop.append(file)
         count+=1
@@ -101,9 +101,10 @@ for ix in range(count):
 
     ## figure 1 population, land and production over time
 ################################################################################
-    fig, axs = plt.subplots(2,1,sharex='col')
+    fig, axs = plt.subplots(3,1,sharex='col')
 
     axs[0].plot(datapop[:,0],datapop[:,1])
+    axs[2].plot(datapop[:,0],datapop[:,2])
 
     colors=['tab:green','tab:orange','tab:red','tab:purple']
     land_type=['N','Ao','D','Ai']
