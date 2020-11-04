@@ -170,7 +170,7 @@ int main(int argc, const char * argv[]){
     filename += "_Tr_"+allArgs[20];
     filename += "_Td_"+allArgs[21];
     filename += "_dtsave_"+allArgs[22];
-    filename += "_expid_"+allArgs[23]
+    filename += "_expid_"+allArgs[23];
     filename+=".dat";
   }
 
