@@ -13,7 +13,7 @@ filesland=[]
 filesevnt=[]
 filesclus=[]
 filesclux=[]
-for file in glob.glob("../../Eukaryote-mountdir/DATA_03-11-2020/*.dat"):
+for file in glob.glob("../../Eukaryote-mountdir/DATA_04-11-2020/*.dat"):
     if "DATA_POPU" in file:
         filespop.append(file)
         count+=1
@@ -90,10 +90,15 @@ for ix in range(count):
 
     a=filespop[ix][ix1:ix2]
 
-    ix1=filespop[ix].find("_k_")+3
-    ix2=filespop[ix].find("_Ti_")
+    ix1=filespop[ix].find("_kg_")+4
+    ix2=filespop[ix].find("_kd_")
 
-    k=filespop[ix][ix1:ix2]
+    kg=filespop[ix][ix1:ix2]
+
+    ix1=filespop[ix].find("_kd_")+4
+    ix2=filespop[ix].find("_cmin_")
+
+    kd=filespop[ix][ix1:ix2]
 
     datapop=np.loadtxt(filespop[ix])
     dataland=np.loadtxt(filesland[ix])
@@ -118,7 +123,7 @@ for ix in range(count):
     axs[1].set_xlabel("Time")
 
     axs[1].legend()
-    axs[0].set_title("a="+str(a)+", k="+str(k))
+    axs[0].set_title("a="+str(a)+ ", kg="+str(kg) + ", kd="+str(kd))
     plt.savefig("time_dynamics.jpg", dpi=500)
     plt.show()
 

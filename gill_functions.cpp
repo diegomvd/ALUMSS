@@ -576,6 +576,7 @@ double populationEquation(double r0, double agricultural_production, double popu
   */
 
   return r0*population*(1-consumption*population/agricultural_production);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -624,13 +625,13 @@ void RungeKutta4(double r0, double kg, double kd, double minimum_consumption, do
   k3p=populationEquation(r0,agricultural_production,p2,c2);
   k3c=consumptionEquation(kg,kd,minimum_consumption,agricultural_production,p2,c2);
   p3=population[0]+k3p*dt;
-  c3=population[0]+k3c*dt;
+  c3=consumption[0]+k3c*dt;
 
   k4p=populationEquation(r0,agricultural_production,p3,c3);
   k4c=consumptionEquation(kg,kd,minimum_consumption,agricultural_production,p3,c3);
 
-  deltaP=(k1p+2*k2p+2*k3p+k4p)/6;
-  deltaC=(k1c+2*k2c+2*k3c+k4c)/6;
+  deltaP=dt*(k1p+2*k2p+2*k3p+k4p)/6;
+  deltaC=dt*(k1c+2*k2c+2*k3c+k4c)/6;
 
   population[0]+=deltaP;
   consumption[0]+=deltaC;
