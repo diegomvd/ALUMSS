@@ -313,6 +313,11 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
         organic_propensity.push_back(0);
 
       }
+      else if (landscape[ix] == 1 || landscape[ix] == 3){
+        organic_propensity.push_back(0);
+        intense_propensity.push_back( 0 );
+
+      }
       else cout << "Error: getActionPropensity: landscape contains an unrecognized value\n";
     }
 
