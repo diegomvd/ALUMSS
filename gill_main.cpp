@@ -333,11 +333,11 @@ int main(int argc, const char * argv[]){
 
       // transform the landscape according to reaction and patch
       if (reaction==0){landscape[patch]=0;count_events[0]+=1;} //recovery
-      else if(reaction==1) {landscape[patch]=2;count_events[1]+=1;} //degradation
-      else if(reaction==2) {landscape[patch]=1;maintenance_costs[patch]=m*y0;count_events[2]+=1;} //expansion
+      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1;} //degradation
+      else if(reaction==2) {landscape[patch]=2;maintenance_costs[patch]=m*y0;count_events[2]+=1;} //expansion
       else if(reaction==3) {landscape[patch]=3;maintenance_costs[patch]=m*y0;count_events[3]+=1;} //intensification
-      else if(reaction==4) {landscape[patch]=0;maintenance_costs[patch]=0;count_events[4]+=1;} //abandonment organic
-      else if(reaction==5) {landscape[patch]=2;maintenance_costs[patch]=0;count_events[5]+=1;} //abandonment intense
+      else if(reaction==4) {landscape[patch]=0;maintenance_costs[patch]=0;count_events[4]+=1;} //abandonment to natural
+      else if(reaction==5) {landscape[patch]=1;maintenance_costs[patch]=0;count_events[5]+=1;} //abandonment to degraded
       else {cout << "Error: gill_main.cpp this reaction does not exist.";}
 
       // update the time and timestep for population

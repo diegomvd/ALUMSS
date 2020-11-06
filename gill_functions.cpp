@@ -197,7 +197,7 @@ double getExposure2Nature(unsigned int i, unsigned int n, const vector<unsigned 
   }
 
   for (ix=0 ; ix<component_area.size(); ++ix){
-    state_exposure+=0.25*pow(component_area[ix]/(n*n),0.3);
+    state_exposure+=0.25*pow(component_area[ix]/(n*n),0.25);
   }
 
   return state_exposure;
@@ -218,7 +218,7 @@ void getRecoveryPropensity(unsigned int n, double Tr, const vector<unsigned int>
   double exposure_to_nature;
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
-    if (landscape[ix] == 2) { // if patch ix is degraded
+    if (landscape[ix] == 1) { // if patch ix is degraded
       exposure_to_nature=getExposure2Nature(ix,n,landscape,natural_components);
       recovery_propensity.push_back( exposure_to_nature/Tr );
     }
@@ -265,7 +265,8 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
   */
 
   // use them to store the accumulated probability in order to normalize afterwards
-  int cum_sum = 0;
+  int org_cum_sum = 0;
+  int int_cum_sum = 0;
 
   /*
   first checking if there is a consumption deficit that justifys human action
@@ -291,23 +292,26 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
 
     for (ix=0 ; ix<landscape.size() ; ++ix){
 
-      if (landscape[ix] == 0){ // if patch is natural, hence can be converted ...
+      if (landscape[ix] == 0){ // if patch is natural, hence can be converted to organic
 
-        // get the indexes of the cropped neighbours
-        vector<unsigned int> cropped_neighbours;
-        getStateNeighbours(ix, 1, n, landscape, cropped_neighbours); // state 1 is agricultural
-
+        // get the indexes of the organic neighbours
+        vector<unsigned int> organic_neighbours;
+        getStateNeighbours(ix, 2, n, landscape, organic_neighbours); // state 2 is organic
         // cropping probability expression is taken from bart's and dani's paper
-        organic_propensity.push_back( pow( max(0.1 , (double)cropped_neighbours.size() ) , w ) );
-        // restoring propensity is 0 because the patch is already natural
-        intense_propensity.push_back( pow( max(0.1 , (double)cropped_neighbours.size() ) , w ) );
-
-        cum_sum=pow( max(0.1 , (double)cropped_neighbours.size() ) , w );
+        organic_propensity.push_back( pow( max(0.1 , (double)organic_neighbours.size() ) , w ) );
+        org_cum_sum += organic_propensity.back();
+        intense_propensity.push_back( 0 );
 
       }
-      else if (landscape[ix]==1 || landscape[ix] == 2 || landscape[ix] == 3){ // if patch is organic, degraded or intense nothing can be done
-        organic_propensity.push_back( 0 );
-        intense_propensity.push_back( 0 );
+      else if (landscape[ix] == 2 ){ // if patch is organic it can be intensifyed
+
+        // get the indexes of the organic neighbours
+        vector<unsigned int> intense_neighbours;
+        getStateNeighbours(ix, 3, n, landscape, intense_neighbours); // state 2 is organic
+        intense_propensity.push_back( pow( max(0.1 , (double)intense_neighbours.size() ) , w ) );
+        int_cum_sum += intense_propensity.back();
+        organic_propensity.push_back(0);
+
       }
       else cout << "Error: getActionPropensity: landscape contains an unrecognized value\n";
     }
@@ -317,10 +321,22 @@ void getActionPropensity(unsigned int n, double w, double a, double g, double co
     probability per unit time of action given the consumption deficit
     */
 
-    if (cum_sum>0){ // this is to avoid dividing by zero
+    if (org_cum_sum>0 && int_cum_sum>0){ // this is to avoid dividing by zero
       for (ix=0; ix<landscape.size() ; ++ix){
-        organic_propensity[ix]=organic_propensity[ix]/cum_sum*g*consumption_deficit*a;
-        intense_propensity[ix]=intense_propensity[ix]/cum_sum*g*consumption_deficit*(1-a);
+        organic_propensity[ix]=organic_propensity[ix]/org_cum_sum*g*consumption_deficit*a;
+        intense_propensity[ix]=intense_propensity[ix]/int_cum_sum*g*consumption_deficit*(1-a);
+      }
+    }
+    else{
+      if (org_cum_sum>0){
+        for (ix=0; ix<landscape.size() ; ++ix){
+          organic_propensity[ix]=organic_propensity[ix]/org_cum_sum*g*consumption_deficit;
+        }
+      }
+      else if (int_cum_sum>0){
+        for (ix=0; ix<landscape.size() ; ++ix){
+          intense_propensity[ix]=intense_propensity[ix]/int_cum_sum*g*consumption_deficit;
+        }
       }
     }
   }
@@ -345,7 +361,7 @@ void getAbandonmentPropensity(double Ta, const vector<unsigned int> &landscape, 
 
     for (ix=0; ix<landscape.size(); ++ix){
       maintenance_deficit=maintenance_costs[ix] - agricultural_production[ix];
-      if (landscape[ix]==1){ // organic patch
+      if (landscape[ix]==2){ // organic patch
         abandonmentI_propensity.push_back(0);
         if (maintenance_deficit>0){
           abandonmentO_propensity.push_back(maintenance_deficit/Ta);
@@ -382,7 +398,7 @@ void getAbandonmentPropensity(double Ta, const vector<unsigned int> &landscape, 
     maintenance_deficit=total_maintenance_cost-total_agricultural_production;
     if (maintenance_deficit>0){
       for(ix=0; ix<landscape.size(); ++ix){
-        if (landscape[ix]==1){ // organic
+        if (landscape[ix]==2){ // organic
           abandonmentO_propensity.push_back(maintenance_costs[ix]/total_maintenance_cost*maintenance_deficit/Ta);
           abandonmentI_propensity.push_back(0);
         }
@@ -480,7 +496,7 @@ void initializeLandscape( vector<unsigned int> &landscape, unsigned int n, doubl
     // selecting random location for initial cropped patches
     ix_land4crop = gsl_rng_uniform_int(r, land4crop.size() );
     ix_landscape = land4crop[ix_land4crop];
-    landscape[ix_landscape]=1; // cropping selected patch with organic agriculture
+    landscape[ix_landscape]=2; // cropping selected patch with organic agriculture
     land4crop.erase(land4crop.begin()+ix_land4crop); // removing the selected patch so it cannot be selected again
   }
   for (ix=0 ; ix<nai0 ; ++ix){
@@ -516,7 +532,7 @@ void initializePopulation(vector<double> &population, const vector<double> &cons
 void initializeMaintenanceCosts(vector<double> &maintenance_costs, double y0, double m, const vector<unsigned int> &landscape){
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
-    if (landscape[ix]==1 || landscape[ix]==3){ //cropped patches
+    if (landscape[ix]==2 || landscape[ix]==3){ //cropped patches
       maintenance_costs.push_back(m*y0);
     }
     else{
@@ -538,7 +554,7 @@ void getAgriculturalProduction(vector<double> &agricultural_production, unsigned
 
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
-    if(landscape[ix]==1){ // cropped patches
+    if(landscape[ix]==2){ // cropped patches
       agricultural_production.push_back(y0*(1+phi*getExposure2Nature(ix,n,landscape,natural_components)));
     }
     else if(landscape[ix]==3){ //intense
