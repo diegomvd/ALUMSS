@@ -346,7 +346,7 @@ int main(int argc, const char * argv[]){
       else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
       else if(reaction==4) {landscape[patch]=0;count_events[4]+=1;} //abandonment to natural
       else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
-      else {cout << "Error: gill_main.cpp this reaction does not exist.";}
+      else {cout << "Error: gill_main.cpp reaction " << reaction << " does not exist.\n";}
       // updating natural connected components
       getNaturalConnectedComponents(naturalComponents, n, landscape);
       // updating agricultural production
