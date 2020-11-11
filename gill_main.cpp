@@ -55,19 +55,23 @@ int main(int argc, const char * argv[]){
   int n;  // lenght of the sides of the square landscape: number of cells=n*n
   int SimTime; // total simulation time
   double dtp; // timestep for population dynamics
+
   double ao0, ai0; //number of agricultural patches at beggining
-  double c0,r0,y0; // per capita consumption, population growth rate and baseline agricultural yield
-  double a; // likelihood of converting
+  double c0; // initial per capita consumption
+
+  double r0; // population growth rate
+  double ys0,yn0; // productivity per unit input or unit ecosystem service
+  double pSD; // perturbation sd for production
+  double ori,ini; // organic and intense inputs
+  double ess; // ecosystem service saturation exponent
+  double a; // expansion probability
   double w; // agricultural clustering parameter
-  double m; // maintenance cost relative to production of a cropped patch
-  double g; // growth coefficient of action probability in function of consumption deficit
-  double Ta; // mean abandonment time
-  double phi; // relative contribution of natural land to agriculture
+  double m,m0; // maintenance cost per unit of input
+  double g; // action probability per unit time per unit of consumption deficit
+  double Ta; // mean abandonment time per maintenance deficit
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
-  double dtsave; // timestep for saving data
-  double k; // relative yield of intense againt baseline for organic
-  double Ti; // time during wich maintenance deficit of intense patches is negative
   double kg,kd,cmin; // growth and decrease rates of per capita consumption
+  double dtsave; // timestep for saving data
 
   ///////////////////////////////////////////////////////////////////////////////
   // IMPORT PARAMETER VALUES
@@ -95,26 +99,29 @@ int main(int argc, const char * argv[]){
         cmin = strtod(argv[10], &pEnd);
 
         // agricultural production parameters
-        y0 = strtod(argv[11], &pEnd);
-        k = strtod(argv[12], &pEnd);
-        phi = strtod(argv[13], &pEnd);
+        ys0 = strtod(argv[11], &pEnd);
+        yn0 = strtod(argv[12], &pEnd);
+        pSD = strtod(argv[13], &pEnd);
+        ori = strtod(argv[14], &pEnd);
+        ini = strtod(argv[15], &pEnd);
+        ess = strtod(argv[16], &pEnd);
 
         // human action parameters
-        a = strtod(argv[14], &pEnd);
-        w = strtod(argv[15], &pEnd);
-        g = strtod(argv[16], &pEnd);
+        a = strtod(argv[17], &pEnd);
+        w = strtod(argv[18], &pEnd);
+        g = strtod(argv[19], &pEnd);
 
         // abandonment parameters
-        m = strtod(argv[17], &pEnd);
-        Ti = strtod(argv[18], &pEnd);
-        Ta = strtod(argv[19], &pEnd);
+        m0= strtod(argv[20], &pEnd);
+        m= strtod(argv[21], &pEnd);
+        Ta = strtod(argv[22], &pEnd);
 
         // spontaneous evolution parameters
-        Tr = strtod(argv[20], &pEnd);
-        Td = strtod(argv[21], &pEnd);
+        Tr = strtod(argv[23], &pEnd);
+        Td = strtod(argv[24], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[22], &pEnd);
+        dtsave = strtod(argv[25], &pEnd);
 
   }
 
@@ -158,19 +165,22 @@ int main(int argc, const char * argv[]){
     filename += "_kg_"+allArgs[8];
     filename += "_kd_"+allArgs[9];
     filename += "_cmin_"+allArgs[10];
-    filename += "_y0_"+allArgs[11];
-    filename += "_k_"+allArgs[12];
-    filename += "_phi_"+allArgs[13];
-    filename += "_a_"+allArgs[14];
-    filename += "_w_"+allArgs[15];
-    filename += "_g_"+allArgs[16];
-    filename += "_m_"+allArgs[17];
-    filename += "_Ti_"+allArgs[18];
-    filename += "_Ta_"+allArgs[19];
-    filename += "_Tr_"+allArgs[20];
-    filename += "_Td_"+allArgs[21];
-    filename += "_dtsave_"+allArgs[22];
-    filename += "_expid_"+allArgs[23];
+    filename += "_ys0_"+allArgs[11];
+    filename += "_yn0_"+allArgs[12];
+    filename += "_pSD_"+allArgs[13];
+    filename += "_ori_"+allArgs[14];
+    filename += "_ini_"+allArgs[15];
+    filename += "_ess_"+allArgs[16];
+    filename += "_a_"+allArgs[17];
+    filename += "_w_"+allArgs[18];
+    filename += "_g_"+allArgs[19];
+    filename += "_m0_"+allArgs[20];
+    filename += "_m_"+allArgs[21];
+    filename += "_Ta_"+allArgs[22];
+    filename += "_Tr_"+allArgs[23];
+    filename += "_Td_"+allArgs[24];
+    filename += "_dtsave_"+allArgs[25];
+    filename += "_expid_"+allArgs[26];
     filename+=".dat";
   }
 
@@ -209,28 +219,28 @@ int main(int argc, const char * argv[]){
   double dt=dtp;
   double x_rand;
   unsigned int reaction,patch;
-  unsigned int i,j;
-  double total_agricultural_production;
-  double consumption_deficit;
+  unsigned int i;
 
   // this vector has only one member and it is the population
   vector<double> population;
   // this vector only has one member and it is the per capita consumption
   vector<double> consumption;
-  consumption.push_back(c0);
   // vector containing the landscape state
   vector<unsigned int> landscape;
   // vector containing the production of each patch
-  vector<double> agricultural_production;
-  // vector containing the maintenance cost of each patch
-  vector<double> maintenance_costs;
+  vector<double> agriculturalProduction;
+  // vector containing the natural connected components information
+  vector<vector<int>> naturalComponents;
+  // vector containing the event's propensities
+  vector<double> propensityVector;
   // vector to store the number of events of each kind
   vector<unsigned int> count_events={0,0,0,0,0,0};
-  // vector containing the natural connected components information
-  vector<vector<int>> natural_components;
-  // vector containing the event's propensities
-  vector<double> propensity_vector;
 
+  ////////////////////////////////////////////////////////////////////////////
+  // STATE INITIALISATION
+  ////////////////////////////////////////////////////////////////////////////
+
+  // BY CONF FILE
   if (LOAD_CONF==1){
     cout << "Starting from conf file \n";
     ifstream conf_file("DATA_CONF_T_2000_dtp_0.1_n_40_p0_5_cg0_1_r0_1_y0_5_a_0.45_w_0_m_1_g_1_l_0.1_Ta_1_phi_3_Tr_1.5_Td_50_dtsave_1.dat");
@@ -253,100 +263,22 @@ int main(int argc, const char * argv[]){
       }
     }
   }
-  else{
-    initializeLandscape(landscape,n,ao0,ai0,r);
-    getNaturalCluster(natural_components, n, landscape);
-    getAgriculturalProduction(agricultural_production,n,y0,k,phi,landscape,natural_components);
-    initializePopulation(population,consumption,agricultural_production);
+  else{ // WITH ARGV PARAMETERS
+    initializeSES(landscape,population,consumption,naturalComponents,agriculturalProduction,c0,n,ao0,ai0,r,ys0,yn0,pSD,ori,ini,ess);
   }
-  initializeMaintenanceCosts(maintenance_costs,y0,m,landscape);
 
   /////////////////////////////////////////////////////////////////////////////
   // BEGIN OF SIMULATION
   /////////////////////////////////////////////////////////////////////////////
 
-  /*
-  1- get all the natural connected components
-  2- use it to calculate the agricultural production
-  3- use the agricultural production to calculate the consumption deficit
-  :: we now have all the information needed to estimate the probability
-  per unit time of each possible stochastic event::
-  4- calculate the propensity vector containing the probabilites per unit time
-  5- calculate the time until next reaction dtg
-  6- compare the time until next reaction dtg with the time-step dt for
-  population dynamics. If dtg>dt then population grows before any event, else
-  there is a transition in the landscape.
-  7- save the data and go back to 1.
-  */
-  j=0;
   // entering the time loop
   while(t<SimTime){
-    /*
-    if (t>SimTime/5*j){
-      auto stop1 = chrono::high_resolution_clock::now();
-      auto duration = chrono::duration_cast<chrono::minutes>(stop1 - start);
-      cout << "Simulation progress " << (int)t << " out of " << SimTime << " in " << duration.count() << "minutes" << "\n";
-      j+=1;
-    }*/
-    // identifying all the natural connected components
-    getNaturalCluster(natural_components, n, landscape);
 
-    // calculating the agricultural production
-    getAgriculturalProduction(agricultural_production,n,y0,k,phi,landscape,natural_components);
-
-    // calculating the consumption deficit
-    total_agricultural_production=0;
-    for(j=0; j<agricultural_production.size(); ++j){
-      total_agricultural_production+=agricultural_production[j];
-    }
-    consumption_deficit = population[0]*consumption[0] - total_agricultural_production;
-
-    // calculating the propensity vector
-    getPropensityVector(propensity_vector, n, Tr, Td, w, a, g, Ta, consumption_deficit, landscape, natural_components, agricultural_production, maintenance_costs);
-
-    // calculating the time until next reaction
-    dtg=-1/propensity_vector.back()*log(ranMT());
-
-    // checking whether population or the landscape changes
-    if (dtg>dt){
-      // update the population value
-      if (population[0]>0){
-        RungeKutta4(r0,kg,kd,cmin,dtp,total_agricultural_production,population,consumption);
-      }
-      //update maintenance costs for cropped patches
-      updateMaintenanceIntense(maintenance_costs, dtp, y0, m, k, Ti, landscape);
-      // update the time and the timestep for population
-      t+=dt;
-      dt=dtp;
-    }
-    else{
-      // compute random number to select next reaction
-      x_rand = ranMT()*propensity_vector.back();
-      // traverse the propensity vector and stop once reaching the selceted cell
-      i=0;
-      while(x_rand>propensity_vector[i]){
-        i++;
-      }
-      // calculate the corresponding reaction and patch from the selected index i
-      reaction=(int)i/(n*n); //result from euclidian division
-      patch=i%(n*n); // remainder from euclidian division
-
-      // transform the landscape according to reaction and patch
-      if (reaction==0){landscape[patch]=0;count_events[0]+=1;} //recovery
-      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1;} //degradation
-      else if(reaction==2) {landscape[patch]=2;maintenance_costs[patch]=m*y0;count_events[2]+=1;} //expansion
-      else if(reaction==3) {landscape[patch]=3;maintenance_costs[patch]=m*y0;count_events[3]+=1;} //intensification
-      else if(reaction==4) {landscape[patch]=0;maintenance_costs[patch]=0;count_events[4]+=1;} //abandonment to natural
-      else if(reaction==5) {landscape[patch]=1;maintenance_costs[patch]=0;count_events[5]+=1;} //abandonment to degraded
-      else {cout << "Error: gill_main.cpp this reaction does not exist.";}
-
-      // update the time and timestep for population
-      t+=dtg;
-      dt-=dtg;
-    }
-
-    // save the data
-    if(t>=t_save){
+    ///////////////////////////////////////////////////////////////////////////
+    // SAVING DATA
+    ///////////////////////////////////////////////////////////////////////////
+    if(t>=t_save)
+    {
 
       tofile_popu << t << " " << population[0] << " " << consumption[0] << "\n";
       tofile_land << t << " ";
@@ -359,14 +291,70 @@ int main(int argc, const char * argv[]){
       for(i=0 ; i<count_events.size() ; i++){
         tofile_evnt << count_events[i] << " ";
       }
-      for(i=0 ; i<natural_components.size() ; i++){
-        tofile_clus << natural_components[i][0] << " " << natural_components[i][1] << "\n";
+      for(i=0 ; i<naturalComponents.size() ; i++){
+        tofile_clus << naturalComponents[i][0] << " " << naturalComponents[i][1] << "\n";
       }
 
       tofile_land << "\n";
       tofile_evnt << "\n";
 
       t_save+=dtsave;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CALCULATING PROPENSITY VECTOR
+    ///////////////////////////////////////////////////////////////////////////
+    getPropensityVector(propensityVector,landscape,naturalComponents,agriculturalProduction,population,consumption,n,Tr,Td,w,a,g,Ta,ori,ini,ess,m0,m);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TIME UNTIL NEXT EVENT
+    ///////////////////////////////////////////////////////////////////////////
+    dtg=-1/propensityVector.back()*log(ranMT());
+
+    ///////////////////////////////////////////////////////////////////////////
+    // LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION AND CONSUMPTION OR
+    // THE REALIZATION OF A STOCHASTIC EVENT
+    ///////////////////////////////////////////////////////////////////////////
+    if (dtg>dt){ // if the time until next event is larger than the ODE timestep
+      // update population and consumption
+      if (population[0]>0){
+        rungeKutta4(population,consumption,agriculturalProduction,dt,r0,kg,kd,cmin);
+      }
+      else{
+        break;
+      }
+      // update the time as well as the timestep for ODE solving
+      t+=dt;
+      dt=dtp;
+    }
+    else{ // if the time until next event is shorter than the ODE timestep
+      // compute random number to select next reaction
+      x_rand = ranMT()*propensityVector.back();
+      // traverse the propensity vector and stop once reaching the selceted cell
+      i=0;
+      while(x_rand>propensityVector[i]){
+        i++;
+      }
+      // calculate the corresponding reaction and patch from the selected index i
+      reaction=(int)i/(n*n); //result from euclidian division
+      patch=i%(n*n); // remainder from euclidian division
+
+      // transform the landscape according to reaction and patch
+      if (reaction==0){landscape[patch]=0;count_events[0]+=1;} //recovery
+      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1;} //degradation
+      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1;} //expansion
+      else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
+      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1;} //abandonment to natural
+      else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
+      else {cout << "Error: gill_main.cpp this reaction does not exist.";}
+      // updating natural connected components
+      getNaturalConnectedComponents(naturalComponents, n, landscape);
+      // updating agricultural production
+      getAgriculturalProduction(agriculturalProduction,landscape,naturalComponents,n,ys0,yn0,pSD,ori,ini,ess,r);
+
+      // update the time and timestep for ODE solving
+      t+=dtg;
+      dt-=dtg;
     }
   }
 
@@ -386,10 +374,10 @@ int main(int argc, const char * argv[]){
     }
     cout << "\n";
   }
-  for(i=0 ; i<natural_components.size() ; i++)
+  for(i=0 ; i<naturalComponents.size() ; i++)
   {
-    cout << "patch " << natural_components[i][0] << " is in cluster " << natural_components[i][1] <<  "\n";
-    cout << "state of patch " << natural_components[i][0] << " is " << landscape[natural_components[i][0]] << "\n";
+    cout << "patch " << naturalComponents[i][0] << " is in cluster " << naturalComponents[i][1] <<  "\n";
+    cout << "state of patch " << naturalComponents[i][0] << " is " << landscape[naturalComponents[i][0]] << "\n";
   }
   for(i=0  ; i<landscape.size() ; i++)
   {

@@ -5,38 +5,65 @@
 #include <gsl/gsl_rng.h>
 using namespace std;
 
-// gets the indexes of all the neighbours of i and puts them in list
-void getNeighbours(unsigned int i, unsigned int n, vector<unsigned int> &list);
-// gets the indexes of the neighbours in a given state and puts them in state_indexes
-void getStateNeighbours(unsigned int i, unsigned int state, unsigned int n, const vector<unsigned int> &landscape, vector<unsigned int> &state_indexes);
-// for every natural patch it gets its connected component membership
-void getNaturalCluster(vector<vector<int>> &natural_components, unsigned int n, const vector<unsigned int> &landscape);
-// calculates the exposure to nature of patch i
-double getExposure2Nature(unsigned int i, unsigned int n, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components);
-// calculates the recovery probability pezr unit time of each patch
-void getRecoveryPropensity(unsigned int n, double Tr, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, vector<double> &recovery_propensity);
-// calculates the degradation probability per unit time of each patch
-void getDegradationPropensity(unsigned int n, double Td, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, vector<double> &degradation_propensity);
-// calculates the action probability per unit time for each patch
-void getActionPropensity(unsigned int n, double w, double a, double g, double consumption_deficit,const vector<unsigned int> &landscape, vector<double> &organic_propensity, vector<double> &intense_propensity);
-// calculates the abandonment probabilty per unit time of each patch
-void getAbandonmentPropensity(double Ta, const vector<unsigned int> &landscape, const vector<double> &agricultural_production, const vector<double> &maintenance_costs, vector<double> &abandonmentO_propensity, vector<double> &abandonmentI_propensity);
-// merges all the probabilites per unit time in a single vector with a cummulative sum
-void getPropensityVector(vector<double> &propensity_vector, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double consumption_deficit, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components, const vector<double> &agricultural_production, const vector<double> &maintenance_costs);
-// initializes the landscape vector
-void initializeLandscape(vector<unsigned int> &landscape, unsigned int n, double ao0, double ai0, gsl_rng  *r);
-// initializes the population density
-void initializePopulation(vector<double> &population, const vector<double> &consumption, const vector<double> &agricultural_production);
-// initializes vector storing maintenance costs
-void initializeMaintenanceCosts(vector<double> &maintenance_costs, double y0, double m, const vector<unsigned int> &landscape);
-// calculates the agricultural production
-void getAgriculturalProduction(vector<double> &agricultural_production, unsigned int n, double y0, double k, double phi, const vector<unsigned int> &landscape, const vector<vector<int>> &natural_components);
-// increments maintenance cost of intense patches
-void updateMaintenanceIntense(vector<double> &maintenance_costs, double dtp, double y0, double m, double k, double Ti, const vector<unsigned int> &landscape);
-// calculates the population change
-double populationEquation(double r0, double agricultural_production, double population, double consumption);
-// calculates the per capita consumption change
-double consumptionEquation(double kg, double kd, double minimum_consumption, double agricultural_production, double population, double consumption);
-// solver for the population-consumption ODE system
-void RungeKutta4(double r0, double kg, double kd, double minimum_consumption, double dt, double agricultural_production, vector<double> &population, vector<double> &consumption);
+/*
+1-Helper functions
+2-Calculation of Ecosystem Service provision
+3-Calculation of events' propensities
+4-Initialization functions
+5-ODEs and solver
+*/
+
+
+///////////////////////////////////////////////////////////////////////////////
+// 1- Helper functions:
+//       - getNeighbours
+//       - getNeighboursState
+///////////////////////////////////////////////////////////////////////////////
+
+void getNeighbours(vector<unsigned int> &neighboursList, unsigned int i, unsigned int n);
+void getNeighboursState(vector<unsigned int> &neighboursState, const vector<unsigned int> &landscape, unsigned int i, unsigned int state, unsigned int n);
+
+////////////////////////////////////////////////////////////////////////////////
+// 2- Calculation of Ecosystem Service provision:
+//       - getNaturalConnectedComponents
+//       - getEcosystemServiceProvision
+//       - getAgriculturalProduction
+////////////////////////////////////////////////////////////////////////////////
+
+void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, unsigned int n, const vector<unsigned int> &landscape);
+double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int i, unsigned int n, double ess);
+void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double ys0, double yn0, double pSD, double ori, double ini, double ess, gsl_rng  *r);
+////////////////////////////////////////////////////////////////////////////////
+// 3- Calculation of events' propensities:
+//       - getSpontaneousPropensity
+//       - getActionPropensity
+//       - getAbandonmentPropensity
+//       - getPropensityVector
+////////////////////////////////////////////////////////////////////////////////
+
+void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double Tr, double Td, double ess);
+void getActionPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double w, double a, double g);
+void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<double> &intenseAbandonPropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, double Ta, double ori, double ini, double m0, double m);
+void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double m0, double m);
+////////////////////////////////////////////////////////////////////////////////
+// 4- Initialization functions:
+//       - initializeLandscape
+//       - initializePopulation
+//       - initializeSES
+////////////////////////////////////////////////////////////////////////////////
+
+void initializeLandscape( vector<unsigned int> &landscape, unsigned int n, double ao0, double ai0, gsl_rng  *r);
+void initializePopulation( vector<double> &population, const vector<double> &consumption, const vector<double> &agriculturalProduction);
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<double> &consumption, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double c0, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double pSD, double ori, double ini, double ess);
+////////////////////////////////////////////////////////////////////////////////
+// 5- ODEs and solver:
+//       - populationEquation
+//       - consumptionEquation
+//       - rungeKutta4
+////////////////////////////////////////////////////////////////////////////////
+
+double populationEquation(double population, double consumption, double agriculturalProduction, double r0);
+double consumptionEquation(double population, double consumption, double agriculturalProduction, double kg, double kd, double minimumConsumption);
+void rungeKutta4(vector<double> &population, vector<double> &consumption, vector<double> &agriculturalProduction, double dt, double r0, double kg, double kd, double minimumConsumption);
+
 #endif
