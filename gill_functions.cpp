@@ -327,8 +327,6 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
     unsigned long ix;
     for(ix=0 ; ix<landscape.size() ; ++ix){
       expansionPropensity.push_back( 0 ); // ... they do not transform the landscape
-    }
-    for(ix=0 ; ix<landscape.size() ; ++ix){
       intensePropensity.push_back( 0 ); // ... they do not transform the landscape
     }
   }
@@ -361,12 +359,10 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
         expansionPropensity.push_back(0);
 
       }
-      else if (landscape[ix] == 1 || landscape[ix] == 3){
+      else{
         expansionPropensity.push_back(0);
         intensePropensity.push_back( 0 );
-
       }
-      else cout << "Error: getActionPropensity: landscape contains an unrecognized value\n";
     }
 
     /*
@@ -415,22 +411,13 @@ void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<d
       if (landscape[ix]==2){ // organic patch
         intenseAbandonPropensity.push_back(0);
         maintenanceDeficit = m0*(1+m*ori) - agriculturalProduction[ix];
-        if (maintenanceDeficit > 0){ // non profitable
-          organicAbandonPropensity.push_back(maintenanceDeficit/Ta);
-        }
-        else{
-          organicAbandonPropensity.push_back(0);
-        }
+        organicAbandonPropensity.push_back(max(0.0, maintenanceDeficit/Ta));
+
       }
       else if(landscape[ix]==3){ //intensive patch
         organicAbandonPropensity.push_back(0);
         maintenanceDeficit = m0*(1+m*ini) - agriculturalProduction[ix];
-        if (maintenanceDeficit>0){
-          intenseAbandonPropensity.push_back(maintenanceDeficit/Ta);
-        }
-        else{
-          intenseAbandonPropensity.push_back(0);
-        }
+        intenseAbandonPropensity.push_back(max(0.0,maintenanceDeficit/Ta));
       }
       else{ // non cropped patches
         organicAbandonPropensity.push_back(0);
@@ -461,18 +448,12 @@ void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<d
     if (totalMaintenanceDeficit>0){
       for(ix=0; ix<landscape.size(); ++ix){
         if (landscape[ix]==2){ // organic
-          organicAbandonPropensity.push_back(0);
-          if (maintenanceDeficit[ix]>0){
-            organicAbandonPropensity.push_back(maintenanceDeficit[ix]/Ta);
-          }
+          organicAbandonPropensity.push_back(max(0.0,maintenanceDeficit[ix]/Ta));
           intenseAbandonPropensity.push_back(0);
         }
         else if (landscape[ix]==3){//intense
-          intenseAbandonPropensity.push_back(0);
           organicAbandonPropensity.push_back(0);
-          if (maintenanceDeficit[ix]>0){
-            intenseAbandonPropensity.push_back(maintenanceDeficit[ix]/Ta);
-          }
+          intenseAbandonPropensity.push_back(max(0.0,maintenanceDeficit[ix]/Ta));
         }
         else{//non cropped
           organicAbandonPropensity.push_back(0);
@@ -481,8 +462,10 @@ void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<d
       }
     }
     else{ // no maintenance deficit
-      organicAbandonPropensity.push_back(0);
-      intenseAbandonPropensity.push_back(0);
+      for (ix=0; ix<landscape.size(); ++ix){
+        organicAbandonPropensity.push_back(0);
+        intenseAbandonPropensity.push_back(0);
+      }
     }
   }
   return;
