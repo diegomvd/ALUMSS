@@ -305,7 +305,7 @@ int main(int argc, const char * argv[]){
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
     getPropensityVector(propensityVector,landscape,naturalComponents,agriculturalProduction,population,consumption,n,Tr,Td,w,a,g,Ta,ori,ini,ess,m0,m);
-
+    cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
     ///////////////////////////////////////////////////////////////////////////
