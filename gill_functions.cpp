@@ -394,22 +394,24 @@ void getAbandonmentPropensity(double Ta, const vector<unsigned int> &landscape, 
 
     double total_maintenance_cost=0;
     double total_agricultural_production=0;
+    vector<double> patch_maintenance_deficit;
 
     // calculate global maintenance deficit
     for (ix=0; ix<landscape.size(); ++ix){
       total_maintenance_cost+=maintenance_costs[ix];
       total_agricultural_production+=agricultural_production[ix];
+      patch_maintenance_deficit.push_back(maintenance_costs[ix]-agricultural_production[ix])
     }
     maintenance_deficit=total_maintenance_cost-total_agricultural_production;
     if (maintenance_deficit>0){
       for(ix=0; ix<landscape.size(); ++ix){
         if (landscape[ix]==2){ // organic
-          abandonmentO_propensity.push_back(maintenance_costs[ix]/total_maintenance_cost*maintenance_deficit/Ta);
+          abandonmentO_propensity.push_back(max(0.0,patch_maintenance_deficit[ix]/Ta));
           abandonmentI_propensity.push_back(0);
         }
         else if (landscape[ix]==3){//intense
           abandonmentO_propensity.push_back(0);
-          abandonmentI_propensity.push_back(maintenance_costs[ix]/total_maintenance_cost*maintenance_deficit/Ta);
+          abandonmentI_propensity.push_back(max(0.0,patch_maintenance_deficit[ix]/Ta));
         }
         else{//non cropped
           abandonmentO_propensity.push_back(0);
@@ -421,7 +423,7 @@ void getAbandonmentPropensity(double Ta, const vector<unsigned int> &landscape, 
       for(ix=0; ix<landscape.size(); ++ix){
         abandonmentO_propensity.push_back(0);
         abandonmentI_propensity.push_back(0);
-      }  
+      }
     }
   }
   return;
