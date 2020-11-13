@@ -418,8 +418,10 @@ void getAbandonmentPropensity(double Ta, const vector<unsigned int> &landscape, 
       }
     }
     else{ // no maintenance deficit
-      abandonmentO_propensity.push_back(0);
-      abandonmentI_propensity.push_back(0);
+      for(ix=0; ix<landscape.size(); ++ix){
+        abandonmentO_propensity.push_back(0);
+        abandonmentI_propensity.push_back(0);
+      }  
     }
   }
   return;
