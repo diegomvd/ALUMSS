@@ -403,7 +403,7 @@ void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<d
   a patch's maintenance cost and its production
   */
 
-  unsigned int local=0;
+  unsigned int local=1;
 
   unsigned int ix;
   double maintenanceDeficit=0;
