@@ -13,7 +13,10 @@ filesland=[]
 filesevnt=[]
 filesclus=[]
 filesclux=[]
-for file in glob.glob("../../Eukaryote-mountdir/DATA_04-11-2020/*.dat"):
+
+path_remote ="../../Eukaryote-mountdir/DATA_13-11-2020/*.dat"
+path_local ="./DATA_06-11-2020/*_varkd.dat"
+for file in glob.glob(path_remote):
     if "DATA_POPU" in file:
         filespop.append(file)
         count+=1
@@ -85,24 +88,29 @@ style.use('seaborn-paper')
 
 for ix in range(count):
 
-    ix1=filespop[ix].find("_a_")+3
-    ix2=filespop[ix].find("_w_")
+    ix1=filespop[ix].find("_m0_")+4
+    ix2=filespop[ix].find("_m_")
 
     a=filespop[ix][ix1:ix2]
 
-    ix1=filespop[ix].find("_kg_")+4
-    ix2=filespop[ix].find("_kd_")
+    ix1=filespop[ix].find("_m_")+3
+    ix2=filespop[ix].find("_Ta_")
 
     kg=filespop[ix][ix1:ix2]
 
-    ix1=filespop[ix].find("_kd_")+4
-    ix2=filespop[ix].find("_cmin_")
+    ix1=filespop[ix].find("_expid_")+7
+    ix2=filespop[ix].find(".dat")
 
-    kd=filespop[ix][ix1:ix2]
+    Ti=filespop[ix][ix1:ix2]
 
     datapop=np.loadtxt(filespop[ix])
     dataland=np.loadtxt(filesland[ix])
     # dataclus=np.loadtxt(filesclus[ix])
+
+    savedir="./PLOTS_13-11-2020/"
+    if not os.path.exists(savedir):
+        os.makedirs(savedir)
+    figid=filespop[ix][filespop[ix].index('_T_'):filespop[ix].index('.dat')]
 
     ## figure 1 population, land and production over time
 ################################################################################
@@ -111,8 +119,8 @@ for ix in range(count):
     axs[0].plot(datapop[:,0],datapop[:,1])
     axs[2].plot(datapop[:,0],datapop[:,2])
 
-    colors=['tab:green','tab:orange','tab:red','tab:purple']
-    land_type=['N','Ao','D','Ai']
+    colors=['tab:green','tab:red','tab:orange','tab:purple']
+    land_type=['N','D','Ao','Ai']
     for type in [0,1,2,3]:
 
         area=np.count_nonzero(dataland[:,1:]==type,axis=1).transpose()
@@ -123,9 +131,10 @@ for ix in range(count):
     axs[1].set_xlabel("Time")
 
     axs[1].legend()
-    axs[0].set_title("a="+str(a)+ ", kg="+str(kg) + ", kd="+str(kd))
-    plt.savefig("time_dynamics.jpg", dpi=500)
-    plt.show()
+    axs[0].set_title("m0="+str(a)+ ", m="+str(kg) + ", exp="+str(Ti))
+
+    plt.savefig(savedir+"time_dynamics"+figid+".jpg", dpi=500)
+    #plt.show()
 
 
     ## figure 2 mean ecosystem service provision with std and fragment size
