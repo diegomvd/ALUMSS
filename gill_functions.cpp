@@ -316,8 +316,8 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
   */
 
   // use them to store the accumulated probability in order to normalize afterwards
-  int expansionCumSum = 0;
-  int intenseCumSum = 0;
+  double expansionCumSum = 0;
+  double intenseCumSum = 0;
 
   /*
   first checking if there is a consumption deficit that justifys human action
@@ -374,6 +374,7 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
       for (ix=0; ix<landscape.size() ; ++ix){
         expansionPropensity[ix]=expansionPropensity[ix]/expansionCumSum*g*consumptionDeficit*a;
         intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*g*consumptionDeficit*(1-a);
+        //cout << "intense propensity at " << ix << " = " << intensePropensity[ix] << "\n";
       }
     }
     else{
@@ -383,12 +384,20 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
         }
       }
       else if (intenseCumSum>0){
+        cout << "I'm here\n";
         for (ix=0; ix<landscape.size() ; ++ix){
           intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*g*consumptionDeficit;
         }
       }
     }
   }
+  unsigned long jx;
+
+  for(jx=0; jx<intensePropensity.size(); jx++){
+    cout << intensePropensity[jx] << " ";
+  }
+  cout << "\n";
+
   return;
 }
 
@@ -400,7 +409,7 @@ void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<d
   a patch's maintenance cost and its production
   */
 
-  unsigned int local=0;
+  unsigned int local=1;
 
   unsigned int ix;
   double maintenanceDeficit=0;
