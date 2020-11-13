@@ -384,7 +384,6 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
         }
       }
       else if (intenseCumSum>0){
-        cout << "I'm here\n";
         for (ix=0; ix<landscape.size() ; ++ix){
           intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*g*consumptionDeficit;
         }
@@ -392,11 +391,6 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
     }
   }
   unsigned long jx;
-
-  for(jx=0; jx<intensePropensity.size(); jx++){
-    cout << intensePropensity[jx] << " ";
-  }
-  cout << "\n";
 
   return;
 }
