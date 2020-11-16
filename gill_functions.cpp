@@ -354,7 +354,8 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
 
       }
       else if (landscape[ix] == 2 ){ // if patch is organic it can be intensifyed
-        intensePropensity.push_back( 1/agriculturalProduction[ix] ); // the less productive organic are more likely to be intensifyed
+        // 10*(1-pow(agriculturalProduction[ix]/maxAgriculturalProduction,0.5))
+        intensePropensity.push_back( 1 ); // the less productive organic are more likely to be intensifyed
         intenseCumSum += intensePropensity.back();
         expansionPropensity.push_back(0);
 
