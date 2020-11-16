@@ -386,8 +386,8 @@ int main(int argc, const char * argv[]){
   auto stop = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::minutes>(stop - start);
   cout << "total execution time " << duration.count() << endl;
-  cout << "Time out of simulation =" << t <<", last dtg= " << dtg << ", Cumsum= " << propensityVector.back() <<  "\n";
-  cout << "looking for nan emplacement... \n";
+  // cout << "Time out of simulation =" << t <<", last dtg= " << dtg << ", Cumsum= " << propensityVector.back() << ", population= " << population[0] << "\n";
+  //cout << "looking for nan emplacement... \n";
   unsigned long ix;
   for(ix=0;ix<propensityVector.size();ix++){
     if (isnan(propensityVector[ix])){
@@ -397,7 +397,7 @@ int main(int argc, const char * argv[]){
   }
   reaction=(int)i/(n*n); //result from euclidian division
   patch=i%(n*n); // remainder from euclidian division
-  cout << "Error in reaction "<< reaction << " at patch " << patch <<"\n";
+  //cout << "Error in reaction "<< reaction << " at patch " << patch <<"\n";
 
   return 0;
 }

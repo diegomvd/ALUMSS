@@ -235,7 +235,9 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   double syntheticInput; // this is determined by the intensification level
   double patchProduction;
   double ecosystemServices;
-  double perturbation=gsl_ran_gaussian_tail(r, 0, pSD);
+//  double perturbation=gsl_ran_gaussian_tail(r, 0, pSD);
+  double perturbation =0;
+  //cout << "perturbation=" << perturbation <<"\n";
 
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
@@ -579,7 +581,6 @@ void initializePopulation( vector<double> &population, const vector<double> &con
   for(ix=0; ix<agriculturalProduction.size(); ++ix){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-
   population.push_back(totalAgriculturalProduction/consumption[0]);
 
   return;
@@ -593,6 +594,7 @@ void initializeSES( vector<unsigned int> &landscape, vector<double> &population,
   getNaturalConnectedComponents(naturalComponents,n,landscape);
   getAgriculturalProduction(agriculturalProduction,landscape,naturalComponents,n,ys0,yn0,pSD,ori,ini,ess,r);
   initializePopulation(population,consumption,agriculturalProduction);
+  cout << "population waka =" << population[0] << "\n";
 
   return;
 
