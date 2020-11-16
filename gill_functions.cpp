@@ -406,7 +406,7 @@ void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<d
   a patch's maintenance cost and its production
   */
 
-  unsigned int local=1;
+  unsigned int local=0;
 
   unsigned int ix;
   double maintenanceDeficit=0;
@@ -594,7 +594,6 @@ void initializeSES( vector<unsigned int> &landscape, vector<double> &population,
   getNaturalConnectedComponents(naturalComponents,n,landscape);
   getAgriculturalProduction(agriculturalProduction,landscape,naturalComponents,n,ys0,yn0,pSD,ori,ini,ess,r);
   initializePopulation(population,consumption,agriculturalProduction);
-  cout << "population waka =" << population[0] << "\n";
 
   return;
 
