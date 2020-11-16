@@ -217,7 +217,7 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
   }
 
   for (ix=0 ; ix<componentArea.size(); ++ix){
-    ecosystemServiceProvision+=0.25*pow(componentArea[ix]/(n*n),0.25*ess);
+    ecosystemServiceProvision+=0.25*pow(componentArea[ix]/(n*n),0.3*ess);
   }
 
   return ecosystemServiceProvision;
