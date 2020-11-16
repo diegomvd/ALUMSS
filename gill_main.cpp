@@ -388,8 +388,9 @@ int main(int argc, const char * argv[]){
   cout << "total execution time " << duration.count() << endl;
   cout << "Time out of simulation =" << t <<", last dtg= " << dtg << ", Cumsum= " << propensityVector.back() <<  "\n";
   cout << "looking for nan emplacement... \n";
+  unsigned long ix;
   for(ix=0;ix<propensityVector.size();ix++){
-    if isnan(propensityVector[ix]){
+    if (isnan(propensityVector[ix]){
       i=ix;
       break;
     }
