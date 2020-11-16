@@ -386,5 +386,6 @@ int main(int argc, const char * argv[]){
   auto stop = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::minutes>(stop - start);
   cout << "total execution time " << duration.count() << endl;
+  cout << "Time out of simulation =" << t <<", last dtg= " << dtg << "\n"; 
   return 0;
 }
