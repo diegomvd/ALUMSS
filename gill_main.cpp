@@ -66,7 +66,7 @@ int main(int argc, const char * argv[]){
   double ess; // ecosystem service saturation exponent
   double a; // expansion probability
   double w; // agricultural clustering parameter
-  double m,m0; // maintenance cost per unit of input
+  double d,b; // maintenance cost per unit of input
   double g; // action probability per unit time per unit of consumption deficit
   double Ta; // mean abandonment time per maintenance deficit
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
@@ -112,8 +112,8 @@ int main(int argc, const char * argv[]){
         g = strtod(argv[19], &pEnd);
 
         // abandonment parameters
-        m0= strtod(argv[20], &pEnd);
-        m= strtod(argv[21], &pEnd);
+        d= strtod(argv[20], &pEnd);
+        b= strtod(argv[21], &pEnd);
         Ta = strtod(argv[22], &pEnd);
 
         // spontaneous evolution parameters
@@ -174,8 +174,8 @@ int main(int argc, const char * argv[]){
     filename += "_a_"+allArgs[17];
     filename += "_w_"+allArgs[18];
     filename += "_g_"+allArgs[19];
-    filename += "_m0_"+allArgs[20];
-    filename += "_m_"+allArgs[21];
+    filename += "_d_"+allArgs[20];
+    filename += "_b_"+allArgs[21];
     filename += "_Ta_"+allArgs[22];
     filename += "_Tr_"+allArgs[23];
     filename += "_Td_"+allArgs[24];
@@ -304,7 +304,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,landscape,naturalComponents,agriculturalProduction,population,consumption,n,Tr,Td,w,a,g,Ta,ori,ini,ess,m0,m);
+    getPropensityVector(propensityVector,landscape,naturalComponents,agriculturalProduction,population,consumption,n,Tr,Td,w,a,g,Ta,ori,ini,ess,d,b);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT

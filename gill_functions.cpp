@@ -398,86 +398,37 @@ void getActionPropensity(vector<double> &expansionPropensity, vector<double> &in
   return;
 }
 
-void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<double> &intenseAbandonPropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, double Ta, double ori, double ini,double m0, double m)
+void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, double Ta, double ori, double ini, double d, double b)
 {
   /*
   fills the abandonment_propensity vector. the probability per unit time is
-  proportional to the maintenance deficit, which is the difference between
-  a patch's maintenance cost and its production
+  proportional to the synthetic inpur or intensification level
   */
 
-  unsigned int local=1;
-
   unsigned int ix;
-  double maintenanceDeficit=0;
+  double meanAbandonTime;
 
-  if (local==1){
-
-    for (ix=0; ix<landscape.size(); ++ix){
-      if (landscape[ix]==2){ // organic patch
-        intenseAbandonPropensity.push_back(0);
-        maintenanceDeficit = m0*(1+m*ori) - agriculturalProduction[ix];
-        organicAbandonPropensity.push_back(max(0.0, maintenanceDeficit/Ta));
-
-      }
-      else if(landscape[ix]==3){ //intensive patch
-        organicAbandonPropensity.push_back(0);
-        maintenanceDeficit = m0*(1+m*ini) - agriculturalProduction[ix];
-        intenseAbandonPropensity.push_back(max(0.0,maintenanceDeficit/Ta));
-      }
-      else{ // non cropped patches
-        organicAbandonPropensity.push_back(0);
-        intenseAbandonPropensity.push_back(0);
-      }
+  for (ix=0; ix<landscape.size(); ++ix){
+    if (landscape[ix]==2){ // organic patch
+      meanAbandonTime = Ta*(1-pow(ori,b));
+      degradedAbandonPropensity.push_back( 1/meanAbandonTime*pow(ori,d) );
+      naturalAbandonPropensity.push_back( 1/meanAbandonTime*(1-pow(ori,d)) );
+    }
+    else if(landscape[ix]==3){ //intensive patch
+      meanAbandonTime = Ta*(1-pow(ini,b));
+      degradedAbandonPropensity.push_back( 1/meanAbandonTime*pow(ini,d) );
+      naturalAbandonPropensity.push_back( 1/meanAbandonTime*(1-pow(ini,d)) );
+    }
+    else{ // non cropped patches
+      naturalAbandonPropensity.push_back(0);
+      degradedAbandonPropensity.push_back(0);
     }
   }
-  else{
 
-    double totalMaintenanceDeficit=0;
-    vector<double> maintenanceDeficit;
-
-    // calculate global maintenance deficit
-    for (ix=0; ix<landscape.size(); ++ix){
-      if (landscape[ix]==2){
-        maintenanceDeficit.push_back(m0*(1+m*ori)-agriculturalProduction[ix]);
-        totalMaintenanceDeficit+=maintenanceDeficit.back();
-      }
-      else if(landscape[ix]==3){
-        maintenanceDeficit.push_back(m0*(1+m*ini)-agriculturalProduction[ix]);
-        totalMaintenanceDeficit+=maintenanceDeficit.back();
-      }
-      else{
-        maintenanceDeficit.push_back(0);
-      }
-    }
-
-    if (totalMaintenanceDeficit>0){
-      for(ix=0; ix<landscape.size(); ++ix){
-        if (landscape[ix]==2){ // organic
-          organicAbandonPropensity.push_back(max(0.0,maintenanceDeficit[ix]/Ta));
-          intenseAbandonPropensity.push_back(0);
-        }
-        else if (landscape[ix]==3){//intense
-          organicAbandonPropensity.push_back(0);
-          intenseAbandonPropensity.push_back(max(0.0,maintenanceDeficit[ix]/Ta));
-        }
-        else{//non cropped
-          organicAbandonPropensity.push_back(0);
-          intenseAbandonPropensity.push_back(0);
-        }
-      }
-    }
-    else{ // no maintenance deficit
-      for (ix=0; ix<landscape.size(); ++ix){
-        organicAbandonPropensity.push_back(0);
-        intenseAbandonPropensity.push_back(0);
-      }
-    }
-  }
   return;
 }
 
-void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double m0, double m)
+void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double d, double b)
 {
   /*
   calls all the functions to calculate the propensity of each event and merges
@@ -488,12 +439,12 @@ void getPropensityVector(vector<double> &propensityVector, const vector<unsigned
   vector<double> degradationPropensity;
   vector<double> expansionPropensity;
   vector<double> intensePropensity;
-  vector<double> organicAbandonPropensity;
-  vector<double> intenseAbandonPropensity;
+  vector<double> naturalAbandonPropensity;
+  vector<double> degradedAbandonPropensity;
 
   getSpontaneousPropensity(recoveryPropensity,degradationPropensity,landscape,naturalComponents,n,Tr,Td,ess);
   getActionPropensity(expansionPropensity,intensePropensity,landscape,agriculturalProduction,population,consumption,n,w,a,g);
-  getAbandonmentPropensity(organicAbandonPropensity,intenseAbandonPropensity,landscape,agriculturalProduction,Ta,ori,ini,m0,m);
+  getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,landscape,Ta,ori,ini,d,b);
 
   // clearing the previous propensity vector to refill it
   propensityVector.clear();
@@ -515,11 +466,11 @@ void getPropensityVector(vector<double> &propensityVector, const vector<unsigned
   for (ix=0 ; ix<intensePropensity.size() ; ++ix){
     propensityVector.push_back(propensityVector.back()+intensePropensity[ix]);
   }
-  for (ix=0 ; ix<organicAbandonPropensity.size() ; ++ix){
-    propensityVector.push_back(propensityVector.back()+organicAbandonPropensity[ix]);
+  for (ix=0 ; ix<naturalAbandonPropensity.size() ; ++ix){
+    propensityVector.push_back(propensityVector.back()+naturalAbandonPropensity[ix]);
   }
-  for (ix=0 ; ix<intenseAbandonPropensity.size() ; ++ix){
-    propensityVector.push_back(propensityVector.back()+intenseAbandonPropensity[ix]);
+  for (ix=0 ; ix<degradedAbandonPropensity.size() ; ++ix){
+    propensityVector.push_back(propensityVector.back()+degradedAbandonPropensity[ix]);
   }
 
   return;

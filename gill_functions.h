@@ -43,7 +43,7 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
 
 void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double Tr, double Td, double ess);
 void getActionPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double w, double a, double g);
-void getAbandonmentPropensity(vector<double> &organicAbandonPropensity, vector<double> &intenseAbandonPropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, double Ta, double ori, double ini, double m0, double m);
+void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, double Ta, double ori, double ini, double d, double b);
 void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double m0, double m);
 ////////////////////////////////////////////////////////////////////////////////
 // 4- Initialization functions:
