@@ -24,3 +24,5 @@ DATA_*
 gillespie-ses
 
 gillespie-ses-local
+
+plot_results.py
