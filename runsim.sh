@@ -5,8 +5,8 @@
 
 	Parameters are:
 
-			1   2   3   4    5   6   7   8   9    10   11   12   13   14   15   16   17  18  19  20  21  22  23  24    25     26
-			T  dtp  n  ao0  ai0  c0  r0  kg  kd  cmin  ys0  yn0  pSD  ori  ini  ess  a   w   g   d   b   Ta  Tr  Td  dtsave   exp
+			1   2   3   4    5   6   7   8     9    10   11   12   13   14   15   16   17  18  19  20  21    22     23
+			T  dtp  n  ao0  ai0  c0  r0  ys0  yn0  pSD  ori  ini  ess    a   w     g   d   b   Ta  Tr  Td  dtsave   exp
 
 COMMENT1
 
@@ -14,9 +14,11 @@ COMMENT1
 
 
 
-./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 5 0.5 0.5 15 10 0.0 0.2 0.8 1 0.5 0 10 1 1 100 2 50 1 varg&
-./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 5 0.5 0.5 15 10 0.0 0.2 0.8 1 0.5 0 9 1 1 100 2 50 1 varg&
-./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 5 0.5 0.5 15 10 0.0 0.2 0.8 1 0.5 0 8 1 1 100 2 50 1 varg&
+./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 15 10 0.0 0.2 0.8 1 0.5 0 10 1 1 100 2 50 1 varg&
+./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 15 10 0.0 0.2 0.8 1 0.5 0 9 1 1 100 2 50 1 varg&
+./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 15 10 0.0 0.2 0.8 1 0.5 0 8 1 1 100 2 50 1 varg&
+
+
 ./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 5 0.5 0.5 15 10 0.0 0.2 0.8 1 0.5 0 7 1 1 100 2 50 1 varg&
 ./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 5 0.5 0.5 15 10 0.0 0.2 0.8 1 0.5 0 6 1 1 100 2 50 1 varg&
 ./gillespie-ses 3000 0.1 40 0.2 0.1 1 1 5 0.5 0.5 15 10 0.0 0.2 0.8 1 0.5 0 5 1 1 100 2 50 1 varg&

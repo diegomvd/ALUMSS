@@ -35,16 +35,19 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
 void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double ys0, double yn0, double pSD, double ori, double ini, double ess, gsl_rng  *r);
 ////////////////////////////////////////////////////////////////////////////////
 // 3- Calculation of events' propensities:
+//       - getConsumptionDeficit
 //       - getSpontaneousPropensity
-//       - getActionPropensity
+//       - getAgroPropensity
 //       - getAbandonmentPropensity
 //       - getPropensityVector
 ////////////////////////////////////////////////////////////////////////////////
 
+double getConsumptionDeficit(const vector<double> &agriculturalProduction, const vector<double> &population, double consumption);
 void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double Tr, double Td, double ess);
-void getActionPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double w, double a, double g);
+void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double w, double a, double g);
 void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, double Ta, double ori, double ini, double d, double b);
-void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double m0, double m);
+void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double d, double b);
+
 ////////////////////////////////////////////////////////////////////////////////
 // 4- Initialization functions:
 //       - initializeLandscape
@@ -53,17 +56,15 @@ void getPropensityVector(vector<double> &propensityVector, const vector<unsigned
 ////////////////////////////////////////////////////////////////////////////////
 
 void initializeLandscape( vector<unsigned int> &landscape, unsigned int n, double ao0, double ai0, gsl_rng  *r);
-void initializePopulation( vector<double> &population, const vector<double> &consumption, const vector<double> &agriculturalProduction);
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<double> &consumption, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double c0, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double pSD, double ori, double ini, double ess);
+void initializePopulation( vector<double> &population, double consumption, const vector<double> &agriculturalProduction);
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double consumption, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double pSD, double ori, double ini, double ess);
+
 ////////////////////////////////////////////////////////////////////////////////
 // 5- ODEs and solver:
 //       - populationEquation
-//       - consumptionEquation
 //       - rungeKutta4
 ////////////////////////////////////////////////////////////////////////////////
 
 double populationEquation(double population, double consumption, double agriculturalProduction, double r0);
-double consumptionEquation(double population, double consumption, double agriculturalProduction, double kg, double kd, double minimumConsumption);
-void rungeKutta4(vector<double> &population, vector<double> &consumption, vector<double> &agriculturalProduction, double dt, double r0, double kg, double kd, double minimumConsumption);
-
+void rungeKutta4(vector<double> &population, double consumption, vector<double> &agriculturalProduction, double dt, double r0);
 #endif

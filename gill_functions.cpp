@@ -264,19 +264,19 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
 // 3- Calculation of events' propensities:
 //       - getConsumptionDeficit
 //       - getSpontaneousPropensity
-//       - getActionPropensity
+//       - getAgroPropensity
 //       - getAbandonmentPropensity
 //       - getPropensityVector
 ////////////////////////////////////////////////////////////////////////////////
 
-double getConsumptionDeficit(const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption)
+double getConsumptionDeficit(const vector<double> &agriculturalProduction, const vector<double> &population, double consumption)
 {
   double totalAgriculturalProduction=0;
   unsigned long ix;
   for(ix=0;ix<agriculturalProduction.size();ix++){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  return population[0]*consumption[0] - totalAgriculturalProduction;
+  return population[0]*consumption - totalAgriculturalProduction;
 }
 
 void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double Tr, double Td, double ess)
@@ -311,7 +311,7 @@ void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double>
   return;
 }
 
-void getActionPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double w, double a, double g)
+void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double w, double a, double g)
 {
   /*
   fills the cropping_propensity and restoring_propensity vector
@@ -428,7 +428,7 @@ void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<d
   return;
 }
 
-void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, const vector<double> &consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double d, double b)
+void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double d, double b)
 {
   /*
   calls all the functions to calculate the propensity of each event and merges
@@ -443,7 +443,7 @@ void getPropensityVector(vector<double> &propensityVector, const vector<unsigned
   vector<double> degradedAbandonPropensity;
 
   getSpontaneousPropensity(recoveryPropensity,degradationPropensity,landscape,naturalComponents,n,Tr,Td,ess);
-  getActionPropensity(expansionPropensity,intensePropensity,landscape,agriculturalProduction,population,consumption,n,w,a,g);
+  getAgroPropensity(expansionPropensity,intensePropensity,landscape,agriculturalProduction,population,consumption,n,w,a,g);
   getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,landscape,Ta,ori,ini,d,b);
 
   // clearing the previous propensity vector to refill it
@@ -522,7 +522,7 @@ void initializeLandscape( vector<unsigned int> &landscape, unsigned int n, doubl
   return;
 }
 
-void initializePopulation( vector<double> &population, const vector<double> &consumption, const vector<double> &agriculturalProduction)
+void initializePopulation( vector<double> &population, double consumption, const vector<double> &agriculturalProduction)
 {
   /*given an agricultural production, it sets the population at an equilibrium
   level
@@ -532,15 +532,14 @@ void initializePopulation( vector<double> &population, const vector<double> &con
   for(ix=0; ix<agriculturalProduction.size(); ++ix){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  population.push_back(totalAgriculturalProduction/consumption[0]);
+  population.push_back(totalAgriculturalProduction/consumption);
 
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<double> &consumption, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double c0, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double pSD, double ori, double ini, double ess)
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double consumption, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double pSD, double ori, double ini, double ess)
 {
 
-  consumption.push_back(c0);
   initializeLandscape(landscape,n,ao0,ai0,r);
   getNaturalConnectedComponents(naturalComponents,n,landscape);
   getAgriculturalProduction(agriculturalProduction,landscape,naturalComponents,n,ys0,yn0,pSD,ori,ini,ess,r);
@@ -553,7 +552,6 @@ void initializeSES( vector<unsigned int> &landscape, vector<double> &population,
 ////////////////////////////////////////////////////////////////////////////////
 // 5- ODEs and solver:
 //       - populationEquation
-//       - consumptionEquation
 //       - rungeKutta4
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -567,28 +565,7 @@ double populationEquation(double population, double consumption, double agricult
 
 }
 
-double consumptionEquation(double population, double consumption, double agriculturalProduction, double kg, double kd, double minimumConsumption)
-{
-  /*
-  returns the expression of the consumption ODE, the growing and decreasing rates
-  are different.
-  */
-  double res;
-
-  if( consumption < agriculturalProduction/population){
-    res = (agriculturalProduction/population - consumption)*kg ;
-  }
-  else if(consumption> agriculturalProduction/population && consumption>minimumConsumption){
-    res = (agriculturalProduction/population - consumption)*kd*kg ;
-  }
-  else{
-    res = 0;
-  }
-
-  return res;
-}
-
-void rungeKutta4(vector<double> &population, vector<double> &consumption, vector<double> &agriculturalProduction, double dt, double r0, double kg, double kd, double minimumConsumption)
+void rungeKutta4(vector<double> &population, double consumption, vector<double> &agriculturalProduction, double dt, double r0)
 {
   /*
   returns the actualized population after solving the ODE with runge kutta 4 method
@@ -600,33 +577,24 @@ void rungeKutta4(vector<double> &population, vector<double> &consumption, vector
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
 
-  double k1p,k2p,k3p,k4p,k1c,k2c,k3c,k4c;
-  double p1,p2,p3,c1,c2,c3;
-  double deltaP, deltaC;
+  double k1p,k2p,k3p,k4p;
+  double p1,p2,p3;
+  double deltaP;
 
-  k1p=populationEquation(population[0],consumption[0],totalAgriculturalProduction,r0);
-  k1c=consumptionEquation(population[0],consumption[0],totalAgriculturalProduction,kg,kd,minimumConsumption);
+  k1p=populationEquation(population[0],consumption,totalAgriculturalProduction,r0);
   p1=population[0]+0.5*k1p*dt;
-  c1=consumption[0]+0.5*k1c*dt;
 
-  k2p=populationEquation(p1,c1,totalAgriculturalProduction,r0);
-  k2c=consumptionEquation(p1,c1,totalAgriculturalProduction,kg,kd,minimumConsumption);
+  k2p=populationEquation(p1,consumption,totalAgriculturalProduction,r0);
   p2=population[0]+0.5*k2p*dt;
-  c2=consumption[0]+0.5*k2c*dt;
 
-  k3p=populationEquation(p2,c2,totalAgriculturalProduction,r0);
-  k3c=consumptionEquation(p2,c2,totalAgriculturalProduction,kg,kd,minimumConsumption);
+  k3p=populationEquation(p2,consumption,totalAgriculturalProduction,r0);
   p3=population[0]+k3p*dt;
-  c3=consumption[0]+k3c*dt;
 
-  k4p=populationEquation(p3,c3,totalAgriculturalProduction,r0);
-  k4c=consumptionEquation(p3,c3,totalAgriculturalProduction,kg,kd,minimumConsumption);
+  k4p=populationEquation(p3,consumption,totalAgriculturalProduction,r0);
 
   deltaP=dt*(k1p+2*k2p+2*k3p+k4p)/6;
-  deltaC=dt*(k1c+2*k2c+2*k3c+k4c)/6;
 
   population[0]+=deltaP;
-  consumption[0]+=deltaC;
 
   return;
 }
