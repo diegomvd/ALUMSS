@@ -61,14 +61,11 @@ int main(int argc, const char * argv[]){
 
   double r0; // population growth rate
   double ys0,yn0; // productivity per unit input or unit ecosystem service
-  double pSD; // perturbation sd for production
-  double ori,ini; // organic and intense inputs
   double ess; // ecosystem service saturation exponent
   double a; // expansion probability
   double w; // agricultural clustering parameter
-  double d,b; // maintenance cost per unit of input
   double g; // action probability per unit time per unit of consumption deficit
-  double Ta; // mean abandonment time per maintenance deficit
+  double Tao,Tai; // mean fertility loss time
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
   double dtsave; // timestep for saving data
 
@@ -95,27 +92,23 @@ int main(int argc, const char * argv[]){
         // agricultural production parameters
         ys0 = strtod(argv[8], &pEnd);
         yn0 = strtod(argv[9], &pEnd);
-        pSD = strtod(argv[10], &pEnd);
-        ori = strtod(argv[11], &pEnd);
-        ini = strtod(argv[12], &pEnd);
-        ess = strtod(argv[13], &pEnd);
+        ess = strtod(argv[10], &pEnd);
 
         // human action parameters
-        a = strtod(argv[14], &pEnd);
-        w = strtod(argv[15], &pEnd);
-        g = strtod(argv[16], &pEnd);
+        a = strtod(argv[11], &pEnd);
+        w = strtod(argv[12], &pEnd);
+        g = strtod(argv[13], &pEnd);
 
         // abandonment parameters
-        d= strtod(argv[17], &pEnd);
-        b= strtod(argv[18], &pEnd);
-        Ta = strtod(argv[19], &pEnd);
+        Tao = strtod(argv[14], &pEnd);
+        Tai = strtod(argv[15], &pEnd);
 
         // spontaneous evolution parameters
-        Tr = strtod(argv[20], &pEnd);
-        Td = strtod(argv[21], &pEnd);
+        Tr = strtod(argv[16], &pEnd);
+        Td = strtod(argv[17], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[22], &pEnd);
+        dtsave = strtod(argv[18], &pEnd);
 
   }
 
@@ -158,20 +151,16 @@ int main(int argc, const char * argv[]){
     filename += "_r0_"+allArgs[7];
     filename += "_ys0_"+allArgs[8];
     filename += "_yn0_"+allArgs[9];
-    filename += "_pSD_"+allArgs[10];
-    filename += "_ori_"+allArgs[11];
-    filename += "_ini_"+allArgs[12];
-    filename += "_ess_"+allArgs[13];
-    filename += "_a_"+allArgs[14];
-    filename += "_w_"+allArgs[15];
-    filename += "_g_"+allArgs[16];
-    filename += "_d_"+allArgs[17];
-    filename += "_b_"+allArgs[18];
-    filename += "_Ta_"+allArgs[19];
-    filename += "_Tr_"+allArgs[20];
-    filename += "_Td_"+allArgs[21];
-    filename += "_dtsave_"+allArgs[22];
-    filename += "_expid_"+allArgs[23];
+    filename += "_ess_"+allArgs[10];
+    filename += "_a_"+allArgs[11];
+    filename += "_w_"+allArgs[12];
+    filename += "_g_"+allArgs[13];
+    filename += "_Tao_"+allArgs[14];
+    filename += "_Tai_"+allArgs[15];
+    filename += "_Tr_"+allArgs[16];
+    filename += "_Td_"+allArgs[17];
+    filename += "_dtsave_"+allArgs[18];
+    filename += "_expid_"+allArgs[19];
     filename+=".dat";
   }
 
@@ -253,7 +242,7 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,c0,n,ao0,ai0,r,ys0,yn0,pSD,ori,ini,ess);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,c0,n,ao0,ai0,r,ys0,yn0,ess);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -293,7 +282,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,landscape,naturalComponents,agriculturalProduction,population,c0,n,Tr,Td,w,a,g,Ta,ori,ini,ess,d,b);
+    getPropensityVector(propensityVector,landscape,naturalComponents,agriculturalProduction,population,c0,n,Tr,Td,w,a,g,Tao,Tai,ess);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
@@ -339,7 +328,7 @@ int main(int argc, const char * argv[]){
       // updating natural connected components
       getNaturalConnectedComponents(naturalComponents, n, landscape);
       // updating agricultural production
-      getAgriculturalProduction(agriculturalProduction, landscape, naturalComponents,n,ys0,yn0,pSD,ori,ini,ess,r);
+      getAgriculturalProduction(agriculturalProduction, landscape, naturalComponents,n,ys0,yn0,ess);
 
       // update the time and timestep for ODE solving
       t+=dtg;

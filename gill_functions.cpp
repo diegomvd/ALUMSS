@@ -223,7 +223,7 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
   return ecosystemServiceProvision;
 }
 
-void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double ys0, double yn0, double pSD, double ori, double ini, double ess, gsl_rng  *r)
+void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double ys0, double yn0, double ess)
 {
   /*
   returns the total agricultural production for a given "landscape" and
@@ -232,29 +232,18 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   */
 
   agriculturalProduction.clear();
-  double syntheticInput; // this is determined by the intensification level
-  double patchProduction;
-  double ecosystemServices;
-//  double perturbation=gsl_ran_gaussian_tail(r, 0, pSD);
-  double perturbation =0;
-  //cout << "perturbation=" << perturbation <<"\n";
 
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
-      syntheticInput = ori;
-      ecosystemServices = getEcosystemServiceProvision(naturalComponents,landscape,ix,n,ess);
-      patchProduction = max( 0.0, ( ys0*syntheticInput + yn0*ecosystemServices*(1-syntheticInput) )*( 1 - perturbation*(1 - ecosystemServices) ) );
+      agriculturalProduction.push_back( yn0*getEcosystemServiceProvision(naturalComponents,landscape,ix,n,ess) ) ;
     }
     else if(landscape[ix]==3){ //intense
-      syntheticInput = ini;
-      ecosystemServices = getEcosystemServiceProvision(naturalComponents,landscape,ix,n,ess);
-      patchProduction = max( 0.0, ( ys0*syntheticInput + yn0*ecosystemServices*(1-syntheticInput) )*( 1 - perturbation*(1 - ecosystemServices) ) );
+      agriculturalProduction.push_back( ys0 );
     }
     else{
-      patchProduction=0;
+      agriculturalProduction.push_back(0);
     }
-    agriculturalProduction.push_back(patchProduction);
   }
 
   return;
@@ -398,11 +387,10 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
   return;
 }
 
-void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, double Ta, double ori, double ini, double d, double b)
+void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, double Tao, double Tai)
 {
   /*
-  fills the abandonment_propensity vector. the probability per unit time is
-  proportional to the synthetic inpur or intensification level
+  fills the abandonment_propensity vector.
   */
 
   unsigned int ix;
@@ -410,14 +398,12 @@ void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<d
 
   for (ix=0; ix<landscape.size(); ++ix){
     if (landscape[ix]==2){ // organic patch
-      meanAbandonTime = Ta*(1-pow(ori,b));
-      degradedAbandonPropensity.push_back( 1/meanAbandonTime*pow(ori,d) );
-      naturalAbandonPropensity.push_back( 1/meanAbandonTime*(1-pow(ori,d)) );
+      degradedAbandonPropensity.push_back(0);
+      naturalAbandonPropensity.push_back(1/Tao);
     }
     else if(landscape[ix]==3){ //intensive patch
-      meanAbandonTime = Ta*(1-pow(ini,b));
-      degradedAbandonPropensity.push_back( 1/meanAbandonTime*pow(ini,d) );
-      naturalAbandonPropensity.push_back( 1/meanAbandonTime*(1-pow(ini,d)) );
+      degradedAbandonPropensity.push_back( 1/Tai );
+      naturalAbandonPropensity.push_back( 0 );
     }
     else{ // non cropped patches
       naturalAbandonPropensity.push_back(0);
@@ -428,7 +414,27 @@ void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<d
   return;
 }
 
-void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double d, double b)
+void getRestorationPropensity(vector<double> &restorationPropensity, const vector<double> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double ess, double Tres, double rho)
+{
+
+  double meanEcosystemServices = 0;
+  for (ix=0 ; ix<landscape.size() ; ++ix){
+    meanEcosystemServices+=getEcosystemServiceProvision(naturalComponents,landscape,ix,n,ess)/(n*n);
+  }
+
+  for (ix=0 ; ix<landscape.size() ; ++ix){
+    if (landscape[ix]==1){
+      restorationPropensity.push_back( 1/Tres*(1-pow(meanEcosystemServices,rho) ) );
+    }
+    else{
+      restorationPropensity.push_back(0);
+    }
+  }
+
+  return;
+}
+
+void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Tao, double Tai, double ess)
 {
   /*
   calls all the functions to calculate the propensity of each event and merges
@@ -444,7 +450,7 @@ void getPropensityVector(vector<double> &propensityVector, const vector<unsigned
 
   getSpontaneousPropensity(recoveryPropensity,degradationPropensity,landscape,naturalComponents,n,Tr,Td,ess);
   getAgroPropensity(expansionPropensity,intensePropensity,landscape,agriculturalProduction,population,consumption,n,w,a,g);
-  getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,landscape,Ta,ori,ini,d,b);
+  getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,landscape,Tao,Tai);
 
   // clearing the previous propensity vector to refill it
   propensityVector.clear();
@@ -537,12 +543,12 @@ void initializePopulation( vector<double> &population, double consumption, const
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double consumption, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double pSD, double ori, double ini, double ess)
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double consumption, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double ess)
 {
 
   initializeLandscape(landscape,n,ao0,ai0,r);
   getNaturalConnectedComponents(naturalComponents,n,landscape);
-  getAgriculturalProduction(agriculturalProduction,landscape,naturalComponents,n,ys0,yn0,pSD,ori,ini,ess,r);
+  getAgriculturalProduction(agriculturalProduction,landscape,naturalComponents,n,ys0,yn0,ess);
   initializePopulation(population,consumption,agriculturalProduction);
 
   return;

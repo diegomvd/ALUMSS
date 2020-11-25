@@ -32,7 +32,8 @@ void getNeighboursState(vector<unsigned int> &neighboursState, const vector<unsi
 
 void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, unsigned int n, const vector<unsigned int> &landscape);
 double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int i, unsigned int n, double ess);
-void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double ys0, double yn0, double pSD, double ori, double ini, double ess, gsl_rng  *r);
+void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double ys0, double yn0, double ess);
+
 ////////////////////////////////////////////////////////////////////////////////
 // 3- Calculation of events' propensities:
 //       - getConsumptionDeficit
@@ -45,8 +46,8 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
 double getConsumptionDeficit(const vector<double> &agriculturalProduction, const vector<double> &population, double consumption);
 void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, unsigned int n, double Tr, double Td, double ess);
 void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double w, double a, double g);
-void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, double Ta, double ori, double ini, double d, double b);
-void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Ta, double ori, double ini, double ess, double d, double b);
+void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, double Tao, double Tai);
+void getPropensityVector(vector<double> &propensityVector, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, unsigned int n, double Tr, double Td, double w, double a, double g, double Tao, double Tai, double ess);
 
 ////////////////////////////////////////////////////////////////////////////////
 // 4- Initialization functions:
@@ -57,7 +58,7 @@ void getPropensityVector(vector<double> &propensityVector, const vector<unsigned
 
 void initializeLandscape( vector<unsigned int> &landscape, unsigned int n, double ao0, double ai0, gsl_rng  *r);
 void initializePopulation( vector<double> &population, double consumption, const vector<double> &agriculturalProduction);
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double consumption, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double pSD, double ori, double ini, double ess);
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, double consumption, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double ess);
 
 ////////////////////////////////////////////////////////////////////////////////
 // 5- ODEs and solver:
