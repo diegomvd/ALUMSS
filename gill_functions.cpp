@@ -42,7 +42,7 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
   neighbourMatrix.resize(n*n);
 
   for (ix=0; ix<neighbourMatrix.size(); ++ix){
-    xi = ix%n - 1;
+    xi = ix%n;
     yi = (int)ix/n;
     for (xj=0; xj<n; xj++){
       dx=abs(xi-xj);
@@ -57,7 +57,7 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
           dy=n-dy;
         }
         manhattanDist = dx+dy;
-        if (manhattanDist<=d){
+        if (manhattanDist<=d and manhattanDist>0){
           jx = xi + xj*n;
           neighbourMatrix[ix].push_back(jx);
         }
@@ -71,9 +71,7 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
 
 void getNeighbours(vector<unsigned int> &neighboursList, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int i)
 {
-
   neighboursList = neighbourMatrix[i];
-
   return;
 }
 
@@ -90,6 +88,7 @@ void getNeighboursState(vector<unsigned int> &neighboursState, const vector<vect
   */
   vector<unsigned int> neighboursList;
   getNeighbours(neighboursList,neighbourMatrix,i);
+
   /*
   getting the index of neighbours in the wanted state
   */
@@ -150,11 +149,11 @@ void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, unsig
     for(i=0 ; i<naturalPatches.size() ; ++i){
       add_edge(i,i,G);//not sure on how to do this
       // converting 1-D coordinates to 2-D
-      xi=naturalPatches[i]%n-1;
+      xi=naturalPatches[i]%n;
       yi=(int)naturalPatches[i]/n;
       for(j=0 ; j<i ; ++j){
         // converting 1-D coordinates to 2-D
-        xj=naturalPatches[j]%n-1;
+        xj=naturalPatches[j]%n;
         yj=(int)naturalPatches[j]/n;
         // calculating manhattan distance between points
         dx=abs(xi-xj);
@@ -201,10 +200,12 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
   patch i
   */
 
+
   vector<int> componentMembership;
   vector<double> componentArea;
   double ecosystemServiceProvision=0;
   double neighbourNumber = neighbourMatrix[0].size();
+
 
   /*
   getting the state neighbours indexes in neighboursState vector
