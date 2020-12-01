@@ -58,11 +58,19 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
         }
         manhattanDist = dx+dy;
         if (manhattanDist<=d and manhattanDist>0){
-          jx = xi + xj*n;
+          jx = xj + yj*n;
           neighbourMatrix[ix].push_back(jx);
         }
       }
     }
+  }
+
+  //test for neighbour matrix
+  for (ix=0; ix<neighbourMatrix.size(); ++ix){
+    for (jx=0; jx<neighbourMatrix[ix].size(); ++jx){
+      cout << neighbourMatrix[ix][jx] << " ";
+    }
+    cout << "\n";
   }
 
   return;
@@ -435,7 +443,7 @@ void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<d
   return;
 }
 
-void getRestorationPropensity(vector<double> &restorationPropensity, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, double ess, double Tres, double rho)
+void getRestorationPropensity(vector<double> &restorationPropensity, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &population, double ess, double Tres, double rho)
 {
 
   double meanEcosystemServices = 0;
@@ -445,7 +453,7 @@ void getRestorationPropensity(vector<double> &restorationPropensity, const vecto
   }
 
   for (ix=0 ; ix<landscape.size() ; ++ix){
-    if (landscape[ix]==1){
+    if (landscape[ix]==1 && population[0]>0){
       restorationPropensity.push_back( 1/Tres*(1-pow(meanEcosystemServices,rho) ) );
     }
     else{
@@ -474,7 +482,7 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
   getSpontaneousPropensity(recoveryPropensity,degradationPropensity,neighbourMatrix,landscape,naturalComponents,Tr,Td,ess);
   getAgroPropensity(expansionPropensity,intensePropensity,neighbourMatrix,landscape,agriculturalProduction,population,consumption,w,a,g);
   getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,landscape,Tao,Tai);
-  getRestorationPropensity(restorationPropensity,neighbourMatrix,landscape,naturalComponents,ess,Tres,rho);
+  getRestorationPropensity(restorationPropensity,neighbourMatrix,landscape,naturalComponents,population,ess,Tres,rho);
 
   // clearing the previous propensity vector to refill it
   propensityVector.clear();
