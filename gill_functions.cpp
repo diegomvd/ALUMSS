@@ -65,13 +65,6 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
     }
   }
 
-  //test for neighbour matrix
-  for (ix=0; ix<neighbourMatrix.size(); ++ix){
-    for (jx=0; jx<neighbourMatrix[ix].size(); ++jx){
-      cout << neighbourMatrix[ix][jx] << " ";
-    }
-    cout << "\n";
-  }
 
   return;
 }
@@ -214,8 +207,6 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
   double ecosystemServiceProvision=0;
   double neighbourNumber = neighbourMatrix[0].size();
 
-  cout << "number of neighbours " << neighbourNumber <<"\n";
-
   /*
   getting the state neighbours indexes in neighboursState vector
   */
@@ -252,7 +243,6 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
     ecosystemServiceProvision+=(1/neighbourNumber)*pow(componentArea[ix]/landscape.size(),0.3*ess);
   }
 
-  cout << "ecosystem service provision " << ecosystemServiceProvision << "\n";
   return ecosystemServiceProvision;
 }
 
