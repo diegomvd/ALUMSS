@@ -214,6 +214,7 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
   double ecosystemServiceProvision=0;
   double neighbourNumber = neighbourMatrix[0].size();
 
+  cout << "number of neighbours " << neighbourNumber <<"\n";
 
   /*
   getting the state neighbours indexes in neighboursState vector
@@ -248,9 +249,10 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
   }
 
   for (ix=0 ; ix<componentArea.size(); ++ix){
-    ecosystemServiceProvision+=(1/neighbourNumber)*pow(componentArea[ix]/(landscape.size()*landscape.size()),0.3*ess);
+    ecosystemServiceProvision+=(1/neighbourNumber)*pow(componentArea[ix]/landscape.size(),0.3*ess);
   }
 
+  cout << "ecosystem service provision " << ecosystemServiceProvision << "\n";
   return ecosystemServiceProvision;
 }
 
