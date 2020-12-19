@@ -241,7 +241,7 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,ao0,ai0,ksi,sar,d,w,r);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,ao0,ai0,ksi,sar,d,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////

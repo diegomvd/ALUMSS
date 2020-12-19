@@ -121,6 +121,8 @@ void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, const
   int xi, xj, yi, yj;
   unsigned int dx, dy;
 
+
+  unsigned int n = (unsigned int) sqrt(landscape.size());
   // clearing natural components vector for refilling
   naturalComponents.clear();
 
@@ -233,7 +235,7 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
           naturalComponents[clusterList[0]].push_back(naturalComponents[clusterList[ix]][jx]);
         }
         // deleting this cluster from naturalComponents after the merge
-        naturalComponents.erase(naturalComponents.begin()+(clusterList[ix]-1));
+        naturalComponents.erase(naturalComponents.begin()+clusterList[ix]);
       }
     }
     else{
@@ -245,13 +247,16 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
   return;
 }
 
-void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int i)
+void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int l)
 {
-  // find cluster of cell i
+
+  unsigned int n = (unsigned int) sqrt(landscape.size());
+
+  // find cluster of cell l
   unsigned long ix;
-  vector<unsigned int>::iterator it;
+  vector<int>::iterator it;
   for (ix=0;ix<naturalComponents.size();ix++){
-    it = find( naturalComponents[ix].begin(),naturalComponents[ix].end(),i);
+    it = find( naturalComponents[ix].begin(),naturalComponents[ix].end(),l);
     if (it!=naturalComponents[ix].end()){
       break;
     }
@@ -263,12 +268,12 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
   // fill natural patches to get connected natural components
   vector<unsigned int> naturalPatches;
   unsigned long jx;
-  for (jx=0;jx<naturalComponents[ix];jx++){
+  for (jx=0;jx<naturalComponents[ix].size();jx++){
     naturalPatches.push_back(naturalComponents[ix][jx]);
   }
 
   // erase concerned cluster from naturalComponents
-  naturalComponents.erase(naturalComponents.begin()+(ix-1));
+  naturalComponents.erase(naturalComponents.begin()+ix);
 
   //get connected components from the naturalPatches
   unsigned int manhattanDist;
@@ -725,10 +730,10 @@ void initializeSES( vector<unsigned int> &landscape, vector<double> &population,
   getNeighbourMatrix(neighbourMatrix,n,1);
   getNeighbourMatrix(neighbourMatrixES,n,d);
   initializeLandscape(landscape,neighbourMatrix,n,ao0,ai0,w,r);
-  getNaturalConnectedComponents(naturalComponents,n,landscape);
+  getNaturalConnectedComponents(naturalComponents,landscape);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,sar);
   getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
-  initializePopulation(population,consumption,agriculturalProduction);
+  initializePopulation(population,agriculturalProduction);
 
   return;
 
