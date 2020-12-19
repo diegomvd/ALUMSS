@@ -57,18 +57,16 @@ int main(int argc, const char * argv[]){
   double dtp; // timestep for population dynamics
 
   double ao0, ai0; //number of agricultural patches at beggining
-  double c0; // initial per capita consumption
 
-  double r0; // population growth rate
-  double ys0,yn0; // productivity per unit input or unit ecosystem service
-  double ess; // ecosystem service saturation exponent
+  double ksi; // productivity per unit input or unit ecosystem service
+  double sar; // ecosystem service saturation exponent
   double a; // expansion probability
   double w; // agricultural clustering parameter
-  double g; // action probability per unit time per unit of consumption deficit
-  double Tao,Tai; // mean fertility loss time
+  double Tag; // action probability per unit time per unit of consumption deficit
+  double Tab; // mean fertility loss time
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
-  double Tres,rho; // restoration
   unsigned int d; // distance at which eecosystem services are delivered
+
   double dtsave; // timestep for saving data
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -87,37 +85,27 @@ int main(int argc, const char * argv[]){
         ao0 = strtod(argv[4],&pEnd);
         ai0 = strtod(argv[5],&pEnd);
 
-        // population  parameters
-        c0 = strtod(argv[6], &pEnd);
-        r0 = strtod(argv[7], &pEnd);
-
         // agricultural production parameters
-        ys0 = strtod(argv[8], &pEnd);
-        yn0 = strtod(argv[9], &pEnd);
-        ess = strtod(argv[10], &pEnd);
+        ksi = strtod(argv[6], &pEnd);
+        sar = strtod(argv[7], &pEnd);
 
         // human action parameters
-        a = strtod(argv[11], &pEnd);
-        w = strtod(argv[12], &pEnd);
-        g = strtod(argv[13], &pEnd);
+        a = strtod(argv[8], &pEnd);
+        w = strtod(argv[9], &pEnd);
+        Tag = strtod(argv[10], &pEnd);
 
         // abandonment parameters
-        Tao = strtod(argv[14], &pEnd);
-        Tai = strtod(argv[15], &pEnd);
+        Tab = strtod(argv[11], &pEnd);
 
         // spontaneous evolution parameters
-        Tr = strtod(argv[16], &pEnd);
-        Td = strtod(argv[17], &pEnd);
-
-        // restoration parameters
-        Tres = strtod(argv[18], &pEnd);
-        rho = strtod(argv[19], &pEnd);
+        Tr = strtod(argv[12], &pEnd);
+        Td = strtod(argv[13], &pEnd);
 
         // distance for es provision
-        d = atoi(argv[20]);
+        d = atoi(argv[14]);
 
         // save timespace just in case
-        dtsave = strtod(argv[21], &pEnd);
+        dtsave = strtod(argv[15], &pEnd);
 
   }
 
@@ -156,23 +144,17 @@ int main(int argc, const char * argv[]){
     filename += "_n_"+allArgs[3];
     filename += "_ao0_"+allArgs[4];
     filename += "_ai0_"+allArgs[5];
-    filename += "_c0_"+allArgs[6];
-    filename += "_r0_"+allArgs[7];
-    filename += "_ys0_"+allArgs[8];
-    filename += "_yn0_"+allArgs[9];
-    filename += "_ess_"+allArgs[10];
-    filename += "_a_"+allArgs[11];
-    filename += "_w_"+allArgs[12];
-    filename += "_g_"+allArgs[13];
-    filename += "_Tao_"+allArgs[14];
-    filename += "_Tai_"+allArgs[15];
-    filename += "_Tr_"+allArgs[16];
-    filename += "_Td_"+allArgs[17];
-    filename += "_Tres_"+allArgs[18];
-    filename += "_rho_"+allArgs[19];
-    filename += "_d_"+allArgs[20];
-    filename += "_dtsave_"+allArgs[21];
-    filename += "_expid_"+allArgs[22];
+    filename += "_ksi_"+allArgs[6];
+    filename += "_sar_"+allArgs[7];
+    filename += "_a_"+allArgs[8];
+    filename += "_w_"+allArgs[9];
+    filename += "_Tag_"+allArgs[10];
+    filename += "_Tab_"+allArgs[11];
+    filename += "_Tr_"+allArgs[12];
+    filename += "_Td_"+allArgs[13];
+    filename += "_d_"+allArgs[14];
+    filename += "_dtsave_"+allArgs[15];
+    filename += "_expid_"+allArgs[16];
     filename+=".dat";
   }
 
@@ -218,15 +200,18 @@ int main(int argc, const char * argv[]){
   // vector containing the landscape state
   vector<unsigned int> landscape;
   // vector containing neighbours
+  vector<vector<unsigned int>> neighbourMatrixES;
   vector<vector<unsigned int>> neighbourMatrix;
   // vector containing the production of each patch
   vector<double> agriculturalProduction;
+  // vector containing the production of each patch
+  vector<double> ecosystemServices;
   // vector containing the natural connected components information
   vector<vector<int>> naturalComponents;
   // vector containing the event's propensities
   vector<double> propensityVector;
   // vector to store the number of events of each kind
-  vector<unsigned int> count_events={0,0,0,0,0,0,0};
+  vector<unsigned int> count_events={0,0,0,0,0,0};
 
   ////////////////////////////////////////////////////////////////////////////
   // STATE INITIALISATION
@@ -256,7 +241,7 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,neighbourMatrix,c0,n,ao0,ai0,r,ys0,yn0,ess,d);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,ao0,ai0,ksi,sar,d,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -296,7 +281,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,neighbourMatrix,landscape,naturalComponents,agriculturalProduction,population,c0,Tr,Td,w,a,g,Tao,Tai,ess,Tres,rho);
+    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
@@ -310,7 +295,7 @@ int main(int argc, const char * argv[]){
     if (dtg>dt){ // if the time until next event is larger than the ODE timestep
       // update population and consumption
       if (population[0]>0){
-        rungeKutta4(population,c0,agriculturalProduction,dt,r0);
+        rungeKutta4(population,agriculturalProduction,dt);
       }
       else{
         break;
@@ -332,18 +317,16 @@ int main(int argc, const char * argv[]){
       patch=i%(n*n); // remainder from euclidian division
 
       // transform the landscape according to reaction and patch
-      if (reaction==0){landscape[patch]=0;count_events[0]+=1;} //recovery
-      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1;} //degradation
-      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1;} //expansion
+      if (reaction==0){landscape[patch]=0;count_events[0]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //recovery
+      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1; updateNCCremoving(naturalComponents,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //degradation
+      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1; updateNCCremoving(naturalComponents,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //expansion
       else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
-      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1;} //abandonment to natural
+      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //abandonment to natural
       else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
-      else if(reaction==6) {landscape[patch]=0;count_events[6]+=1;} //restoration
       else {cout << "Error: gill_main.cpp reaction " << reaction << " does not exist.\n";}
-      // updating natural connected components
-      getNaturalConnectedComponents(naturalComponents, n, landscape);
+
       // updating agricultural production
-      getAgriculturalProduction(agriculturalProduction, neighbourMatrix, landscape, naturalComponents, ys0, yn0, ess);
+      getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
 
       // update the time and timestep for ODE solving
       t+=dtg;

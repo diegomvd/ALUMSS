@@ -12,7 +12,6 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-
 using namespace std;
 
 /*
@@ -69,7 +68,6 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
   return;
 }
 
-
 void getNeighbours(vector<unsigned int> &neighboursList, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int i)
 {
   neighboursList = neighbourMatrix[i];
@@ -110,7 +108,7 @@ void getNeighboursState(vector<unsigned int> &neighboursState, const vector<vect
 //       - getAgriculturalProduction
 ////////////////////////////////////////////////////////////////////////////////
 
-void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, unsigned int n, const vector<unsigned int> &landscape)
+void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape)
 {
   /*
   fills a vector where each member is a vector containing the indexes of all the
@@ -148,7 +146,7 @@ void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, unsig
 
 
     for(i=0 ; i<naturalPatches.size() ; ++i){
-      add_edge(i,i,G);//not sure on how to do this
+      add_edge(i,i,G);
       // converting 1-D coordinates to 2-D
       xi=naturalPatches[i]%n;
       yi=(int)naturalPatches[i]/n;
@@ -183,16 +181,163 @@ void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, unsig
     /*
     converting the nodes indexes into actual landscape coordinates
     */
-    naturalComponents.resize(component.size());
+    naturalComponents.resize(num);
     for (i=0 ; i<naturalComponents.size() ; ++i){
-      naturalComponents[i].push_back(naturalPatches[i]);
-      naturalComponents[i].push_back(component[i]);
+      for (j=0; j<component.size(); j++){
+        if(component[j]==i){
+          naturalComponents[i].push_back(naturalPatches[j]);
+        }
+      }
     }
+
   }
   return;
 }
 
-double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, unsigned int i, double ess)
+void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, unsigned int i)
+{
+  vector<unsigned int> neighboursNatural;
+  getNeighboursState(neighboursNatural,neighbourMatrix,landscape,i,0); // state 0 is natural
+
+  if(neighboursNatural.size()==0){ //no natural neighbour
+      vector<int> newNaturalComponent;
+      newNaturalComponent.push_back(i); // create a new natural component
+      naturalComponents.push_back(newNaturalComponent); // add it to the list
+  }
+  else{
+    unsigned long ix,jx;
+    vector<unsigned int> clusterList;
+    for (ix=0;ix<neighboursNatural.size();ix++){
+      // for each of the natural neighbours check their cluster membership and
+      // store it to determine whether cluster have been merged or not
+      for (jx=0; jx<naturalComponents.size(); jx++){
+        // check if neighbour belongs to clster jx
+        if (find( naturalComponents[jx].begin(),naturalComponents[jx].end(),neighboursNatural[ix]) != naturalComponents[jx].end()){
+          //check if cluster jx is not in the clusterlist
+          if (find( clusterList.begin(), clusterList.end(), jx) == clusterList.end()){
+            // add cluster jx to list
+            clusterList.push_back(jx);
+            break;
+          }
+        }
+      }
+    }
+
+    // now update getNaturalConnectedComponents
+    if (clusterList.size()>0){
+      // adding the new natural cell to the first cluster in the list
+      naturalComponents[clusterList[0]].push_back(i);
+      for (ix=1; ix<clusterList.size(); ix++){
+        // putting all the members of the merging cluster in the first one of the list
+        for(jx=0;naturalComponents[clusterList[ix]].size();jx++){
+          naturalComponents[clusterList[0]].push_back(naturalComponents[clusterList[ix]][jx]);
+        }
+        // deleting this cluster from naturalComponents after the merge
+        naturalComponents.erase(naturalComponents.begin()+(clusterList[ix]-1));
+      }
+    }
+    else{
+      cout << "Error: clusterList should not be empty in updateNaturalConnectedComponents function.";
+    }
+
+  }
+
+  return;
+}
+
+void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int i)
+{
+  // find cluster of cell i
+  unsigned long ix;
+  vector<unsigned int>::iterator it;
+  for (ix=0;ix<naturalComponents.size();ix++){
+    it = find( naturalComponents[ix].begin(),naturalComponents[ix].end(),i);
+    if (it!=naturalComponents[ix].end()){
+      break;
+    }
+  }
+
+  // erase cell i from naturalComponents
+  naturalComponents[ix].erase(it);
+
+  // fill natural patches to get connected natural components
+  vector<unsigned int> naturalPatches;
+  unsigned long jx;
+  for (jx=0;jx<naturalComponents[ix];jx++){
+    naturalPatches.push_back(naturalComponents[ix][jx]);
+  }
+
+  // erase concerned cluster from naturalComponents
+  naturalComponents.erase(naturalComponents.begin()+(ix-1));
+
+  //get connected components from the naturalPatches
+  unsigned int manhattanDist;
+  unsigned int i, j;
+  int xi, xj, yi, yj;
+  unsigned int dx, dy;
+
+  /*
+  create an undirected graph with the set of natural patches to calculate
+  the connected components. to estimate whether two patches are connected
+  we calculate the manhattan distance between them
+  */
+
+  using namespace boost;
+  {
+    typedef adjacency_list< vecS, vecS, undirectedS > Graph;
+    Graph G;
+
+
+    for(i=0 ; i<naturalPatches.size() ; ++i){
+      add_edge(i,i,G);
+      // converting 1-D coordinates to 2-D
+      xi=naturalPatches[i]%n;
+      yi=(int)naturalPatches[i]/n;
+      for(j=0 ; j<i ; ++j){
+        // converting 1-D coordinates to 2-D
+        xj=naturalPatches[j]%n;
+        yj=(int)naturalPatches[j]/n;
+        // calculating manhattan distance between points
+        dx=abs(xi-xj);
+        dy=abs(yi-yj);
+        // calculating cyclic distances to account for periodic borders
+        if (dx>n/2){
+          dx=n-dx;
+        }
+        if (dy>n/2){
+          dy=n-dy;
+        }
+        //
+        manhattanDist=dx+dy;
+        if ( manhattanDist<2 ){
+          add_edge(i, j, G);
+        }
+      }
+    }
+
+    /*
+    initializing the vector containing the components and calculating components
+    */
+    vector<int> component(num_vertices(G));
+    int num = connected_components(G, &component[0]);
+
+    // adding the new components to naturalComponents
+    vector<int> newComponent;
+    for(i=0; i<num; i++){
+      for(j=0; j<component.size(); j++){
+        if(i==component[j]){
+          newComponent.push_back(naturalPatches[j]);
+        }
+      }
+      naturalComponents.push_back(newComponent);
+      newComponent.clear();
+    }
+  }
+
+  return;
+}
+
+void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, double sar)
 {
   /*
   returns the exposure to the wanted state of patch i. currently it is only used
@@ -201,52 +346,46 @@ double getEcosystemServiceProvision(const vector<vector<int>> &naturalComponents
   patch i
   */
 
-
-  vector<int> componentMembership;
-  vector<double> componentArea;
-  double ecosystemServiceProvision=0;
-  double neighbourNumber = neighbourMatrix[0].size();
-
-  /*
-  getting the state neighbours indexes in neighboursState vector
-  */
+  double area;
+  double ecosystemServiceProvision;
   vector<unsigned int> neighboursState;
-  getNeighboursState(neighboursState,neighbourMatrix,landscape,i,0); // state 0 is natural
+  double neighbourNumber = neighbourMatrix[0].size();
+  unsigned long i,ix,jx;
 
-  /*
-  identify cluster membership of each natural neighbour
-  */
-  unsigned long ix, jx;
-  for (ix=0 ; ix<neighboursState.size() ; ++ix){
-    jx=0;
-    while(naturalComponents[jx][0]!=neighboursState[ix]){
-      jx++;
-    }
-    componentMembership.push_back(naturalComponents[jx][1]);
-  }
+  ecosystemServices.clear();
 
-  /*
-  calculate the area of each cluster
-  */
-  int area;
-  for(ix=0 ; ix<componentMembership.size(); ++ix){
-    area=0;
-    for(jx=0 ; jx<naturalComponents.size() ; ++jx){
-      if (componentMembership[ix]==naturalComponents[jx][1]){
-        area++;
+  for(i=0;i<landscape.size();i++){
+
+    ecosystemServiceProvision=0;
+    /*
+    getting the state neighbours indexes in neighboursState vector
+    */
+
+    getNeighboursState(neighboursState,neighbourMatrix,landscape,i,0); // state 0 is natural
+
+    /*
+    calculate the area of each of the neighbour's component
+    */
+    for (ix=0;ix<neighboursState.size();ix++){
+      // for each of the natural neighbours check their cluster membership
+      for (jx=0; jx<naturalComponents.size(); jx++){
+        // check if neighbour belongs to cluster jx
+        if (find( naturalComponents[jx].begin(),naturalComponents[jx].end(),neighboursState[ix]) != naturalComponents[jx].end()){
+          area=naturalComponents[jx].size()/landscape.size();
+          ecosystemServiceProvision+=(1/neighbourNumber)*pow(area,sar);
+          break;
+        }
       }
     }
-    componentArea.push_back(area);
+
+    ecosystemServices.push_back(ecosystemServiceProvision);
+    neighboursState.clear();
   }
 
-  for (ix=0 ; ix<componentArea.size(); ++ix){
-    ecosystemServiceProvision+=(1/neighbourNumber)*pow(componentArea[ix]/landscape.size(),0.3*ess);
-  }
-
-  return ecosystemServiceProvision;
+  return;
 }
 
-void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, double ys0, double yn0, double ess)
+void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double ksi)
 {
   /*
   returns the total agricultural production for a given "landscape" and
@@ -259,10 +398,10 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
-      agriculturalProduction.push_back( yn0*getEcosystemServiceProvision(naturalComponents,neighbourMatrix,landscape,ix,ess) ) ;
+      agriculturalProduction.push_back( ksi*ecosystemServices[ix] ) ;
     }
     else if(landscape[ix]==3){ //intense
-      agriculturalProduction.push_back( ys0 );
+      agriculturalProduction.push_back( 1 );
     }
     else{
       agriculturalProduction.push_back(0);
@@ -281,17 +420,17 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
 //       - getPropensityVector
 ////////////////////////////////////////////////////////////////////////////////
 
-double getConsumptionDeficit(const vector<double> &agriculturalProduction, const vector<double> &population, double consumption)
+double getConsumptionDeficit(const vector<double> &agriculturalProduction, const vector<double> &population)
 {
   double totalAgriculturalProduction=0;
   unsigned long ix;
   for(ix=0;ix<agriculturalProduction.size();ix++){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  return population[0]*consumption - totalAgriculturalProduction;
+  return population[0] - totalAgriculturalProduction;
 }
 
-void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, double Tr, double Td, double ess)
+void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tr, double Td)
 {
   /*
   fills the recoveryPropensity vector and the degradationPropensity vector
@@ -301,18 +440,15 @@ void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double>
   traverse the landscape and calculate the recovery propensity for the degraded
   patches and the degradation propensity for the natural patches
   */
-  double ecosystemServices;
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if (landscape[ix] == 1) { // if patch ix is degraded
-      ecosystemServices=getEcosystemServiceProvision(naturalComponents,neighbourMatrix,landscape,ix,ess);
-      recoveryPropensity.push_back( ecosystemServices/Tr );
+      recoveryPropensity.push_back( ecosystemServices[ix]/Tr );
       degradationPropensity.push_back(0);
     }
     else if(landscape[ix] == 0){
-      ecosystemServices=getEcosystemServiceProvision(naturalComponents,neighbourMatrix,landscape,ix,ess);
       recoveryPropensity.push_back( 0 );
-      degradationPropensity.push_back(1/Td*(1-ecosystemServices) );
+      degradationPropensity.push_back(1/Td*(1-ecosystemServices[ix]) );
     }
     else{
       recoveryPropensity.push_back( 0 );
@@ -323,7 +459,7 @@ void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double>
   return;
 }
 
-void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, double w, double a, double g)
+void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, double w, double a, double Tag)
 {
   /*
   fills the cropping_propensity and restoring_propensity vector
@@ -333,10 +469,13 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
   double expansionCumSum = 0;
   double intenseCumSum = 0;
 
+  // fraction of natural patches
+  double fracN = 0;
+
   /*
   first checking if there is a consumption deficit that justifys human action
   */
-  double consumptionDeficit = getConsumptionDeficit(agriculturalProduction,population,consumption);
+  double consumptionDeficit = getConsumptionDeficit(agriculturalProduction,population);
   if (consumptionDeficit<0){ // if humans are satisfied...
     unsigned long ix;
     for(ix=0 ; ix<landscape.size() ; ++ix){
@@ -353,13 +492,16 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
     is uniform over space.
     */
     unsigned int ix;
-
+    vector<unsigned int> organicNeighbours;
+    vector<unsigned int> intenseNeighbours;
     for (ix=0 ; ix<landscape.size() ; ++ix){
 
       if (landscape[ix] == 0){ // if patch is natural, hence can be converted to organic
 
+        fracN+=1;
+
         // get the indexes of the organic neighbours
-        vector<unsigned int> organicNeighbours;
+        organicNeighbours.clear();
         getNeighboursState(organicNeighbours,neighbourMatrix,landscape,ix, 2); // state 2 is organic
         // cropping probability expression is taken from bart's and dani's paper
         expansionPropensity.push_back( pow( max(0.1 , (double)organicNeighbours.size() ) , w ) );
@@ -368,8 +510,11 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
 
       }
       else if (landscape[ix] == 2 ){ // if patch is organic it can be intensifyed
-        // 10*(1-pow(agriculturalProduction[ix]/maxAgriculturalProduction,0.5))
-        intensePropensity.push_back( 1 ); // the less productive organic are more likely to be intensifyed
+        // get the indexes of the organic neighbours
+        intenseNeighbours.clear();
+        getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,ix, 3); // state 3 is intense
+
+        intensePropensity.push_back( pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) );
         intenseCumSum += intensePropensity.back();
         expansionPropensity.push_back(0);
 
@@ -384,23 +529,23 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
     now we normalize the previously obtained probabilities and get calculate the
     probability per unit time of action given the consumption deficit
     */
+    fracN/=landscape.size();
 
     if (expansionCumSum>0 && intenseCumSum>0){ // this is to avoid dividing by zero
       for (ix=0; ix<landscape.size() ; ++ix){
-        expansionPropensity[ix]=expansionPropensity[ix]/expansionCumSum*g*consumptionDeficit*a;
-        intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*g*consumptionDeficit*(1-a);
-        //cout << "intense propensity at " << ix << " = " << intensePropensity[ix] << "\n";
+        expansionPropensity[ix]=expansionPropensity[ix]/expansionCumSum/Tag*consumptionDeficit*pow(fracN,a);
+        intensePropensity[ix]=intensePropensity[ix]/intenseCumSum/Tag*consumptionDeficit*(1-pow(fracN,a));
       }
     }
     else{
       if (expansionCumSum>0){
         for (ix=0; ix<landscape.size() ; ++ix){
-          expansionPropensity[ix]=expansionPropensity[ix]/expansionCumSum*g*consumptionDeficit;
+          expansionPropensity[ix]=expansionPropensity[ix]/expansionCumSum*(1/Tag)*consumptionDeficit;
         }
       }
       else if (intenseCumSum>0){
         for (ix=0; ix<landscape.size() ; ++ix){
-          intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*g*consumptionDeficit;
+          intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*(1/Tag)*consumptionDeficit;
         }
       }
     }
@@ -409,24 +554,21 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
   return;
 }
 
-void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, double Tao, double Tai, double ess)
+void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tab)
 {
   /*
   fills the abandonment_propensity vector.
   */
 
-  double ecosystemServices;
   unsigned int ix;
 
   for (ix=0; ix<landscape.size(); ++ix){
     if (landscape[ix]==2){ // organic patch
       degradedAbandonPropensity.push_back(0);
-      ecosystemServices=getEcosystemServiceProvision(naturalComponents,neighbourMatrix,landscape,ix,ess);
-      naturalAbandonPropensity.push_back(1/Tao*(1-ecosystemServices));
+      naturalAbandonPropensity.push_back(1/Tab*(1-ecosystemServices[ix]));
     }
     else if(landscape[ix]==3){ //intensive patch
-      ecosystemServices=getEcosystemServiceProvision(naturalComponents,neighbourMatrix,landscape,ix,ess);
-      degradedAbandonPropensity.push_back( 1/Tai*(1-ecosystemServices) );
+      degradedAbandonPropensity.push_back( 1/Tab*(1-ecosystemServices[ix]) );
       naturalAbandonPropensity.push_back( 0 );
     }
     else{ // non cropped patches
@@ -438,28 +580,7 @@ void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<d
   return;
 }
 
-void getRestorationPropensity(vector<double> &restorationPropensity, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &population, double ess, double Tres, double rho)
-{
-
-  double meanEcosystemServices = 0;
-  unsigned long ix;
-  for (ix=0 ; ix<landscape.size() ; ++ix){
-    meanEcosystemServices+=getEcosystemServiceProvision(naturalComponents,neighbourMatrix,landscape,ix,ess)/( landscape.size() );
-  }
-
-  for (ix=0 ; ix<landscape.size() ; ++ix){
-    if (landscape[ix]==1 && population[0]>0){
-      restorationPropensity.push_back( 1/Tres*(1-pow(meanEcosystemServices,rho) ) );
-    }
-    else{
-      restorationPropensity.push_back(0);
-    }
-  }
-
-  return;
-}
-
-void getPropensityVector(vector<double> &propensityVector, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents, const vector<double> &agriculturalProduction, const vector<double> &population, double consumption, double Tr, double Td, double w, double a, double g, double Tao, double Tai, double ess, double Tres, double rho)
+void getPropensityVector(vector<double> &propensityVector, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, const vector<double> &agriculturalProduction, const vector<double> &population, double Tr, double Td, double w, double a, double Tag, double Tab)
 {
   /*
   calls all the functions to calculate the propensity of each event and merges
@@ -472,12 +593,10 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
   vector<double> intensePropensity;
   vector<double> naturalAbandonPropensity;
   vector<double> degradedAbandonPropensity;
-  vector<double> restorationPropensity;
 
-  getSpontaneousPropensity(recoveryPropensity,degradationPropensity,neighbourMatrix,landscape,naturalComponents,Tr,Td,ess);
-  getAgroPropensity(expansionPropensity,intensePropensity,neighbourMatrix,landscape,agriculturalProduction,population,consumption,w,a,g);
-  getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,neighbourMatrix,landscape,naturalComponents,Tao,Tai,ess);
-  getRestorationPropensity(restorationPropensity,neighbourMatrix,landscape,naturalComponents,population,ess,Tres,rho);
+  getSpontaneousPropensity(recoveryPropensity,degradationPropensity,landscape,ecosystemServices,Tr,Td);
+  getAgroPropensity(expansionPropensity,intensePropensity,neighbourMatrix,landscape,agriculturalProduction,population,w,a,Tag);
+  getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,landscape,ecosystemServices,Tab);
 
   // clearing the previous propensity vector to refill it
   propensityVector.clear();
@@ -505,9 +624,6 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
   for (ix=0 ; ix<degradedAbandonPropensity.size() ; ++ix){
     propensityVector.push_back(propensityVector.back()+degradedAbandonPropensity[ix]);
   }
-  for (ix=0 ; ix<restorationPropensity.size() ; ++ix){
-    propensityVector.push_back(propensityVector.back()+restorationPropensity[ix]);
-  }
 
   return;
 }
@@ -519,46 +635,76 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
 //       - initializeSES
 ////////////////////////////////////////////////////////////////////////////////
 
-void initializeLandscape( vector<unsigned int> &landscape, unsigned int n, double ao0, double ai0, gsl_rng  *r)
+void initializeLandscape( vector<unsigned int> &landscape, vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double ao0, double ai0, double w, gsl_rng  *r)
 {
   /*
   initializes the landscape given a fraction of initial agricultural patches a0
   */
 
   //unsigned int number_cropped_patches = 1;
-  unsigned long ix;
-  unsigned int ix_land4crop;
-  unsigned int ix_landscape;
+  unsigned long ix,jx,lx;
   // this vector contains the indexes of all the natural patches
-  vector<unsigned int> land4crop;
-
-  // first build a completely natural landscape with n*n patches
-  for (ix=0 ; ix<n*n; ++ix){
-    landscape.push_back(0);
-    land4crop.push_back(ix);
-  }
+  vector<double> probConversion;
+  vector<double> probIntense;
 
   unsigned int nao0=(unsigned int) (ao0*n*n);
   unsigned int nai0=(unsigned int) (ai0*n*n);
-  for (ix=0 ; ix<nao0 ; ++ix){
-    // selecting random location for initial cropped organic patches
-    ix_land4crop = gsl_rng_uniform_int(r, land4crop.size() );
-    ix_landscape = land4crop[ix_land4crop];
-    landscape[ix_landscape]=2; // cropping selected patch with organic agriculture
-    land4crop.erase(land4crop.begin()+ix_land4crop); // removing the selected patch so it cannot be selected again
+  unsigned int na0=nao0+nai0;
+
+  // first build a completely natural landscape with n*n patches
+  landscape.push_back(0);
+  probConversion.push_back(1);
+  for (ix=1 ; ix<n*n; ++ix){
+    landscape.push_back(0);
+    probConversion.push_back(probConversion.back()+1);
+    probIntense.push_back(0);
   }
-  for (ix=0 ; ix<nai0 ; ++ix){
-    // selecting random location for initial cropped intense patches
-    ix_land4crop = gsl_rng_uniform_int(r, land4crop.size() );
-    ix_landscape = land4crop[ix_land4crop];
-    landscape[ix_landscape]=3; // cropping selected patch with intense agriculture
-    land4crop.erase(land4crop.begin()+ix_land4crop); // removing the selected patch so it cannot be selected again
+
+  vector<unsigned int> organicNeighbours;
+  for(ix=0;ix<na0;++ix){
+    jx=0;
+    while (gsl_rng_uniform(r)*probConversion.back()>probConversion[jx]){
+      jx++;
+    }
+    landscape[jx]=2;
+    probIntense[jx]=1;
+
+    // recalculating probconversion
+    organicNeighbours.clear();
+    getNeighboursState(organicNeighbours,neighbourMatrix,landscape,0, 2);
+    probConversion[0]=pow( max(0.1 , (double)organicNeighbours.size() ) , w ) ;
+    for(lx=1;lx<probConversion.size();lx++){
+      organicNeighbours.clear();
+      getNeighboursState(organicNeighbours,neighbourMatrix,landscape,lx, 2);
+      probConversion[lx]=probConversion[lx-1]+pow( max(0.1 , (double)organicNeighbours.size() ) , w ) ;
+    }
+    probConversion[jx]=0;
+  }
+
+  vector<unsigned int> intenseNeighbours;
+  for(ix=0;ix<nai0;++ix){
+    jx=0;
+    while (gsl_rng_uniform(r)*probIntense.back()>probIntense[jx]){
+      jx++;
+    }
+    landscape[jx]=3;
+
+    // recalculating probconversion
+    intenseNeighbours.clear();
+    getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,0, 3);
+    probIntense[0]=pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) ;
+    for(lx=1;lx<probIntense.size();lx++){
+      intenseNeighbours.clear();
+      getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,lx, 3);
+      probIntense[lx]=probIntense[lx-1]+pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) ;
+    }
+    probIntense[jx]=0;
   }
 
   return;
 }
 
-void initializePopulation( vector<double> &population, double consumption, const vector<double> &agriculturalProduction)
+void initializePopulation( vector<double> &population, const vector<double> &agriculturalProduction)
 {
   /*given an agricultural production, it sets the population at an equilibrium
   level
@@ -568,18 +714,20 @@ void initializePopulation( vector<double> &population, double consumption, const
   for(ix=0; ix<agriculturalProduction.size(); ++ix){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  population.push_back(totalAgriculturalProduction/consumption);
+  population.push_back(totalAgriculturalProduction);
 
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<vector<unsigned int>> &neighbourMatrix, double consumption, unsigned int n, double ao0, double ai0, gsl_rng  *r, double ys0, double yn0, double ess, unsigned int d)
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double ao0, double ai0, double ksi, double sar, unsigned int d, double w,gsl_rng  *r)
 {
 
-  initializeLandscape(landscape,n,ao0,ai0,r);
+  getNeighbourMatrix(neighbourMatrix,n,1);
+  getNeighbourMatrix(neighbourMatrixES,n,d);
+  initializeLandscape(landscape,neighbourMatrix,n,ao0,ai0,w,r);
   getNaturalConnectedComponents(naturalComponents,n,landscape);
-  getNeighbourMatrix(neighbourMatrix,n,d);
-  getAgriculturalProduction(agriculturalProduction,neighbourMatrix,landscape,naturalComponents,ys0,yn0,ess);
+  getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,sar);
+  getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
   initializePopulation(population,consumption,agriculturalProduction);
 
   return;
@@ -592,17 +740,17 @@ void initializeSES( vector<unsigned int> &landscape, vector<double> &population,
 //       - rungeKutta4
 ////////////////////////////////////////////////////////////////////////////////
 
-double populationEquation(double population, double consumption, double agriculturalProduction, double r0)
+double populationEquation(double population, double agriculturalProduction)
 {
   /*
   returns the expression of the population ODE
   */
 
-  return r0*population*(1-consumption*population/agriculturalProduction);
+  return population*(1-population/agriculturalProduction);
 
 }
 
-void rungeKutta4(vector<double> &population, double consumption, vector<double> &agriculturalProduction, double dt, double r0)
+void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduction, double dt)
 {
   /*
   returns the actualized population after solving the ODE with runge kutta 4 method
@@ -618,16 +766,16 @@ void rungeKutta4(vector<double> &population, double consumption, vector<double> 
   double p1,p2,p3;
   double deltaP;
 
-  k1p=populationEquation(population[0],consumption,totalAgriculturalProduction,r0);
+  k1p=populationEquation(population[0],totalAgriculturalProduction);
   p1=population[0]+0.5*k1p*dt;
 
-  k2p=populationEquation(p1,consumption,totalAgriculturalProduction,r0);
+  k2p=populationEquation(p1,totalAgriculturalProduction);
   p2=population[0]+0.5*k2p*dt;
 
-  k3p=populationEquation(p2,consumption,totalAgriculturalProduction,r0);
+  k3p=populationEquation(p2,totalAgriculturalProduction);
   p3=population[0]+k3p*dt;
 
-  k4p=populationEquation(p3,consumption,totalAgriculturalProduction,r0);
+  k4p=populationEquation(p3,totalAgriculturalProduction);
 
   deltaP=dt*(k1p+2*k2p+2*k3p+k4p)/6;
 

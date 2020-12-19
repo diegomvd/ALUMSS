@@ -8,6 +8,9 @@
 			1   2   3   4    5   6   7   8     9   10   11  12  13  14   15   16  17  18    19   20  21     22
 			T  dtp  n  ao0  ai0  c0  r0  ys0  yn0  ess  a   w   g   Tao  Tai  Tr  Td  Tres  rho  d  dtsave  exp
 
+			1   2   3   4    5    6    7   8   9   10    11    12  13  14   15     16  
+			T  dtp  n  ao0  ai0  ksi  sar  a   w   Tag   Tab   Tr  Td   d  dtsave  exp
+
 COMMENT1
 
 #run
