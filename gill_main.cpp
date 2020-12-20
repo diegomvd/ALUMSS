@@ -158,25 +158,30 @@ int main(int argc, const char * argv[]){
     filename+=".dat";
   }
 
-  string filename_POPU=dirname+"/"+"DATA_POPU"+filename;
-  ofstream tofile_popu(filename_POPU);
-  tofile_popu.precision(5);
-  tofile_popu.setf(ios::scientific,ios::floatfield);
+  string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
+  ofstream tofile_agre(filename_AGRE);
+  tofile_agre.precision(5);
+  tofile_agre.setf(ios::scientific,ios::floatfield);
 
   string filename_LAND=dirname+"/"+"DATA_LAND"+filename;
   ofstream tofile_land(filename_LAND);
   tofile_land.precision(5);
   tofile_land.setf(ios::scientific,ios::floatfield);
 
-  string filename_EVNT=dirname+"/"+"DATA_EVNT"+filename;
-  ofstream tofile_evnt(filename_EVNT);
-  tofile_evnt.precision(5);
-  tofile_evnt.setf(ios::scientific,ios::floatfield);
+  string filename_METR=dirname+"/"+"DATA_METR"+filename;
+  ofstream tofile_metr(filename_METR);
+  tofile_metr.precision(5);
+  tofile_metr.setf(ios::scientific,ios::floatfield);
 
   string filename_CLUS=dirname+"/"+"DATA_CLUS"+filename;
   ofstream tofile_clus(filename_CLUS);
   tofile_clus.precision(5);
   tofile_clus.setf(ios::scientific,ios::floatfield);
+
+  string filename_RIPL=dirname+"/"+"DATA_RIPL"+filename;
+  ofstream tofile_ripl(filename_RIPL);
+  tofile_ripl.precision(5);
+  tofile_ripl.setf(ios::scientific,ios::floatfield);
 
   string filename_CONF=dirname+"/"+"DATA_CONF"+filename;
   ofstream tofile_conf(filename_CONF);
@@ -256,24 +261,11 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     if(t>=t_save)
     {
-
-      tofile_popu << t << " " << population[0] << "\n";
-      tofile_land << t << " ";
-      tofile_evnt << t << " ";
-      tofile_clus << -1 << " " << t << "\n";
-
-      for(i=0 ; i<landscape.size() ; i++){
-        tofile_land << landscape[i] << " ";
-      }
-      for(i=0 ; i<count_events.size() ; i++){
-        tofile_evnt << count_events[i] << " ";
-      }
-      for(i=0 ; i<naturalComponents.size() ; i++){
-        tofile_clus << naturalComponents[i][0] << " " << naturalComponents[i][1] << "\n";
-      }
-
-      tofile_land << "\n";
-      tofile_evnt << "\n";
+      saveAggregated(tofile_agre,t,population,landscape);
+      saveLandscape(tofile_land,t,landscape);
+      saveComponents(tofile_clus,t,landscape,naturalComponents);
+      saveLandMetrics(tofile_metr,t,naturalComponents,ecosystemServices);
+      saveRipley(tofile_ripl,t,n,landscape,1);
 
       t_save+=dtsave;
     }

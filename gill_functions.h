@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <gsl/gsl_rng.h>
+#include <fstream>
+
 using namespace std;
 
 /*
@@ -71,4 +73,20 @@ void initializeSES( vector<unsigned int> &landscape, vector<double> &population,
 
 double populationEquation(double population, double agriculturalProduction);
 void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduction, double dt);
+
+////////////////////////////////////////////////////////////////////////////////
+// 6- Outputs:
+//       - saveAggregated
+//       - saveLandscape
+//       - saveComponents
+//       - saveLandMetrics
+//       - saveRipley
+////////////////////////////////////////////////////////////////////////////////
+
+void saveAggregated(ofstream &file, double t, vector<double> &population, vector<unsigned int> &landscape);
+void saveLandscape(ofstream &file, double t, vector<unsigned int> &landscape);
+void saveComponents(ofstream &file, double t, vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents);
+void saveLandMetrics(ofstream &file, double t, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices);
+void saveRipley(ofstream &file, double t, unsigned int n, vector<unsigned int> &landscape, double ripleyDistance);
+
 #endif
