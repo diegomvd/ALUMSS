@@ -36,7 +36,7 @@ void getNeighboursState(vector<unsigned int> &neighboursState, const vector<vect
 
 void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape);
 void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, unsigned int i);
-void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int i);
+void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, int i);
 void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, double sar);
 void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double ksi);
 

@@ -253,6 +253,9 @@ int main(int argc, const char * argv[]){
   // BEGIN OF SIMULATION
   /////////////////////////////////////////////////////////////////////////////
 
+  unsigned long ix,jx;
+  vector<int>::iterator it;
+
   // entering the time loop
   while(t<SimTime){
 
@@ -312,12 +315,11 @@ int main(int argc, const char * argv[]){
       // transform the landscape according to reaction and patch
       if (reaction==0){landscape[patch]=0;count_events[0]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //recovery
       else if(reaction==1) {landscape[patch]=1;count_events[1]+=1; updateNCCremoving(naturalComponents,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //degradation
-      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1; updateNCCremoving(naturalComponents,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //expansion
+      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1;updateNCCremoving(naturalComponents,landscape,patch);getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);} //expansion
       else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
       else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //abandonment to natural
       else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
       else {cout << "Error: gill_main.cpp reaction " << reaction << " does not exist.\n";}
-
       // updating agricultural production
       getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
 

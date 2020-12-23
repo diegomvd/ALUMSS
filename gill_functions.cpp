@@ -246,37 +246,92 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
     }
 
   }
-
+  //checking that the ne natural patch was effectively added
+  vector<vector<int>>::iterator it1;
+  vector<int>::iterator it2;
+  double test=0;
+  for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
+    for(it2=it1->begin();it2!=it1->end();it2++){
+      if(*it2==i){
+        test=1;
+        break;
+      }
+    }
+  }
+  if (test==0){
+    cout << "\n------------Error, new natural cell has not been correctly added.----------\n";
+  }
   return;
 }
 
-void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int l)
+void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, int l)
 {
-
+  //cout <<"\n";
   unsigned int n = (unsigned int) sqrt(landscape.size());
 
   // find cluster of cell l
   unsigned long ix;
-  vector<int>::iterator it;
-  for (ix=0;ix<naturalComponents.size();ix++){
-    it = find( naturalComponents[ix].begin(),naturalComponents[ix].end(),l);
-    if (it!=naturalComponents[ix].end()){
+
+  // vector<int>::iterator it;
+  // // cout <<"inside first loop\n";
+  // for (ix=0;ix<naturalComponents.size();ix++){
+  //   it = find( naturalComponents[ix].begin(),naturalComponents[ix].end(),l);
+  //   if (it!=naturalComponents[ix].end()){
+  //     // cout <<"natural component index " << ix << " with size " << naturalComponents[ix].size() << " pointed cell " << *it << "\n";
+  //     naturalComponents[ix].erase(it);
+  //     // cout <<"after erase \n";
+  //     break;
+  //   }
+  // }
+
+  vector<vector<int>>::iterator it1;
+  vector<int>::iterator it2;
+  vector<vector<int>>::iterator itComp;
+  for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
+    it2=find(it1->begin(), it1->end(),l);
+    if(it2!=it1->end()){
+      it1->erase(it2);
+      itComp =it1;
       break;
     }
   }
 
+  double test=0;
+  int cellsincomponent=0;
+  for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
+    for(it2=it1->begin();it2!=it1->end();it2++){
+      cellsincomponent+=1;
+      if(*it2==l){
+        test=1;
+      }
+    }
+  }
+  if (test==1){
+    cout << "\n------------Error, old natural cell has not been correctly removed.----------\n";
+  }
+  int cellsnatural=0;
+  for(ix=0;ix<landscape.size();ix++){
+    if (landscape[ix]==0){
+      cellsnatural+=1;
+    }
+  }
+  cout << "there are " << cellsnatural << " natural cells  and "<< cellsincomponent <<" cells in component\n";
+
+  // cout <<"out of first loop\n";
   // erase cell i from naturalComponents
-  naturalComponents[ix].erase(it);
+//  naturalComponents[ix].erase(it);
 
   // fill natural patches to get connected natural components
   vector<unsigned int> naturalPatches;
-  unsigned long jx;
-  for (jx=0;jx<naturalComponents[ix].size();jx++){
-    naturalPatches.push_back(naturalComponents[ix][jx]);
+  //unsigned long jx;
+  for (it2=itComp->begin();it2!=itComp->end();it2++){
+    naturalPatches.push_back(*it2);
   }
 
+  // cout <<"out of second loop \n";
+
   // erase concerned cluster from naturalComponents
-  naturalComponents.erase(naturalComponents.begin()+ix);
+  naturalComponents.erase(it1);
 
   //get connected components from the naturalPatches
   unsigned int manhattanDist;
@@ -323,6 +378,8 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
       }
     }
 
+    // cout <<"out of component calculation \n";
+
     /*
     initializing the vector containing the components and calculating components
     */
@@ -341,6 +398,35 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
       newComponent.clear();
     }
   }
+
+  // cout <<"out of the function \n";
+
+  //checking that the old natural patch was effectively removed
+  // vector<vector<int>>::iterator it1;
+  // vector<int>::iterator it2;
+  // double test=0;
+  // int cellsincomponent=0;
+  // for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
+  //   for(it2=it1->begin();it2!=it1->end();it2++){
+  //     cellsincomponent+=1;
+  //     if(*it2==i){
+  //       test=1;
+  //     }
+  //   }
+  // }
+  // if (test==1){
+  //   cout << "\n------------Error, old natural cell has not been correctly removed.----------\n";
+  // }
+  // int cellsnatural=0;
+  // for(ix=0;ix<landscape.size();ix++){
+  //   if (landscape[ix]==0){
+  //     cellsnatural+=1;
+  //   }
+  // }
+  // cout << "there are " << cellsnatural << " natural cells  and "<< cellsincomponent <<" cells in component\n";
+
+  //consistency check
+
 
   return;
 }
@@ -667,26 +753,36 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     probConversion.push_back(probConversion.back()+1);
     probIntense.push_back(0);
   }
-
+  double cumprob;
   vector<unsigned int> organicNeighbours;
   for(ix=0;ix<na0;++ix){
     jx=0;
-    while (gsl_rng_uniform(r)*probConversion.back()>probConversion[jx]){
+    cumprob = gsl_rng_uniform(r)*probConversion.back();
+    while (cumprob > probConversion[jx]){
       jx++;
     }
     landscape[jx]=2;
     probIntense[jx]=1;
 
     // recalculating probconversion
-    organicNeighbours.clear();
-    getNeighboursState(organicNeighbours,neighbourMatrix,landscape,0, 2);
-    probConversion[0]=pow( max(0.1 , (double)organicNeighbours.size() ) , w ) ;
-    for(lx=1;lx<probConversion.size();lx++){
+    if (landscape[0]==0){
       organicNeighbours.clear();
-      getNeighboursState(organicNeighbours,neighbourMatrix,landscape,lx, 2);
-      probConversion[lx]=probConversion[lx-1]+pow( max(0.1 , (double)organicNeighbours.size() ) , w ) ;
+      getNeighboursState(organicNeighbours,neighbourMatrix,landscape,0, 2);
+      probConversion[0]=pow( max(0.1 , (double)organicNeighbours.size() ) , w ) ;
     }
-    probConversion[jx]=0;
+    else{
+      probConversion[0]=0;
+    }
+    for(lx=1;lx<probConversion.size();lx++){
+      if (landscape[lx]==0){
+        organicNeighbours.clear();
+        getNeighboursState(organicNeighbours,neighbourMatrix,landscape,lx, 2);
+        probConversion[lx]=probConversion[lx-1]+pow( max(0.1 , (double)organicNeighbours.size() ) , w ) ;
+      }
+      else{
+        probConversion[lx]=probConversion[lx-1];
+      }
+    }
   }
 
   vector<unsigned int> intenseNeighbours;
@@ -698,15 +794,24 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     landscape[jx]=3;
 
     // recalculating probconversion
-    intenseNeighbours.clear();
-    getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,0, 3);
-    probIntense[0]=pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) ;
-    for(lx=1;lx<probIntense.size();lx++){
+    if (jx>0){
       intenseNeighbours.clear();
-      getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,lx, 3);
-      probIntense[lx]=probIntense[lx-1]+pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) ;
+      getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,0, 3);
+      probIntense[0]=pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) ;
     }
-    probIntense[jx]=0;
+    else{
+      probIntense[0]=0;
+    }
+    for(lx=1;lx<probIntense.size();lx++){
+      if (jx!=lx){
+        intenseNeighbours.clear();
+        getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,lx, 3);
+        probIntense[lx]=probIntense[lx-1]+pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) ;
+      }
+      else{
+        probIntense[lx]=probIntense[lx-1];
+      }
+    }
   }
 
   return;
@@ -753,7 +858,6 @@ double populationEquation(double population, double agriculturalProduction)
   /*
   returns the expression of the population ODE
   */
-
   return population*(1-population/agriculturalProduction);
 
 }
