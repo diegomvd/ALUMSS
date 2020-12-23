@@ -202,6 +202,7 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
   vector<unsigned int> neighboursNatural;
   getNeighboursState(neighboursNatural,neighbourMatrix,landscape,i,0); // state 0 is natural
 
+
   if(neighboursNatural.size()==0){ //no natural neighbour
       vector<int> newNaturalComponent;
       newNaturalComponent.push_back(i); // create a new natural component
@@ -226,14 +227,15 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
       }
     }
 
-    // now update getNaturalConnectedComponents
+    // now update naturalComponents
     if (clusterList.size()>0){
+      vector <int>::iterator it;
       // adding the new natural cell to the first cluster in the list
       naturalComponents[clusterList[0]].push_back(i);
       for (ix=1; ix<clusterList.size(); ix++){
         // putting all the members of the merging cluster in the first one of the list
-        for(jx=0;naturalComponents[clusterList[ix]].size();jx++){
-          naturalComponents[clusterList[0]].push_back(naturalComponents[clusterList[ix]][jx]);
+        for(it=naturalComponents[clusterList[ix]].begin();it!=naturalComponents[clusterList[ix]].end();it++){
+          naturalComponents[clusterList[0]].push_back(*it);
         }
         // deleting this cluster from naturalComponents after the merge
         naturalComponents.erase(naturalComponents.begin()+clusterList[ix]);
@@ -377,8 +379,8 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
       for (jx=0; jx<naturalComponents.size(); jx++){
         // check if neighbour belongs to cluster jx
         if (find( naturalComponents[jx].begin(),naturalComponents[jx].end(),neighboursState[ix]) != naturalComponents[jx].end()){
-          area=naturalComponents[jx].size()/landscape.size();
-          ecosystemServiceProvision+=(1/neighbourNumber)*pow(area,sar);
+          area=(double)naturalComponents[jx].size()/landscape.size();
+          ecosystemServiceProvision+=(double)(1/neighbourNumber)*pow(area,sar);
           break;
         }
       }
@@ -641,7 +643,7 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
 //       - initializeSES
 ////////////////////////////////////////////////////////////////////////////////
 
-void initializeLandscape( vector<unsigned int> &landscape, vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double ao0, double ai0, double w, gsl_rng  *r)
+void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double ao0, double ai0, double w, gsl_rng  *r)
 {
   /*
   initializes the landscape given a fraction of initial agricultural patches a0
@@ -799,7 +801,7 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 //       - saveRipley
 ////////////////////////////////////////////////////////////////////////////////
 
-void saveAggregated(ofstream &file, double t, vector<double> &population, vector<unsigned int> &landscape)
+void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape)
 {
   unsigned long ix;
   double n=0,d=0,a0=0,a1=0;
@@ -824,7 +826,7 @@ void saveAggregated(ofstream &file, double t, vector<double> &population, vector
   return;
 }
 
-void saveLandscape(ofstream &file, double t, vector<unsigned int> &landscape)
+void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape)
 {
   unsigned long ix;
 
@@ -837,16 +839,16 @@ void saveLandscape(ofstream &file, double t, vector<unsigned int> &landscape)
   return;
 }
 
-void saveComponents(ofstream &file, double t, vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents)
+void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents)
 {
   unsigned long ix,jx;
   unsigned int test;
-  vector<int>::iterator it;
+  vector<int>::const_iterator it;
 
   file << t;
   for (ix=0;ix<landscape.size();ix++){
     test=0;
-    for (jx=0;jx<naturalComponents[jx].size();jx++){
+    for (jx=0;jx<naturalComponents.size();jx++){
       it = find( naturalComponents[jx].begin(), naturalComponents[jx].end(), ix );
       if (it!=naturalComponents[jx].end()){
         file << " " << jx;
@@ -864,7 +866,7 @@ void saveComponents(ofstream &file, double t, vector<unsigned int> &landscape, v
   return;
 }
 
-void saveLandMetrics(ofstream &file, double t, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices)
+void saveLandMetrics(ofstream &file, double t, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices)
 {
   unsigned long numComponents = naturalComponents.size();
   unsigned long ix;
@@ -875,7 +877,7 @@ void saveLandMetrics(ofstream &file, double t, vector<vector<int>> &naturalCompo
   double componentSize;
 
   for (ix=0;ix<naturalComponents.size();ix++){
-    componentSize=naturalComponents[ix].size()/ecosystemServices.size();
+    componentSize=(double)naturalComponents[ix].size()/ecosystemServices.size();
     meanSize+=componentSize;
     squaredMeanSize+=componentSize*componentSize;
     if(componentSize>maxSize){
@@ -903,7 +905,7 @@ void saveLandMetrics(ofstream &file, double t, vector<vector<int>> &naturalCompo
 
 }
 
-void saveRipley(ofstream &file, double t, unsigned int n, vector<unsigned int> &landscape, double ripleyDistance)
+void saveRipley(ofstream &file, double t, unsigned int n, const vector<unsigned int> &landscape, double ripleyDistance)
 {
   unsigned long ix;
 

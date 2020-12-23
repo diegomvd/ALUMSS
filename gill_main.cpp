@@ -270,6 +270,7 @@ int main(int argc, const char * argv[]){
       t_save+=dtsave;
     }
 
+
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
@@ -279,7 +280,6 @@ int main(int argc, const char * argv[]){
     // TIME UNTIL NEXT EVENT
     ///////////////////////////////////////////////////////////////////////////
     dtg=-1/propensityVector.back()*log(ranMT());
-
     ///////////////////////////////////////////////////////////////////////////
     // LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION AND CONSUMPTION OR
     // THE REALIZATION OF A STOCHASTIC EVENT
@@ -292,6 +292,7 @@ int main(int argc, const char * argv[]){
       else{
         break;
       }
+
       // update the time as well as the timestep for ODE solving
       t+=dt;
       dt=dtp;

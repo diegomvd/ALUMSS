@@ -61,7 +61,7 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
 //       - initializeSES
 ////////////////////////////////////////////////////////////////////////////////
 
-void initializeLandscape( vector<unsigned int> &landscape, vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double ao0, double ai0, double w, gsl_rng  *r);
+void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double ao0, double ai0, double w, gsl_rng  *r);
 void initializePopulation( vector<double> &population, const vector<double> &agriculturalProduction);
 void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double ao0, double ai0, double ksi, double sar, unsigned int d, double w,gsl_rng  *r);
 
@@ -83,10 +83,10 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 //       - saveRipley
 ////////////////////////////////////////////////////////////////////////////////
 
-void saveAggregated(ofstream &file, double t, vector<double> &population, vector<unsigned int> &landscape);
-void saveLandscape(ofstream &file, double t, vector<unsigned int> &landscape);
-void saveComponents(ofstream &file, double t, vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents);
-void saveLandMetrics(ofstream &file, double t, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices);
-void saveRipley(ofstream &file, double t, unsigned int n, vector<unsigned int> &landscape, double ripleyDistance);
+void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape);
+void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape);
+void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents);
+void saveLandMetrics(ofstream &file, double t, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices);
+void saveRipley(ofstream &file, double t, unsigned int n, const vector<unsigned int> &landscape, double ripleyDistance);
 
 #endif
