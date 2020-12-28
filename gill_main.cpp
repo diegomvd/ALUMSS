@@ -253,9 +253,6 @@ int main(int argc, const char * argv[]){
   // BEGIN OF SIMULATION
   /////////////////////////////////////////////////////////////////////////////
 
-  unsigned long ix,jx;
-  vector<int>::iterator it;
-
   // entering the time loop
   while(t<SimTime){
 
