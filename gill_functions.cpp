@@ -201,60 +201,117 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
 {
   vector<unsigned int> neighboursNatural;
   getNeighboursState(neighboursNatural,neighbourMatrix,landscape,i,0); // state 0 is natural
-
+  vector<int> newNaturalComponent, newNaturalComponent2;
+  newNaturalComponent.push_back(i);
 
   if(neighboursNatural.size()==0){ //no natural neighbour
-      cout << "in if \n";
-      vector<int> newNaturalComponent;
-      newNaturalComponent.push_back(i); // create a new natural component
       naturalComponents.push_back(newNaturalComponent); // add it to the list
   }
   else{
-    cout << "in else\n";
-    unsigned long ix,jx;
-    vector<unsigned int> clusterList;
-    for (ix=0;ix<neighboursNatural.size();ix++){
-      // for each of the natural neighbours check their cluster membership and
-      // store it to determine whether cluster have been merged or not
-      for (jx=0; jx<naturalComponents.size(); jx++){
-        // check if neighbour belongs to clster jx
-        if (find( naturalComponents[jx].begin(),naturalComponents[jx].end(),neighboursNatural[ix]) != naturalComponents[jx].end()){
-          //check if cluster jx is not in the clusterlist
-          if (find( clusterList.begin(), clusterList.end(), jx) == clusterList.end()){
-            // add cluster jx to list
-            clusterList.push_back(jx);
+    vector<unsigned int>::iterator it1;
+    vector<vector<int>>::iterator it2;
+    vector<int>::iterator it3,it4;
+    vector<vector<int>> clusterList;
+    vector<vector<vector<int>>::iterator> toErase;
+
+    clusterList.push_back(newNaturalComponent); // add it to the list
+
+    // add all components to clusterList and record the components to erase
+    for(it1=neighboursNatural.begin();it1!=neighboursNatural.end();it1++){
+      for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){
+        if( find( it2->begin(), it2->end(), *it1) != it2->end() ){
+          if ( find( clusterList.begin(), clusterList.end(), *it2 ) == clusterList.end() ){
+            clusterList.push_back(*it2);
+            toErase.push_back(it2);
             break;
           }
         }
       }
     }
-
-    // now update naturalComponents
-    if (clusterList.size()>0){
-      vector <int>::iterator it;
-      // adding the new natural cell to the first cluster in the list
-      naturalComponents[clusterList[0]].push_back(i);
-      for (ix=1; ix<clusterList.size(); ix++){
-        // putting all the members of the merging cluster in the first one of the list
-        for(it=naturalComponents[clusterList[ix]].begin();it!=naturalComponents[clusterList[ix]].end();it++){
-          naturalComponents[clusterList[0]].push_back(*it);
-        }
-        // deleting this cluster from naturalComponents after the merge
-        naturalComponents.erase(naturalComponents.begin()+clusterList[ix]);
-      }
+    double ncells=0, ncells2=0;;
+    // if there is a single component in toErase just add i, no need of merging
+    if (toErase.size()>0 && toErase.size()<2){
+      toErase[0]->push_back(i);
+      // for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){
+      //   for(it3=it2->begin();it3!=it2->end();it3++){
+      //     ncells+=1;
+      //   }
+      // }
+      // for(it2=clusterList.begin();it2!=clusterList.end();it2++){
+      //   for(it3=it2->begin();it3!=it2->end();it3++){
+      //     ncells2+=1;
+      //   }
+      // }
+      // if (ncells!=ncells2){
+      //   cout << "Cells in component " << ncells << ", cells in cluster list " << ncells2 << ".\n";
+      // }
     }
-    else{
-      cout << "Error: clusterList should not be empty in updateNaturalConnectedComponents function.";
+    else if(toErase.size()>1){ // if there are more, erase them and push back the merged ones
+      // erasing components that are going to be merged
+
+      for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){
+        for(it3=it2->begin();it3!=it2->end();it3++){
+          ncells+=1;
+        }
+      }
+      // cout << "Before merging. By looking at components there should be " << ncells << " natural cells.\n";
+      // cout << "There were " << naturalComponents.size() << " natural components.\n";
+
+      int nnat=0;
+      for(unsigned long ix=0;ix<landscape.size();ix++){
+        if(landscape[ix]==0){
+          nnat+=1;
+        }
+      }
+
+      ncells=0;
+
+      unsigned long ix;
+      for(ix=0;ix<toErase.size();ix++){
+        naturalComponents.erase(toErase[ix]);
+      }
+
+      // setting the new natural component by merging all the cells in clusterList
+      for(it2=clusterList.begin();it2!=clusterList.end();it2++){
+        for(it3=it2->begin();it3!=it2->end();it3++){
+          ncells+=1;
+          newNaturalComponent2.push_back(*it3);
+        }
+      }
+      // for (it3=newNaturalComponent2.begin();it3!=newNaturalComponent2.end();it3++){
+      //   for(it4=it3+1;it4!=newNaturalComponent2.end();it4++){
+      //     if(*it3==*it4){
+      //       cout <<" there's a repeated cell in the component " << *it3 <<", new natural is "<< i << "\n";
+      //     }
+      //   }
+      // }
+
+      naturalComponents.push_back(newNaturalComponent2);
+      // cout << "Components merged. By looking at clusterList there should be " << ncells << " natural cells.\n";
+      // cout << "There are " << naturalComponents.size() << " natural components.\n";
+
+      ncells=0;
+      for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){
+        for(it3=it2->begin();it3!=it2->end();it3++){
+          ncells+=1;
+        }
+      }
+      cout << "There are " << ncells << " natural cells in component.\n";
+      cout << "There are " << nnat << " natural cells.\n";
+    }
+    else{ // toErase is empty, in which case there is an error in the code
+      cout << "Error: toErase size is " << toErase.size() << " but toErase cannot be empty\n";
     }
 
   }
-  //checking that the ne natural patch was effectively added
-  vector<vector<int>>::iterator it1;
-  vector<int>::iterator it2;
+
+  //checking that the new natural patch was effectively added
+  vector<vector<int>>::iterator it10;
+  vector<int>::iterator it20;
   double test=0;
-  for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
-    for(it2=it1->begin();it2!=it1->end();it2++){
-      if(*it2==i){
+  for(it10=naturalComponents.begin();it10!=naturalComponents.end();it10++){
+    for(it20=it10->begin();it20!=it10->end();it20++){
+      if(*it20==i){
         test=1;
         break;
       }
@@ -263,6 +320,7 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
   if (test==0){
     cout << "\n------------Error, new natural cell has not been correctly added.----------\n";
   }
+
   return;
 }
 
