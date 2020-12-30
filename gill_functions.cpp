@@ -208,117 +208,57 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
       naturalComponents.push_back(newNaturalComponent); // add it to the list
   }
   else{
+
     vector<unsigned int>::iterator it1;
     vector<vector<int>>::iterator it2;
-    vector<int>::iterator it3,it4;
-    vector<vector<int>> clusterList;
+    vector<int>::iterator it3;
     vector<vector<vector<int>>::iterator> toErase;
 
-    clusterList.push_back(newNaturalComponent); // add it to the list
-
-    // add all components to clusterList and record the components to erase
-    for(it1=neighboursNatural.begin();it1!=neighboursNatural.end();it1++){
-      for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){
-        if( find( it2->begin(), it2->end(), *it1) != it2->end() ){
-          if ( find( clusterList.begin(), clusterList.end(), *it2 ) == clusterList.end() ){
-            clusterList.push_back(*it2);
+    /*
+    first traversing the natural components and then the neighbours guarantees that
+    pointers to components are located in a sorted way. this is key to ensure
+    that the erasing process doesn't mess up with the memory.
+    */
+    unsigned int neighboursFound = 0;
+    for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){ // traverse all the components
+      for(it1=neighboursNatural.begin();it1!=neighboursNatural.end();it1++){ // traverse all the natural neigbhours
+        if( find( it2->begin(), it2->end(), *it1) != it2->end() ){ // found a neighbour in this component
+          neighboursFound+=1;
+          if ( find( toErase.begin(), toErase.end(), it2 ) == toErase.end() ){
             toErase.push_back(it2);
-            break;
           }
         }
       }
+      if(neighboursFound==neighboursNatural.size()){ // end the search if all neighbours were located
+        break;
+      }
     }
-    double ncells=0, ncells2=0;;
-    // if there is a single component in toErase just add i, no need of merging
+
+
+    // if there is a single component in toErase just add i to that component, no need of merging
     if (toErase.size()>0 && toErase.size()<2){
       toErase[0]->push_back(i);
-      // for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){
-      //   for(it3=it2->begin();it3!=it2->end();it3++){
-      //     ncells+=1;
-      //   }
-      // }
-      // for(it2=clusterList.begin();it2!=clusterList.end();it2++){
-      //   for(it3=it2->begin();it3!=it2->end();it3++){
-      //     ncells2+=1;
-      //   }
-      // }
-      // if (ncells!=ncells2){
-      //   cout << "Cells in component " << ncells << ", cells in cluster list " << ncells2 << ".\n";
-      // }
     }
     else if(toErase.size()>1){ // if there are more, erase them and push back the merged ones
       // erasing components that are going to be merged
-
-      for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){
-        for(it3=it2->begin();it3!=it2->end();it3++){
-          ncells+=1;
-        }
-      }
-      // cout << "Before merging. By looking at components there should be " << ncells << " natural cells.\n";
-      // cout << "There were " << naturalComponents.size() << " natural components.\n";
-
-      int nnat=0;
-      for(unsigned long ix=0;ix<landscape.size();ix++){
-        if(landscape[ix]==0){
-          nnat+=1;
-        }
-      }
-
-      ncells=0;
-
-      unsigned long ix;
+      long ix;
       for(ix=0;ix<toErase.size();ix++){
+        for(it3=toErase[ix]->begin();it3!=toErase[ix]->end();it3++){
+          newNaturalComponent.push_back(*it3);
+        }
+      }
+      /*now erase the components: traverse erase vector backwards to be sure of
+      addressing the correct bits of memory erasing first the furthest pointers*/
+      for(ix=toErase.size()-1;ix>=0;ix--){
         naturalComponents.erase(toErase[ix]);
       }
-
-      // setting the new natural component by merging all the cells in clusterList
-      for(it2=clusterList.begin();it2!=clusterList.end();it2++){
-        for(it3=it2->begin();it3!=it2->end();it3++){
-          ncells+=1;
-          newNaturalComponent2.push_back(*it3);
-        }
-      }
-      // for (it3=newNaturalComponent2.begin();it3!=newNaturalComponent2.end();it3++){
-      //   for(it4=it3+1;it4!=newNaturalComponent2.end();it4++){
-      //     if(*it3==*it4){
-      //       cout <<" there's a repeated cell in the component " << *it3 <<", new natural is "<< i << "\n";
-      //     }
-      //   }
-      // }
-
-      naturalComponents.push_back(newNaturalComponent2);
-      // cout << "Components merged. By looking at clusterList there should be " << ncells << " natural cells.\n";
-      // cout << "There are " << naturalComponents.size() << " natural components.\n";
-
-      ncells=0;
-      for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){
-        for(it3=it2->begin();it3!=it2->end();it3++){
-          ncells+=1;
-        }
-      }
-      cout << "There are " << ncells << " natural cells in component.\n";
-      cout << "There are " << nnat << " natural cells.\n";
+      /*now add the new natural component*/
+      naturalComponents.push_back(newNaturalComponent);
     }
     else{ // toErase is empty, in which case there is an error in the code
       cout << "Error: toErase size is " << toErase.size() << " but toErase cannot be empty\n";
     }
 
-  }
-
-  //checking that the new natural patch was effectively added
-  vector<vector<int>>::iterator it10;
-  vector<int>::iterator it20;
-  double test=0;
-  for(it10=naturalComponents.begin();it10!=naturalComponents.end();it10++){
-    for(it20=it10->begin();it20!=it10->end();it20++){
-      if(*it20==i){
-        test=1;
-        break;
-      }
-    }
-  }
-  if (test==0){
-    cout << "\n------------Error, new natural cell has not been correctly added.----------\n";
   }
 
   return;
@@ -334,41 +274,6 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
   // these iterators are to traverse the naturalComponents
   vector<vector<int>>::iterator it1;
   vector<int>::iterator it2;
-  double test;
-  int cellsincomponent,cellsnatural;
-
-  // test=0;
-  // int cellsincomponent=0;
-  // for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
-  //   for(it2=it1->begin();it2!=it1->end();it2++){
-  //     cellsincomponent+=1;
-  //     if(*it2==l){
-  //       test=1;
-  //     }
-  //   }
-  // }
-  // if (test==1){
-  //   cout << "------------Error, old natural cell has not been correctly removed.----------\n";
-  // }
-  // int cellsnatural=0;
-  // for(ix=0;ix<landscape.size();ix++){
-  //   if (landscape[ix]==0){
-  //     cellsnatural+=1;
-  //   }
-  // }
-  // cout << " 1- there are " << cellsnatural << " natural cells  and "<< cellsincomponent <<" cells in component\n";
-
-  // vector<int>::iterator it;
-  // // cout <<"inside first loop\n";
-  // for (ix=0;ix<naturalComponents.size();ix++){
-  //   it = find( naturalComponents[ix].begin(),naturalComponents[ix].end(),l);
-  //   if (it!=naturalComponents[ix].end()){
-  //     // cout <<"natural component index " << ix << " with size " << naturalComponents[ix].size() << " pointed cell " << *it << "\n";
-  //     naturalComponents[ix].erase(it);
-  //     // cout <<"after erase \n";
-  //     break;
-  //   }
-  // }
 
   // iterating over natural components and checking to which natural component
   // belonged the natural cell that needs to be removed.
@@ -383,54 +288,16 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
     if(it2!=it1->end()){
       it1->erase(it2);
       itComp =it1;
-      // check if the cell was correctly removed
-      if (find(it1->begin(), it1->end(),l)!=it1->end()){
-        cout << "\n-----------I just removed the cell and found it again!!-----------\n";
-      }
       break;
     }
   }
-  if(it1==naturalComponents.end() && it2==it1->end()){
-    cout << "natural cell " << l << " couldn't be found in naturalComponents \n";
-  }
-
-  test=0;
-  cellsincomponent=0;
-  for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
-    for(it2=it1->begin();it2!=it1->end();it2++){
-      cellsincomponent+=1;
-      if(*it2==l){
-        test=1;
-      }
-    }
-  }
-  if (test==1){
-    cout << "------------Error, old natural cell has not been correctly removed.----------\n";
-  }
-  cellsnatural=0;
-  for(ix=0;ix<landscape.size();ix++){
-    if (landscape[ix]==0){
-      cellsnatural+=1;
-    }
-  }
-  if (cellsnatural!=cellsincomponent){
-    cout << "there are " << cellsnatural << " natural cells  and "<< cellsincomponent <<" cells in component\n";
-  }
-  // cout << "2- there are " << cellsnatural << " natural cells  and "<< cellsincomponent <<" cells in component\n";
-
-  // cout <<"out of first loop\n";
-  // erase cell i from naturalComponents
-//  naturalComponents[ix].erase(it);
 
   // fill natural patches to get connected natural components
   vector<unsigned int> naturalPatches;
-  //unsigned long jx;
   for (it2=itComp->begin();it2!=itComp->end();it2++){
     naturalPatches.push_back(*it2);
   }
-  // cout << "size of natural patches is " << naturalPatches.size() << "\n";
 
-  // cout <<"out of second loop \n";
 
   // erase concerned cluster from naturalComponents
   naturalComponents.erase(itComp);
@@ -480,8 +347,6 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
       }
     }
 
-    // cout <<"out of component calculation \n";
-
     /*
     initializing the vector containing the components and calculating components
     */
@@ -500,56 +365,6 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
       newComponent.clear();
     }
   }
-
-  // test=0;
-  // cellsincomponent=0;
-  // for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
-  //   for(it2=it1->begin();it2!=it1->end();it2++){
-  //     cellsincomponent+=1;
-  //     if(*it2==l){
-  //       test=1;
-  //     }
-  //   }
-  // }
-  // if (test==1){
-  //   cout << "------------Error, old natural cell has not been correctly removed.----------\n";
-  // }
-  // cellsnatural=0;
-  // for(ix=0;ix<landscape.size();ix++){
-  //   if (landscape[ix]==0){
-  //     cellsnatural+=1;
-  //   }
-  // }
-  // cout << "3- there are " << cellsnatural << " natural cells  and "<< cellsincomponent <<" cells in component\n";
-
-  // cout <<"out of the function \n";
-
-  //checking that the old natural patch was effectively removed
-  // vector<vector<int>>::iterator it1;
-  // vector<int>::iterator it2;
-  // double test=0;
-  // int cellsincomponent=0;
-  // for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
-  //   for(it2=it1->begin();it2!=it1->end();it2++){
-  //     cellsincomponent+=1;
-  //     if(*it2==i){
-  //       test=1;
-  //     }
-  //   }
-  // }
-  // if (test==1){
-  //   cout << "\n------------Error, old natural cell has not been correctly removed.----------\n";
-  // }
-  // int cellsnatural=0;
-  // for(ix=0;ix<landscape.size();ix++){
-  //   if (landscape[ix]==0){
-  //     cellsnatural+=1;
-  //   }
-  // }
-  // cout << "there are " << cellsnatural << " natural cells  and "<< cellsincomponent <<" cells in component\n";
-
-  //consistency check
-
 
   return;
 }
