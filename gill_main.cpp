@@ -188,6 +188,11 @@ int main(int argc, const char * argv[]){
   tofile_conf.precision(5);
   tofile_conf.setf(ios::scientific,ios::floatfield);
 
+  string filename_SENS="sensitivityOut.dat";
+  ofstream tofile_sens(filename_SENS);
+  tofile_sens.precision(5);
+  tofile_sens.setf(ios::scientific,ios::floatfield);
+
   /////////////////////////////////////////////////////////////////////////////
   // VARIABLE DECLARATION AND INITIALISATION
   /////////////////////////////////////////////////////////////////////////////
@@ -333,27 +338,12 @@ int main(int argc, const char * argv[]){
   }
   tofile_conf << "\n";
 
-  /* //print landscape to check
-  for(i=0  ; i<n ; i++)
-  {
-    for(j=0 ; j<n ; j++)
-    {
-      cout << landscape[j+i*n] << " ";
-    }
-    cout << "\n";
-  }
-  for(i=0 ; i<naturalComponents.size() ; i++)
-  {
-    cout << "patch " << naturalComponents[i][0] << " is in cluster " << naturalComponents[i][1] <<  "\n";
-    cout << "state of patch " << naturalComponents[i][0] << " is " << landscape[naturalComponents[i][0]] << "\n";
-  }
-  for(i=0  ; i<landscape.size() ; i++)
-  {
-    cout << "patch " << i << " is in state " << landscape[i] << "\n";
-  }*/
+  // saving output for sensitivity analysis
+  saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
+
   auto stop = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::minutes>(stop - start);
-  cout << "total execution time " << duration.count() << endl;
+  // cout << "total execution time " << duration.count() << endl;
 
   return 0;
 }

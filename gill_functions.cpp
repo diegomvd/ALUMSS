@@ -1005,3 +1005,120 @@ void saveRipley(ofstream &file, double t, unsigned int n, const vector<unsigned 
   return;
 
 }
+
+void saveSensitivityOutput(ofstream &file, unsigned int nn, double ripleyDistance, const vector<double> &population, const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices)
+{
+
+  /*
+  First part is a copy of the saveLandMetrics. Of course this can be improved to
+  avoid code repetition
+  */
+  unsigned long numComponents = naturalComponents.size();
+  unsigned long ix;
+  double meanSize=0;
+  double squaredMeanSize=0;
+  double maxSize=0;
+  double stdSize;
+  double componentSize;
+
+  for (ix=0;ix<naturalComponents.size();ix++){
+    componentSize=(double)naturalComponents[ix].size()/ecosystemServices.size();
+    meanSize+=componentSize;
+    squaredMeanSize+=componentSize*componentSize;
+    if(componentSize>maxSize){
+      maxSize=componentSize;
+    }
+  }
+  meanSize/=numComponents;
+  squaredMeanSize/=numComponents;
+  stdSize=sqrt(squaredMeanSize-meanSize*meanSize);
+
+  double meanES=0;
+  double squaredMeanES=0;
+  double stdES;
+  for (ix=0;ix<ecosystemServices.size();ix++){
+    meanES+=ecosystemServices[ix];
+    squaredMeanES+=ecosystemServices[ix]*ecosystemServices[ix];
+  }
+  meanES/=ecosystemServices.size();
+  squaredMeanES/=ecosystemServices.size();
+  stdES=sqrt(squaredMeanES-meanES*meanES);
+
+  /*
+  Second part is a copy of saveAggregated
+  */
+  double n=0,d=0,a0=0,a1=0;
+
+  for(ix=0;ix<landscape.size();ix++){
+    if (landscape[ix]==0){
+      n+=1;
+    }
+    else if (landscape[ix]==1){
+      d+=1;
+    }
+    else if (landscape[ix]==2){
+      a0+=1;
+    }
+    else{
+      a1+=1;
+    }
+  }
+  n/=landscape.size();d/=landscape.size();a0/=landscape.size();a1/=landscape.size();
+
+  /*
+  Last part is a copy of saveRipley
+  */
+
+  // first get the neighbour matrix given a ripley distance, here it is 1
+  vector<vector<unsigned int>> neighbourMatrix;
+  getNeighbourMatrix(neighbourMatrix,nn,ripleyDistance);
+
+  // then determine the number of points for each type of land
+  double nN=0,nD=0,nA0=0,nA1=0;
+  for(ix=0;ix<landscape.size();ix++){
+    if (landscape[ix]==0){
+      nN+=1;
+    }
+    else if (landscape[ix]==1){
+      nD+=1;
+    }
+    else if (landscape[ix]==2){
+      nA0+=1;
+    }
+    else{
+      nA1+=1;
+    }
+  }
+
+  // now calculate ripley without normalizing
+  double ripleyN=0, ripleyD=0, ripleyA0=0, ripleyA1=0;
+  vector<unsigned int> stateNeighbours;
+  for(ix=0;ix<landscape.size();ix++){
+    stateNeighbours.clear();
+    if (landscape[ix]==0){
+      getNeighboursState(stateNeighbours, neighbourMatrix, landscape, ix, 0);
+      ripleyN+=stateNeighbours.size();
+    }
+    else if (landscape[ix]==1){
+      getNeighboursState(stateNeighbours, neighbourMatrix, landscape, ix, 1);
+      ripleyD+=stateNeighbours.size();
+    }
+    else if (landscape[ix]==2){
+      getNeighboursState(stateNeighbours, neighbourMatrix, landscape, ix, 2);
+      ripleyA0+=stateNeighbours.size();
+    }
+    else{
+      getNeighboursState(stateNeighbours, neighbourMatrix, landscape, ix, 3);
+      ripleyA1+=stateNeighbours.size();
+    }
+  }
+
+  if (nN>0){ripleyN *= landscape.size()/(nN*nN);}
+  if (nD>0){ripleyD *= landscape.size()/(nD*nD);}
+  if (nA0>0){ripleyA0 *= landscape.size()/(nA0*nA0);}
+  if (nA1>0){ripleyA1 *= landscape.size()/(nA1*nA1);}
+
+  file << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 <<"\n";
+
+  return;
+}

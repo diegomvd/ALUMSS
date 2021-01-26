@@ -88,5 +88,6 @@ void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landsca
 void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents);
 void saveLandMetrics(ofstream &file, double t, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices);
 void saveRipley(ofstream &file, double t, unsigned int n, const vector<unsigned int> &landscape, double ripleyDistance);
+void saveSensitivityOutput(ofstream &file, unsigned int nn, double ripleyDistance, const vector<double> &population, const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices);
 
 #endif
