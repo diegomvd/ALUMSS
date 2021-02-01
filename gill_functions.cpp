@@ -501,9 +501,6 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
   double expansionCumSum = 0;
   double intenseCumSum = 0;
 
-  // fraction of natural patches
-  double fracN = 0;
-
   /*
   first checking if there is a consumption deficit that justifys human action
   */
@@ -529,8 +526,6 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
     for (ix=0 ; ix<landscape.size() ; ++ix){
 
       if (landscape[ix] == 0){ // if patch is natural, hence can be converted to organic
-
-        fracN+=1;
 
         // get the indexes of the organic neighbours
         organicNeighbours.clear();
@@ -561,12 +556,11 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
     now we normalize the previously obtained probabilities and get calculate the
     probability per unit time of action given the consumption deficit
     */
-    fracN/=landscape.size();
 
     if (expansionCumSum>0 && intenseCumSum>0){ // this is to avoid dividing by zero
       for (ix=0; ix<landscape.size() ; ++ix){
-        expansionPropensity[ix]=expansionPropensity[ix]/expansionCumSum/Tag*consumptionDeficit*pow(fracN,a);
-        intensePropensity[ix]=intensePropensity[ix]/intenseCumSum/Tag*consumptionDeficit*(1-pow(fracN,a));
+        expansionPropensity[ix]=expansionPropensity[ix]/expansionCumSum/Tag*consumptionDeficit*(1-a);
+        intensePropensity[ix]=intensePropensity[ix]/intenseCumSum/Tag*consumptionDeficit*a;
       }
     }
     else{
@@ -576,8 +570,15 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
         }
       }
       else if (intenseCumSum>0){
-        for (ix=0; ix<landscape.size() ; ++ix){
-          intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*(1/Tag)*consumptionDeficit;
+        if (a==0){
+          for (ix=0; ix<landscape.size() ; ++ix){
+            intensePropensity[ix]=0;
+          }
+        }
+        else{
+          for (ix=0; ix<landscape.size() ; ++ix){
+            intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*(1/Tag)*consumptionDeficit;
+          }
         }
       }
     }
