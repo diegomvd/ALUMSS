@@ -41,7 +41,7 @@ val scriptTask =
 
 val readOutput =
     ScalaTask("""
-    val oString = scala.io.Source.fromFile(f).mkString
+    val oString = scala.io.Source.fromFile(sensitivityOut).mkString
     val outputs = oString.split(" ")
     val nFrag = outputs(0).toDouble
     val meanSize = outputs(1).toDouble
