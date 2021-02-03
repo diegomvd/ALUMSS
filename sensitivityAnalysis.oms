@@ -4,11 +4,11 @@ val ksi = Val[Double]
 val sar = Val[Double]
 val a = Val[Double]
 val w = Val[Double]
-val Tg = Val[Double]
+val Tag = Val[Double]
 val Tab = Val[Double]
 val Tr = Val[Double]
 val Td = Val[Double]
-val d = Val[Double]
+val d = Val[Int]
 
 val oString = Val[String]
 
@@ -23,16 +23,16 @@ val N = Val[Double]
 val D = Val[Double]
 val A0 = Val[Double]
 val A1 = Val[Double]
-val RipleyN = Val[Double]
-val RipleyD = Val[Double]
-val RipleyA0 = Val[Double]
-val RipleyA1 = Val[Double]
+val ripleyN = Val[Double]
+val ripleyD = Val[Double]
+val ripleyA0 = Val[Double]
+val ripleyA1 = Val[Double]
 
 
 val scriptTask =
   SystemExecTask(
     command = Seq(
-      "./gillespie-ses 6000 0.1 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tg} ${Tab} ${Tr} ${Td} ${d} 7000 OM "),
+      "./gillespie-ses 6000 0.1 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 OM "),
     )set(
       inputs+=(ksi,sar,a,w,Tag,Tab,Tr,Td,d),
       outputFiles += ("sensitivityOut.dat",sensitivityOut) ,
@@ -43,21 +43,21 @@ val readOutput =
     ScalaTask("""
     val oString = scala.io.Source.fromFile(f).mkString
     val outputs = oString.split(" ")
-    val nFrag = outputs[0].toDouble
-    val meanSize = outputs[1].toDouble
-    val stdSize = outputs[2].toDouble
-    val maxSize = outputs[3].toDouble
-    val meanES = outputs[4].toDouble
-    val stdES = outputs[5].toDouble
-    val P = outputs[6].toDouble
-    val N = outputs[7].toDouble
-    val D = outputs[8].toDouble
-    val A0 = outputs[9].toDouble
-    val A1 = outputs[10].toDouble
-    val ripleyN = outputs[11].toDouble
-    val ripleyD = outputs[12].toDouble
-    val ripleyA0 = outputs[13].toDouble
-    val ripleyA1 = outputs[14].toDouble
+    val nFrag = outputs(0).toDouble
+    val meanSize = outputs(1).toDouble
+    val stdSize = outputs(2).toDouble
+    val maxSize = outputs(3).toDouble
+    val meanES = outputs(4).toDouble
+    val stdES = outputs(5).toDouble
+    val P = outputs(6).toDouble
+    val N = outputs(7).toDouble
+    val D = outputs(8).toDouble
+    val A0 = outputs(9).toDouble
+    val A1 = outputs(10).toDouble
+    val ripleyN = outputs(11).toDouble
+    val ripleyD = outputs(12).toDouble
+    val ripleyA0 = outputs(13).toDouble
+    val ripleyA1 = outputs(14).toDouble
     """
     )set(
         inputs+=sensitivityOut,
@@ -69,7 +69,7 @@ val moleTask = MoleTask(scriptTask -- readOutput)
 val env = LocalEnvironment(20)
 
 SensitivityMorris(
-    evaluation = MoleTask on env,
+    evaluation = moleTask on env,
     inputs = Seq(
         ksi in (0.0,1.0),
         sar in (0.0,0.5),
@@ -79,7 +79,7 @@ SensitivityMorris(
         Tab in (1.0,100.0),
         Tr in (1.0,10.0),
         Td in (1.0,100.0),
-        d in (1 to 5)
+        d in (1,5)
         ),
     outputs = Seq(
         nFrag,
