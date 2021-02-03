@@ -339,7 +339,7 @@ int main(int argc, const char * argv[]){
   tofile_conf << "\n";
 
   // saving output for sensitivity analysis
-  // saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
+  saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
 
   auto stop = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::minutes>(stop - start);
