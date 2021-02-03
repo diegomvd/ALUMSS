@@ -98,6 +98,6 @@ SensitivityMorris(
         ripleyA0,
         ripleyA1
         ),
-    sample = 10,
-    level = 10
+    sample = 2,
+    level = 2
 ) hook (workDirectory / "gillespieSensitivityResults")
