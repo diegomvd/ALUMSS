@@ -72,7 +72,7 @@ SensitivityMorris(
     evaluation = moleTask on env,
     inputs = Seq(
         ksi in (0.1,1.0),
-        sar in (0.0,1.0),
+        sar in (0.0,0.5),
         a in (0.0,1.0),
         w in (0.0,3.0),
         Tag in (0.05,1.0),
