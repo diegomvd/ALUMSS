@@ -32,7 +32,7 @@ val ripleyA1 = Val[Double]
 val scriptTask =
   SystemExecTask(
     command = Seq(
-      "./gillespie-ses 6000 0.1 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 OM "),
+      "./gillespie-ses 6000 0.07 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 OM "),
     )set(
       inputs+=(ksi,sar,a,w,Tag,Tab,Tr,Td,d),
       outputFiles += ("sensitivityOut.dat",sensitivityOut) ,
