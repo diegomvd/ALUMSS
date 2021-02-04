@@ -56,16 +56,17 @@ int main(int argc, const char * argv[]){
   int SimTime; // total simulation time
   double dtp; // timestep for population dynamics
 
-  double ao0, ai0; //number of agricultural patches at beggining
+  double a0; //number of agricultural patches at beggining
+  double d0; // number of degraded patches at beggining
 
   double ksi; // productivity per unit input or unit ecosystem service
   double sar; // ecosystem service saturation exponent
-  double a; // expansion probability
+  double a; // intensification probability
   double w; // agricultural clustering parameter
   double Tag; // action probability per unit time per unit of consumption deficit
   double Tab; // mean fertility loss time
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
-  unsigned int d; // distance at which eecosystem services are delivered
+  double d; // distance at which eecosystem services are delivered
 
   double dtsave; // timestep for saving data
 
@@ -82,8 +83,8 @@ int main(int argc, const char * argv[]){
         n = atoi(argv[3]);
 
         // initial values of agricultural land use and consumption
-        ao0 = strtod(argv[4],&pEnd);
-        ai0 = strtod(argv[5],&pEnd);
+        a0 = strtod(argv[4],&pEnd);
+        d0 = strtod(argv[5],&pEnd);
 
         // agricultural production parameters
         ksi = strtod(argv[6], &pEnd);
@@ -102,7 +103,7 @@ int main(int argc, const char * argv[]){
         Td = strtod(argv[13], &pEnd);
 
         // distance for es provision
-        d = atoi(argv[14]);
+        d = strtod(argv[14], &pEnd);
 
         // save timespace just in case
         dtsave = strtod(argv[15], &pEnd);
@@ -142,8 +143,8 @@ int main(int argc, const char * argv[]){
     filename = "_T_"+allArgs[1];
     filename += "_dtp_"+allArgs[2];
     filename += "_n_"+allArgs[3];
-    filename += "_ao0_"+allArgs[4];
-    filename += "_ai0_"+allArgs[5];
+    filename += "_a0_"+allArgs[4];
+    filename += "_d0_"+allArgs[5];
     filename += "_ksi_"+allArgs[6];
     filename += "_sar_"+allArgs[7];
     filename += "_a_"+allArgs[8];
@@ -251,7 +252,7 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,ao0,ai0,ksi,sar,d,w,r);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,sar,d,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////

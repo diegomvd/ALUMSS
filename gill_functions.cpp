@@ -30,7 +30,7 @@ using namespace std;
 //       - getNeighbours
 //       - getNeighboursState
 ///////////////////////////////////////////////////////////////////////////////
-void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, unsigned int d)
+void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double d)
 {
 
   /*fills a vector containing the neighbours indexes for each patch*/
@@ -661,10 +661,10 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
 //       - initializeSES
 ////////////////////////////////////////////////////////////////////////////////
 
-void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double ao0, double ai0, double w, gsl_rng  *r)
+void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double a0, double d0, double a, double w, gsl_rng  *r)
 {
   /*
-  initializes the landscape given a fraction of initial agricultural patches a0
+  initializes the landscape given a fraction of initial agricultural patches a0 and degraded patches d0
   */
 
   //unsigned int number_cropped_patches = 1;
@@ -672,14 +672,16 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   // this vector contains the indexes of all the natural patches
   vector<double> probConversion;
   vector<double> probIntense;
+  vector<double> probDegradation;
 
-  unsigned int nao0=(unsigned int) (ao0*n*n);
-  unsigned int nai0=(unsigned int) (ai0*n*n);
+  unsigned int nao0=(unsigned int) (a0*n*n*(1-a));
+  unsigned int nai0=(unsigned int) (a0*n*n*a);
   unsigned int na0=nao0+nai0;
 
   // first build a completely natural landscape with n*n patches
   landscape.push_back(0);
   probConversion.push_back(1);
+
   for (ix=1 ; ix<n*n; ++ix){
     landscape.push_back(0);
     probConversion.push_back(probConversion.back()+1);
@@ -717,6 +719,10 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     }
   }
 
+  // perform the cumulative sum of probIntense
+  for(ix=1; ix<probIntense.size(); ix++){
+    probIntense[ix]=probIntense[ix]+probIntense[ix-1];
+  }
   vector<unsigned int> intenseNeighbours;
   for(ix=0;ix<nai0;++ix){
     jx=0;
@@ -725,7 +731,8 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     }
     landscape[jx]=3;
 
-    // recalculating probconversion
+    // recalculating probintense
+    // first initialize the vector to do the cumulative sum
     if (jx>0){
       intenseNeighbours.clear();
       getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,0, 3);
@@ -742,6 +749,57 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
       }
       else{
         probIntense[lx]=probIntense[lx-1];
+      }
+    }
+  }
+
+  // now deal with degraded patches
+  unsigned int nd0=(unsigned int) (d0*n*n);
+  // initialize probDegradation
+  if (landscape[0]==0){
+    probDegradation.push_back(1);
+  }
+  else{
+    probDegradation.push_back(0);
+  }
+  // fill probDegradation for first pick
+  for (ix=1; ix<landscape.size(); ix++){
+    if (landscape[ix]==0){
+      probDegradation.push_back(probDegradation.back()+1);
+    }
+    else{
+      probDegradation.push_back(probDegradation.back());
+    }
+  }
+  // now start filling the landscape with the degraded cells
+  vector<unsigned int> degradedNeighbours;
+  for (ix=0; ix<nd0; ix++){
+    // select to be degraded cell
+    jx=0;
+    cumprob = gsl_rng_uniform(r)*probDegradation.back();
+    while (cumprob > probConversion[jx]){
+      jx++;
+    }
+    landscape[jx]=1;
+
+    // update the probDegradation
+    // first initialize the vector
+    if (jx>0){
+      degradedNeighbours.clear();
+      getNeighboursState(degradedNeighbours,neighbourMatrix,landscape,0, 1);
+      probDegradation[0]=pow( max(0.1 , (double)degradedNeighbours.size() ) , w ) ;
+    }
+    else{
+      probDegradation[0]=0;
+    }
+    for(lx=1;lx<probDegradation.size();lx++){
+      if (jx!=lx){
+        degradedNeighbours.clear();
+        getNeighboursState(degradedNeighbours,neighbourMatrix,landscape,lx, 1);
+        probDegradation[lx]=probDegradation[lx-1]+pow( max(0.1 , (double)degradedNeighbours.size() ) , w ) ;
+      }
+      else{
+        probDegradation[lx]=probDegradation[lx-1];
       }
     }
   }
@@ -764,12 +822,12 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double ao0, double ai0, double ksi, double sar, unsigned int d, double w,gsl_rng  *r)
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double sar, double d, double w,gsl_rng  *r)
 {
 
   getNeighbourMatrix(neighbourMatrix,n,1);
   getNeighbourMatrix(neighbourMatrixES,n,d);
-  initializeLandscape(landscape,neighbourMatrix,n,ao0,ai0,w,r);
+  initializeLandscape(landscape,neighbourMatrix,n,a0,d0,a,w,r);
   getNaturalConnectedComponents(naturalComponents,landscape);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,sar);
   getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);

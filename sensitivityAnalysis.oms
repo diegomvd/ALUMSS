@@ -8,7 +8,7 @@ val Tag = Val[Double]
 val Tab = Val[Double]
 val Tr = Val[Double]
 val Td = Val[Double]
-val d = Val[Int]
+val d = Val[Double]
 
 val oString = Val[String]
 
@@ -32,11 +32,12 @@ val ripleyA1 = Val[Double]
 val scriptTask =
   SystemExecTask(
     command = Seq(
-      "./gillespie-ses 6000 0.07 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 OM "),
+      "./gillespie-ses 5 0.1 10 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 OM "),
     )set(
       inputs+=(ksi,sar,a,w,Tag,Tab,Tr,Td,d),
       outputFiles += ("sensitivityOut.dat",sensitivityOut) ,
-      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses"
+      // resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses"
+      resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses"
     )
 
 val readOutput =
@@ -71,15 +72,15 @@ val env = LocalEnvironment(20)
 SensitivityMorris(
     evaluation = moleTask on env,
     inputs = Seq(
-        ksi in (0.1,1.0),
-        sar in (0.0,0.5),
+        ksi in (0.8,1.0),
+        sar in (0.1,0.3),
         a in (0.0,1.0),
         w in (0.0,3.0),
-        Tag in (0.05,1.0),
-        Tab in (10.0,100.0),
+        Tag in (0.05,0.5),
+        Tab in (50.0,100.0),
         Tr in (1.0,10.0),
-        Td in (10.0,100.0),
-        d in (1,4)
+        Td in (50.0,100.0),
+        d in (1.0,4.0)
         ),
     outputs = Seq(
         nFrag,
