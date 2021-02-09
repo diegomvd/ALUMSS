@@ -194,6 +194,12 @@ int main(int argc, const char * argv[]){
   tofile_sens.precision(5);
   tofile_sens.setf(ios::scientific,ios::floatfield);
 
+  string filename_SPEX="SPEXOut.dat";
+  ofstream tofile_spex(filename_SPEX);
+  tofile_spex.precision(5);
+  tofile_spex.setf(ios::scientific,ios::floatfield);
+
+
   /////////////////////////////////////////////////////////////////////////////
   // VARIABLE DECLARATION AND INITIALISATION
   /////////////////////////////////////////////////////////////////////////////
@@ -340,7 +346,9 @@ int main(int argc, const char * argv[]){
   tofile_conf << "\n";
 
   // saving output for sensitivity analysis
-  saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
+  // saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
+  // saving output for pattern exploration space and origin exploration space
+  saveAggregated(tofile_spex,t,population,landscape);
 
   auto stop = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::minutes>(stop - start);
