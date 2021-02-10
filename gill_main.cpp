@@ -106,7 +106,7 @@ int main(int argc, const char * argv[]){
         dtsave = strtod(argv[15], &pEnd);
 
         // save seed
-        seed = atoi(argv[16]);
+        seed = abs(atoi(argv[16]));
   }
 
   // seeding the random double generator: used for gillespie
