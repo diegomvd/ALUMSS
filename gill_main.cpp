@@ -31,6 +31,7 @@ extern void seedMT2(void);
 
 #define PI 3.14159265358979323846
 #define LOAD_CONF 0
+#define SEED_MT 1
 
 ///////////////////////////////////////////////////////////////////////////////
 // MAIN PROGRAM
@@ -41,12 +42,6 @@ auto start = chrono::high_resolution_clock::now();
 auto start2 = chrono::high_resolution_clock::now();
 
 int main(int argc, const char * argv[]){
-
-  // seeding the random double generator: used for gillespie
-  seedMT2();
-  // creating the random integer generator and seeding it
-  gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
-  gsl_rng_set(r, 1425638);
 
   ///////////////////////////////////////////////////////////////////////////////
   // PARAMETER DECLARATION
@@ -69,6 +64,8 @@ int main(int argc, const char * argv[]){
   double d; // distance at which eecosystem services are delivered
 
   double dtsave; // timestep for saving data
+
+  unsigned long int seed; // this is expid
 
   ///////////////////////////////////////////////////////////////////////////////
   // IMPORT PARAMETER VALUES
@@ -108,7 +105,19 @@ int main(int argc, const char * argv[]){
         // save timespace just in case
         dtsave = strtod(argv[15], &pEnd);
 
+        // save seed
+        seed = atoi(argv[16]);
   }
+
+  // seeding the random double generator: used for gillespie
+  if (SEED_MT==1){
+    seedMT(seed);
+  }
+  seedMT2();
+
+  // creating the random integer generator and seeding it
+  gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
+  gsl_rng_set(r, seed);
 
   /////////////////////////////////////////////////////////////////////////////
   // CREATION OF DATA FILES
