@@ -1,0 +1,93 @@
+val output = Val[File]
+val mySeed = Val[Int]
+
+val ksi = Val[Double]
+val sar = Val[Double]
+val a = Val[Double]
+val w = Val[Double]
+val Tag = Val[Double]
+val Tab = Val[Double]
+val Tr = Val[Double]
+val Td = Val[Double]
+val d = Val[Double]
+
+val oString = Val[String]
+
+// val nFrag = Val[Double]
+// val meanSize = Val[Double]
+// val stdSize = Val[Double]
+// val maxSize = Val[Double]
+// val meanES = Val[Double]
+// val stdES = Val[Double]
+val P = Val[Double]
+val N = Val[Double]
+// val D = Val[Double]
+// val A0 = Val[Double]
+// val A1 = Val[Double]
+// val ripleyN = Val[Double]
+// val ripleyD = Val[Double]
+// val ripleyA0 = Val[Double]
+// val ripleyA1 = Val[Double]
+
+
+
+val scriptTask =
+  SystemExecTask(
+    command = Seq(
+      "./gillespie-ses 2000 0.1 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 ${mySeed} "),
+    )set(
+      inputs+=(Tag,Tab, mySeed),
+      outputFiles += ("SPEXOut.dat",output) ,
+      outputs += (Tag, Tab),
+      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
+      // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
+
+      ksi:=1.0,
+      sar:=0.25,
+      a:=0.0,
+      w:=0.0,
+      Tag:=0.1,
+      Tab:=50.0
+      Tr:=5.0,
+      Td:=50.0,
+      d:=1.0
+
+    )
+
+val readOutput =
+    ScalaTask("""
+    val oString = scala.io.Source.fromFile(output).mkString
+    val outputs = oString.split(" ")
+    val P = outputs(1).toDouble
+    val N = outputs(2).toDouble
+    """
+    )set(
+        inputs+=(output, sar, d),
+        outputs+=(sar, d, P, N)
+    )
+
+val moleTask = MoleTask(scriptTask -- readOutput)
+
+val reps =
+  Replication(
+    evaluation = moleTask,
+    seed = mySeed,
+    sample = 10,
+    aggregation = Seq (sar, d, P aggregate median, N aggregate median)
+  )
+
+val env = LocalEnvironment(20)
+
+DirectSampling(
+  evaluation = reps on env,
+  sampling =
+    (sar in (0.0 to 1.0 by 0.1) ) x
+    (Tab in LogRange(1.0,20.0,10)),
+) hook (workDirectory / "experimentSarD.csv")
+
+DirectSampling(
+  evaluation = reps on env,
+  sampling =
+    (a in (0.0 to 1.0 by 0.1) ) x
+    (w in LogRange(0.0,5.0,10)),
+) hook (workDirectory / "experimentWA.csv")
