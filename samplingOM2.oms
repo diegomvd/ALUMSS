@@ -36,9 +36,9 @@ val scriptTask =
     command = Seq(
       "./gillespie-ses 2000 0.1 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 ${mySeed} "),
     )set(
-      inputs+=(Tag,Tab, mySeed),
+      inputs+=(sar,d, mySeed),
       outputFiles += ("SPEXOut.dat",output) ,
-      outputs += (Tag, Tab),
+      outputs += (sar, d),
       resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
@@ -54,7 +54,7 @@ val scriptTask =
 
     )
 
-val readOutput1 =
+val readOutput =
     ScalaTask("""
     val oString = scala.io.Source.fromFile(output).mkString
     val outputs = oString.split(" ")
@@ -66,52 +66,52 @@ val readOutput1 =
         outputs+=(sar, d, P, N)
     )
 
-val moleTask1 = MoleTask(scriptTask -- readOutput1)
+val moleTask= MoleTask(scriptTask -- readOutput)
 
-val reps1 =
+val reps =
   Replication(
-    evaluation = moleTask1,
+    evaluation = moleTask,
     seed = mySeed,
     sample = 10,
     aggregation = Seq (sar, d, P aggregate median, N aggregate median)
   )
 
-//////////////////////////////////////////////////////////////////////////////
-
-val readOutput2 =
-    ScalaTask("""
-    val oString = scala.io.Source.fromFile(output).mkString
-    val outputs = oString.split(" ")
-    val P = outputs(1).toDouble
-    val N = outputs(2).toDouble
-    """
-    )set(
-        inputs+=(output, a, w),
-        outputs+=(a, w, P, N)
-    )
-
-val moleTask2 = MoleTask(scriptTask -- readOutput2)
-
-val reps2 =
-  Replication(
-    evaluation = moleTask2,
-    seed = mySeed,
-    sample = 10,
-    aggregation = Seq (a, w, P aggregate median, N aggregate median)
-  )
-
 val env = LocalEnvironment(20)
 
 DirectSampling(
-  evaluation = reps1 on env,
+  evaluation = reps on env,
   sampling =
     (sar in (0.0 to 1.0 by 0.1) ) x
     (Tab in LogRange(1.0,20.0,10)),
 ) hook (workDirectory / "experimentSarD.csv")
 
-DirectSampling(
-  evaluation = reps2 on env,
-  sampling =
-    (a in (0.0 to 1.0 by 0.1) ) x
-    (w in LogRange(0.0,5.0,10)),
-) hook (workDirectory / "experimentWA.csv")
+
+// val readOutput2 =
+//     ScalaTask("""
+//     val oString = scala.io.Source.fromFile(output).mkString
+//     val outputs = oString.split(" ")
+//     val P = outputs(1).toDouble
+//     val N = outputs(2).toDouble
+//     """
+//     )set(
+//         inputs+=(output, a, w),
+//         outputs+=(a, w, P, N)
+//     )
+//
+// val moleTask2 = MoleTask(scriptTask -- readOutput2)
+//
+// val reps2 =
+//   Replication(
+//     evaluation = moleTask2,
+//     seed = mySeed,
+//     sample = 10,
+//     aggregation = Seq (a, w, P aggregate median, N aggregate median)
+//   )
+
+//
+// DirectSampling(
+//   evaluation = reps2 on env,
+//   sampling =
+//     (a in (0.0 to 1.0 by 0.1) ) x
+//     (w in LogRange(0.0,5.0,10)),
+// ) hook (workDirectory / "experimentWA.csv")
