@@ -311,6 +311,7 @@ int main(int argc, const char * argv[]){
         rungeKutta4(population,agriculturalProduction,dt);
       }
       else{
+        population[0]=0;
         break;
       }
 
