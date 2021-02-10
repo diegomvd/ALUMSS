@@ -1,15 +1,15 @@
 val output = Val[File]
 val mySeed = Val[Int]
 
-// val ksi = Val[Double]
-// val sar = Val[Double]
-// val a = Val[Double]
-// val w = Val[Double]
+val ksi = Val[Double]
+val sar = Val[Double]
+val a = Val[Double]
+val w = Val[Double]
 val Tag = Val[Double]
 val Tab = Val[Double]
-// val Tr = Val[Double]
-// val Td = Val[Double]
-// val d = Val[Double]
+val Tr = Val[Double]
+val Td = Val[Double]
+val d = Val[Double]
 
 val oString = Val[String]
 
@@ -30,36 +30,33 @@ val N = Val[Double]
 // val ripleyA1 = Val[Double]
 
 
-ksi=1.0
-sar=0.25
-a=0.0
-w=0.0
-Tr=5.0
-Td=50.0
-d=1.0
 
 val scriptTask =
   SystemExecTask(
     command = Seq(
-      "./gillespie-ses 2 0.1 10 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 ${mySeed} "),
+      "./gillespie-ses 2000 0.1 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 ${mySeed} "),
     )set(
       inputs+=(Tag,Tab, mySeed),
       outputFiles += ("SPEXOut.dat",output) ,
-      outputs += (Tag, Tab)
+      outputs += (Tag, Tab),
       resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses"
-      //resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses"
+      //resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
+
+      ksi:=1.0,
+      sar:=0.25,
+      a:=0.0,
+      w:=0.0,
+      Tr:=5.0,
+      Td:=50.0,
+      d:=1.0
+
     )
 
 val readOutput =
     ScalaTask("""
     val oString = scala.io.Source.fromFile(output).mkString
     val outputs = oString.split(" ")
-    if(outputs(1)=="-inf" || outputs(1)=="inf" || outputs(1)=="nan" || outputs(1)=="-nan"){
-      val P = 0
-    }
-    else{
-      val P = outputs(1).toDouble
-    }
+    val P = outputs(1).toDouble
     val N = outputs(2).toDouble
     """
     )set(
