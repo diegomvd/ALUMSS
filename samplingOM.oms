@@ -36,16 +36,18 @@ val scriptTask =
     command = Seq(
       "./gillespie-ses 2000 0.1 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} 7000 ${mySeed} "),
     )set(
-      inputs+=(Tag,Tab, mySeed),
+      inputs+=(a,w, mySeed),
       outputFiles += ("SPEXOut.dat",output) ,
-      outputs += (Tag, Tab),
-      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses"
-      //resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
+      outputs += (a, w),
+      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
+      // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
       ksi:=1.0,
       sar:=0.25,
       a:=0.0,
       w:=0.0,
+      Tag:=0.1,
+      Tab:=50.0,
       Tr:=5.0,
       Td:=50.0,
       d:=1.0
@@ -60,18 +62,18 @@ val readOutput =
     val N = outputs(2).toDouble
     """
     )set(
-        inputs+=(output, Tag, Tab),
-        outputs+=(Tag, Tab, P, N)
+        inputs+=(output, a, w),
+        outputs+=(a, w, P, N)
     )
 
-val moleTask = MoleTask(scriptTask -- readOutput)
+val moleTask= MoleTask(scriptTask -- readOutput)
 
 val reps =
   Replication(
     evaluation = moleTask,
     seed = mySeed,
-    sample = 1,
-    aggregation = Seq (Tag, Tab, P aggregate median, N aggregate median)
+    sample = 5,
+    aggregation = Seq (a, w, P aggregate median, N aggregate median)
   )
 
 val env = LocalEnvironment(20)
@@ -79,6 +81,6 @@ val env = LocalEnvironment(20)
 DirectSampling(
   evaluation = reps on env,
   sampling =
-    (Tag in LogRange(0.01,10.0,10) ) x
-    (Tab in LogRange(10.0,100.0,10)),
-) hook (workDirectory / "experimentTabTag.csv")
+    (a in (0.0 to 1.0 by 0.1) ) x
+    (w in LogRange(0.0,4.0,10)),
+) hook (workDirectory / "experimentAW.sscsv")
