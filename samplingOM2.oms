@@ -72,7 +72,7 @@ val reps =
   Replication(
     evaluation = moleTask,
     seed = mySeed,
-    sample = 10,
+    sample = 5,
     aggregation = Seq (sar, d, P aggregate median, N aggregate median)
   )
 
@@ -82,36 +82,5 @@ DirectSampling(
   evaluation = reps on env,
   sampling =
     (sar in (0.0 to 1.0 by 0.1) ) x
-    (Tab in LogRange(1.0,20.0,10)),
+    (d in LogRange(1.0,20.0,10)),
 ) hook (workDirectory / "experimentSarD.csv")
-
-
-// val readOutput2 =
-//     ScalaTask("""
-//     val oString = scala.io.Source.fromFile(output).mkString
-//     val outputs = oString.split(" ")
-//     val P = outputs(1).toDouble
-//     val N = outputs(2).toDouble
-//     """
-//     )set(
-//         inputs+=(output, a, w),
-//         outputs+=(a, w, P, N)
-//     )
-//
-// val moleTask2 = MoleTask(scriptTask -- readOutput2)
-//
-// val reps2 =
-//   Replication(
-//     evaluation = moleTask2,
-//     seed = mySeed,
-//     sample = 10,
-//     aggregation = Seq (a, w, P aggregate median, N aggregate median)
-//   )
-
-//
-// DirectSampling(
-//   evaluation = reps2 on env,
-//   sampling =
-//     (a in (0.0 to 1.0 by 0.1) ) x
-//     (w in LogRange(0.0,5.0,10)),
-// ) hook (workDirectory / "experimentWA.csv")
