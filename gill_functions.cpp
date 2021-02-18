@@ -895,7 +895,7 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 //       - saveRipley
 ////////////////////////////////////////////////////////////////////////////////
 
-void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape)
+void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction)
 {
   unsigned long ix;
   double n=0,d=0,a0=0,a1=0;
@@ -916,7 +916,13 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
   }
   n/=landscape.size();d/=landscape.size();a0/=landscape.size();a1/=landscape.size();
 
-  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << "\n";
+  double totalAgriculturalProduction=0;
+  unsigned long ix;
+  for(ix=0;ix<agriculturalProduction.size();ix++){
+    totalAgriculturalProduction+=agriculturalProduction[ix];
+  }
+
+  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalAgriculturalProduction <<"\n";
   return;
 }
 

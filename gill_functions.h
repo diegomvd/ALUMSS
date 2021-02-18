@@ -83,7 +83,7 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 //       - saveRipley
 ////////////////////////////////////////////////////////////////////////////////
 
-void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape);
+void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction);
 void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape);
 void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents);
 void saveLandMetrics(ofstream &file, double t, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices);

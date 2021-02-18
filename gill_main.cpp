@@ -277,12 +277,15 @@ int main(int argc, const char * argv[]){
   // entering the time loop
   while(t<SimTime){
 
+    // updating agricultural production
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
+
     ///////////////////////////////////////////////////////////////////////////
     // SAVING DATA
     ///////////////////////////////////////////////////////////////////////////
     if(t>=t_save)
     {
-      saveAggregated(tofile_agre,t,population,landscape);
+      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction);
       saveLandscape(tofile_land,t,landscape);
       saveComponents(tofile_clus,t,landscape,naturalComponents);
       saveLandMetrics(tofile_metr,t,naturalComponents,ecosystemServices);
@@ -339,8 +342,7 @@ int main(int argc, const char * argv[]){
       else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //abandonment to natural
       else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
       else {cout << "Error: gill_main.cpp reaction " << reaction << " does not exist.\n";}
-      // updating agricultural production
-      getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
+
 
       // update the time and timestep for ODE solving
       t+=dtg;
@@ -358,7 +360,7 @@ int main(int argc, const char * argv[]){
   // saving output for sensitivity analysis
   // saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
   // saving output for pattern exploration space and origin exploration space
-  saveAggregated(tofile_spex,t,population,landscape);
+  // saveAggregated(tofile_spex,t,population,landscape);
 
   auto stop = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::minutes>(stop - start);
