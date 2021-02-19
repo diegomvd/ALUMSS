@@ -917,7 +917,6 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
   n/=landscape.size();d/=landscape.size();a0/=landscape.size();a1/=landscape.size();
 
   double totalAgriculturalProduction=0;
-  unsigned long ix;
   for(ix=0;ix<agriculturalProduction.size();ix++){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
