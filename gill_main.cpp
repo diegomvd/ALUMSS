@@ -360,7 +360,7 @@ int main(int argc, const char * argv[]){
   // saving output for sensitivity analysis
   // saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
   // saving output for pattern exploration space and origin exploration space
-  saveAggregated(tofile_spex,t,population,landscape);
+  saveAggregated(tofile_spex,t,population,landscape,agriculturalProduction);
 
   auto stop = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::minutes>(stop - start);
