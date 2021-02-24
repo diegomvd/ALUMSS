@@ -274,6 +274,9 @@ int main(int argc, const char * argv[]){
   // BEGIN OF SIMULATION
   /////////////////////////////////////////////////////////////////////////////
 
+  // for the nopop experiment
+  unsigned int nat_cells;
+  
   // entering the time loop
   while(t<SimTime){
 
@@ -308,6 +311,17 @@ int main(int argc, const char * argv[]){
     // LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION AND CONSUMPTION OR
     // THE REALIZATION OF A STOCHASTIC EVENT
     ///////////////////////////////////////////////////////////////////////////
+
+    // calculate the number of natural cells for the nopop experiment
+    for(i=0;i<landscape.size();i++){
+      if(landscape[i]==0){
+        nat_cells+=1;
+      }
+    }
+    if(nat_cells<1 || nat_cells==landscape.size()){
+      break;
+    }
+
     if (dtg>dt){ // if the time until next event is larger than the ODE timestep
       // update population and consumption
       if (population[0]>0){
@@ -315,7 +329,7 @@ int main(int argc, const char * argv[]){
       }
       else{
         population[0]=0;
-        break;
+        // break;
       }
 
       // update the time as well as the timestep for ODE solving
