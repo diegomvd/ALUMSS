@@ -276,7 +276,7 @@ int main(int argc, const char * argv[]){
 
   // for the nopop experiment
   unsigned int nat_cells;
-  
+
   // entering the time loop
   while(t<SimTime){
 
@@ -329,7 +329,7 @@ int main(int argc, const char * argv[]){
       }
       else{
         population[0]=0;
-        // break;
+        break;
       }
 
       // update the time as well as the timestep for ODE solving
