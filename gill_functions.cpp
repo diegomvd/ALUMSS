@@ -430,7 +430,7 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
-      agriculturalProduction.push_back( ksi*ecosystemServices[ix] ) ;
+      agriculturalProduction.push_back( 0.5*(1+ksi*ecosystemServices[ix]) ) ;
     }
     else if(landscape[ix]==3){ //intense
       agriculturalProduction.push_back( 1 );
