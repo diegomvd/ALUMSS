@@ -430,7 +430,7 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
-      agriculturalProduction.push_back( 0.5*(1+ksi*ecosystemServices[ix]) ) ;
+      agriculturalProduction.push_back( ksi*ecosystemServices[ix] ) ;
     }
     else if(landscape[ix]==3){ //intense
       agriculturalProduction.push_back( 1 );
@@ -571,12 +571,7 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
       }
       else if (intenseCumSum>0){
         for (ix=0; ix<landscape.size() ; ++ix){
-          if(a==0){
-            intensePropensity[ix]=0; // this is to handle the case without intensification
-          }
-          else{
-            intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*(1/Tag)*consumptionDeficit;
-          }
+          intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*(1/Tag)*consumptionDeficit;
         }
       }
     }
