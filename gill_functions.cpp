@@ -571,7 +571,12 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
       }
       else if (intenseCumSum>0){
         for (ix=0; ix<landscape.size() ; ++ix){
-          intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*(1/Tag)*consumptionDeficit;
+          if(a==0){
+            intensePropensity[ix]=0; // this is to handle the case without intensification
+          }
+          else{
+            intensePropensity[ix]=intensePropensity[ix]/intenseCumSum*(1/Tag)*consumptionDeficit;
+          }
         }
       }
     }
