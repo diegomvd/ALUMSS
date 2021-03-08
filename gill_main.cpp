@@ -61,6 +61,7 @@ int main(int argc, const char * argv[]){
   double Tag; // action probability per unit time per unit of consumption deficit
   double Tab; // mean fertility loss time
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
+  double e12,c12; // half saturation values for es provision and consumption deficit
   double d; // distance at which eecosystem services are delivered
 
   double dtsave; // timestep for saving data
@@ -99,14 +100,18 @@ int main(int argc, const char * argv[]){
         Tr = strtod(argv[12], &pEnd);
         Td = strtod(argv[13], &pEnd);
 
+        // half values for saturation functions
+        e12 = strtod(argv[14], &pEnd);
+        c12 = strtod(argv[15], &pEnd);
+
         // distance for es provision
-        d = strtod(argv[14], &pEnd);
+        d = strtod(argv[16], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[15], &pEnd);
+        dtsave = strtod(argv[17], &pEnd);
 
         // save seed
-        seed = abs(atoi(argv[16]));
+        seed = abs(atoi(argv[18]));
   }
 
   // seeding the random double generator: used for gillespie
@@ -163,8 +168,10 @@ int main(int argc, const char * argv[]){
     filename += "_Tr_"+allArgs[12];
     filename += "_Td_"+allArgs[13];
     filename += "_d_"+allArgs[14];
-    filename += "_dtsave_"+allArgs[15];
-    filename += "_expid_"+allArgs[16];
+    filename += "_e12_"+allArgs[15];
+    filename += "_c12_"+allArgs[16];
+    filename += "_dtsave_"+allArgs[17];
+    filename += "_expid_"+allArgs[18];
     filename+=".dat";
   }
 
@@ -267,7 +274,7 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,sar,d,w,r);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,e12,sar,d,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -281,7 +288,7 @@ int main(int argc, const char * argv[]){
   while(t<SimTime){
 
     // updating agricultural production
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, e12);
 
     ///////////////////////////////////////////////////////////////////////////
     // SAVING DATA
@@ -301,7 +308,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
+    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab,e12,c12);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
@@ -318,7 +325,7 @@ int main(int argc, const char * argv[]){
         nat_cells+=1;
       }
     }
-    if(nat_cells<1 || nat_cells==landscape.size()){
+    if(nat_cells==landscape.size()){
       break;
     }
 
