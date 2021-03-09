@@ -1,0 +1,199 @@
+// output files
+val agreOut = Val[File]
+val metrOut = Val[File]
+val riplOut = Val[File]
+
+// variable to handle filenames in scala tasks
+val oStringAgre = Val[String]
+val oStringMetr = Val[String]
+val oStringRipl = Val[String]
+
+// random number generator seed
+val mySeed = Val[Int]
+
+// model parameters
+val ksi = Val[Double]
+val sar = Val[Double]
+val a = Val[Double]
+val w = Val[Double]
+val Tag = Val[Double]
+val Tab = Val[Double]
+val Tr = Val[Double]
+val Td = Val[Double]
+val e12 = Val[Double]
+val c12 = Val[Double]
+val d = Val[Double]
+
+// simulation parameters
+val T = Val[Double]
+val dtp = Val[Double]
+val L = Val[Double]
+val d0 = Val[Double]
+val a0 = Val[Double]
+val dtsave = Val[Double]
+
+// variable outputs
+val t = Val[Double]
+val nFrag = Val[Double]
+val meanSize = Val[Double]
+val stdSize = Val[Double]
+val maxSize = Val[Double]
+val meanES = Val[Double]
+val stdES = Val[Double]
+val P = Val[Double]
+val N = Val[Double]
+val D = Val[Double]
+val A0 = Val[Double]
+val A1 = Val[Double]
+val Y = Val[Double]
+val ripleyN = Val[Double]
+val ripleyD = Val[Double]
+val ripleyA0 = Val[Double]
+val ripleyA1 = Val[Double]
+
+///////////////////////////////////////////////////////////////////////////////
+// model plugin with all the parameter inputs as well as the output files
+
+val scriptTask =
+  SystemExecTask(
+    command = Seq(
+      "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${e12} ${c12} ${d} ${dtsave} ${mySeed} "),
+    )set(
+      inputs += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
+      outputs += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
+      outputFiles += ("DATA_AGRE",agreOut),
+      outputFiles += ("DATA_METR",metrOut),
+      outputFiles += ("DATA_RIPL",riplOut),
+      // resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
+      resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
+
+      T:=4000.0,
+      dtp:=0.1,
+      L:=40,
+      a0:=0.1,
+      d0:=0.0,
+      ksi:=1.0,
+      sar:=0.25,
+      a:=0.0,
+      w:=0.0,
+      Tag:=0.1,
+      Tab:=50.0,
+      Tr:=5.0,
+      Td:=1.0,
+      e12:=0.3,
+      c12:=0.3,
+      d:=1.0,
+      dtsave:=1.0,
+      mySeed:=1111
+    )
+
+///////////////////////////////////////////////////////////////////////////////
+// file reading function for ouptut management
+
+// use this function only when reading one-line files
+
+val readOutputOneLine =
+    ScalaTask("""
+
+    // read file line and put in a string
+    val oStringAgre = scala.io.Source.fromFile(agreOut).mkString
+    val oStringMetr = scala.io.Source.fromFile(metrOut).mkString
+    val oStringRipl = scala.io.Source.fromFile(riplOut).mkString
+    // split the string and store it in an array
+    val valuesAgre = oStringAgre.split(" ")
+    val valuesMetr = oStringAgre.split(" ")
+    val valuesRipl = oStringAgre.split(" ")
+
+    // store each value of the values array independently to pass to outputs of
+    // scala function
+    val t = valuesAgre(0).toDouble
+    val P = valuesAgre(1).toDouble
+    val N = valuesAgre(2).toDouble
+    val D = valuesAgre(3).toDouble
+    val A0 = valuesAgre(4).toDouble
+    val A1 = valuesAgre(5).toDouble
+    val Y = valuesAgre(6).toDouble
+
+    val nFrag = valuesMetr(1).toDouble
+    val maxSize = valuesMetr(2).toDouble
+    val meanSize = valuesMetr(3).toDouble
+    val stdSize = valuesMetr(4).toDouble
+    val meanES = valuesMetr(5).toDouble
+    val stdES = valuesMetr(6).toDouble
+
+    val ripleyN = valuesRipl(1).toDouble
+    val ripleyD = valuesRipl(2).toDouble
+    val ripleyA0 = valuesRipl(3).toDouble
+    val ripleyA1 = valuesRipl(4).toDouble
+    """
+
+    )set(
+        inputs+=(agreOut,metrOut,riplOut,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
+        outputs+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed,t,P,N,D,A0,A1,Y,nFrag,maxSize,meanSize,stdSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
+    )
+
+///////////////////////////////////////////////////////////////////////////////
+// creating a compound task merging the model plugin with the read output functions
+
+val moleTask= MoleTask(scriptTask -- readOutputOneLine)
+
+///////////////////////////////////////////////////////////////////////////////
+// setting the environment in which tasks are going to be eecuted
+
+val env = LocalEnvironment(30)
+
+///////////////////////////////////////////////////////////////////////////////
+// setting replications with different aggregation
+
+val replicationsFinal =
+  Replication(
+    evaluation = moleTask,
+    seed = mySeed,
+    sample = 10,
+    aggregation = Seq (
+      T aggregate average,
+      dtp aggregate average,
+      L aggregate average,
+      a0 aggregate average,
+      d0 aggregate average,
+      ksi aggregate average,
+      sar aggregate average,
+      a aggregate average,
+      w aggregate average,
+      Tag aggregate average,
+      Tab aggregate average,
+      Tr aggregate average,
+      Td aggregate average,
+      e12 aggregate average,
+      c12 aggregate average,
+      d aggregate average,
+      dtsave aggregate average,
+      mySeed aggregate average,
+      t aggregate average,
+      P aggregate average,
+      N aggregate average,
+      D aggregate average,
+      A0 aggregate average,
+      A1 aggregate average,
+      Y aggregate average,
+      nFrag aggregate average,
+      maxSize aggregate average,
+      meanSize aggregate average,
+      stdSize aggregate average,
+      meanES aggregate average,
+      stdES aggregate average,
+      ripleyN aggregate average,
+      ripleyD aggregate average,
+      ripleyA0 aggregate average,
+      ripleyA1 aggregate average)
+  )
+
+///////////////////////////////////////////////////////////////////////////////
+// setting up the experiments
+
+DirectSampling(
+  evaluation = replicationsFinal on env,
+  sampling =
+    (Tag in LogRange(0.01,10.0,20) ) x
+    (Tab in LogRange(0.1,100.0,20) ),
+) hook (workDirectory / "experimentTabTag3.csv")
