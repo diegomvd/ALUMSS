@@ -175,8 +175,8 @@ int main(int argc, const char * argv[]){
     filename+=".dat";
   }
 
-  // string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
-  string filename_AGRE="DATA_AGRE";
+  string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
+  // string filename_AGRE="DATA_AGRE";
   ofstream tofile_agre(filename_AGRE);
   tofile_agre.precision(5);
   tofile_agre.setf(ios::scientific,ios::floatfield);
@@ -186,8 +186,8 @@ int main(int argc, const char * argv[]){
   tofile_land.precision(5);
   tofile_land.setf(ios::scientific,ios::floatfield);
 
-  // string filename_METR=dirname+"/"+"DATA_METR"+filename;
-  string filename_METR="DATA_METR";
+  string filename_METR=dirname+"/"+"DATA_METR"+filename;
+  // string filename_METR="DATA_METR";
   ofstream tofile_metr(filename_METR);
   tofile_metr.precision(5);
   tofile_metr.setf(ios::scientific,ios::floatfield);
@@ -197,8 +197,8 @@ int main(int argc, const char * argv[]){
   tofile_clus.precision(5);
   tofile_clus.setf(ios::scientific,ios::floatfield);
 
-  // string filename_RIPL=dirname+"/"+"DATA_RIPL"+filename;
-  string filename_RIPL="DATA_RIPL";
+  string filename_RIPL=dirname+"/"+"DATA_RIPL"+filename;
+  // string filename_RIPL="DATA_RIPL";
   ofstream tofile_ripl(filename_RIPL);
   tofile_ripl.precision(5);
   tofile_ripl.setf(ios::scientific,ios::floatfield);
