@@ -83,7 +83,7 @@ val scriptTask =
       e12:=0.3,
       c12:=0.3,
       d:=1.0,
-      dtsave:=1.0,
+      dtsave:=7000.0,
       mySeed:=1111
     )
 
