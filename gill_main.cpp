@@ -66,7 +66,8 @@ int main(int argc, const char * argv[]){
 
   double dtsave; // timestep for saving data
 
-  unsigned long int seed; // this is expid
+  int seed; // this is expid
+  unsigned long int seed2;
 
   ///////////////////////////////////////////////////////////////////////////////
   // IMPORT PARAMETER VALUES
@@ -111,18 +112,8 @@ int main(int argc, const char * argv[]){
         dtsave = strtod(argv[17], &pEnd);
 
         // save seed
-        seed = abs(atoi(argv[18]));
+        seed = atoi(argv[18]);
   }
-
-  // seeding the random double generator: used for gillespie
-  if (SEED_MT==1){
-    seedMT(seed);
-  }
-  seedMT2();
-
-  // creating the random integer generator and seeding it
-  gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
-  gsl_rng_set(r, seed);
 
   /////////////////////////////////////////////////////////////////////////////
   // CREATION OF DATA FILES
@@ -167,15 +158,16 @@ int main(int argc, const char * argv[]){
     filename += "_Tab_"+allArgs[11];
     filename += "_Tr_"+allArgs[12];
     filename += "_Td_"+allArgs[13];
-    filename += "_d_"+allArgs[14];
-    filename += "_e12_"+allArgs[15];
-    filename += "_c12_"+allArgs[16];
+    filename += "_e12_"+allArgs[14];
+    filename += "_c12_"+allArgs[15];
+    filename += "_d_"+allArgs[16];
     filename += "_dtsave_"+allArgs[17];
     filename += "_expid_"+allArgs[18];
     filename+=".dat";
   }
 
-  string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
+  // string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
+  string filename_AGRE="DATA_AGRE"+filename;
   // string filename_AGRE="DATA_AGRE";
   ofstream tofile_agre(filename_AGRE);
   tofile_agre.precision(5);
@@ -186,7 +178,8 @@ int main(int argc, const char * argv[]){
   tofile_land.precision(5);
   tofile_land.setf(ios::scientific,ios::floatfield);
 
-  string filename_METR=dirname+"/"+"DATA_METR"+filename;
+  // string filename_METR=dirname+"/"+"DATA_METR"+filename;
+  string filename_METR="DATA_METR"+filename;
   // string filename_METR="DATA_METR";
   ofstream tofile_metr(filename_METR);
   tofile_metr.precision(5);
@@ -197,7 +190,8 @@ int main(int argc, const char * argv[]){
   tofile_clus.precision(5);
   tofile_clus.setf(ios::scientific,ios::floatfield);
 
-  string filename_RIPL=dirname+"/"+"DATA_RIPL"+filename;
+  // string filename_RIPL=dirname+"/"+"DATA_RIPL"+filename;
+  string filename_RIPL="DATA_RIPL"+filename;
   // string filename_RIPL="DATA_RIPL";
   ofstream tofile_ripl(filename_RIPL);
   tofile_ripl.precision(5);
@@ -218,6 +212,19 @@ int main(int argc, const char * argv[]){
   tofile_spex.precision(5);
   tofile_spex.setf(ios::scientific,ios::floatfield);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // seeding the random number generator
+
+  seed2=abs(seed);
+  // seeding the random double generator: used for gillespie
+  if (SEED_MT==1){
+    seedMT(seed2);
+  }
+  seedMT2();
+
+  // creating the random integer generator and seeding it
+  gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
+  gsl_rng_set(r, seed2);
 
   /////////////////////////////////////////////////////////////////////////////
   // VARIABLE DECLARATION AND INITIALISATION
