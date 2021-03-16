@@ -178,39 +178,25 @@ int main(int argc, const char * argv[]){
   tofile_land.precision(5);
   tofile_land.setf(ios::scientific,ios::floatfield);
 
-  // string filename_METR=dirname+"/"+"DATA_METR"+filename;
-  string filename_METR="DATA_METR"+filename;
-  // string filename_METR="DATA_METR";
-  ofstream tofile_metr(filename_METR);
-  tofile_metr.precision(5);
-  tofile_metr.setf(ios::scientific,ios::floatfield);
-
   string filename_CLUS=dirname+"/"+"DATA_CLUS"+filename;
   ofstream tofile_clus(filename_CLUS);
   tofile_clus.precision(5);
   tofile_clus.setf(ios::scientific,ios::floatfield);
-
-  // string filename_RIPL=dirname+"/"+"DATA_RIPL"+filename;
-  string filename_RIPL="DATA_RIPL"+filename;
-  // string filename_RIPL="DATA_RIPL";
-  ofstream tofile_ripl(filename_RIPL);
-  tofile_ripl.precision(5);
-  tofile_ripl.setf(ios::scientific,ios::floatfield);
 
   string filename_CONF=dirname+"/"+"DATA_CONF"+filename;
   ofstream tofile_conf(filename_CONF);
   tofile_conf.precision(5);
   tofile_conf.setf(ios::scientific,ios::floatfield);
 
-  string filename_SENS="sensitivityOut.dat";
-  ofstream tofile_sens(filename_SENS);
-  tofile_sens.precision(5);
-  tofile_sens.setf(ios::scientific,ios::floatfield);
-
-  string filename_SPEX="SPEXOut.dat";
-  ofstream tofile_spex(filename_SPEX);
-  tofile_spex.precision(5);
-  tofile_spex.setf(ios::scientific,ios::floatfield);
+  // string filename_SENS="sensitivityOut.dat";
+  // ofstream tofile_sens(filename_SENS);
+  // tofile_sens.precision(5);
+  // tofile_sens.setf(ios::scientific,ios::floatfield);
+  //
+  // string filename_SPEX="SPEXOut.dat";
+  // ofstream tofile_spex(filename_SPEX);
+  // tofile_spex.precision(5);
+  // tofile_spex.setf(ios::scientific,ios::floatfield);
 
   /////////////////////////////////////////////////////////////////////////////
   // seeding the random number generator
@@ -305,11 +291,9 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     if(t>=t_save)
     {
-      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction);
+      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1);
       saveLandscape(tofile_land,t,landscape);
       saveComponents(tofile_clus,t,landscape,naturalComponents);
-      saveLandMetrics(tofile_metr,t,naturalComponents,ecosystemServices);
-      saveRipley(tofile_ripl,t,n,landscape,1);
 
       t_save+=dtsave;
     }
@@ -390,11 +374,9 @@ int main(int argc, const char * argv[]){
 
   // saving files so ifdtsave was largest than execution time one gets the final
   // values for every output we look at
-  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction);
+  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1);
   saveLandscape(tofile_land,t,landscape);
   saveComponents(tofile_clus,t,landscape,naturalComponents);
-  saveLandMetrics(tofile_metr,t,naturalComponents,ecosystemServices);
-  saveRipley(tofile_ripl,t,n,landscape,1);
 
   // saving output for sensitivity analysis
   // saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);

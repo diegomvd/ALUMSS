@@ -1,17 +1,9 @@
 // output files
 val agreOut = Val[File]
-val metrOut = Val[File]
-val riplOut = Val[File]
-val repsAgre = Val[File]
-
-// variable to handle filenames in scala tasks
-val oStringAgre = Val[String]
-val oStringMetr = Val[String]
-val oStringRipl = Val[String]
+val f = Val[File]
 
 // random number generator seed
 val mySeed = Val[Int]
-val emptyCheck = Val[Boolean]
 
 // model parameters
 val ksi = Val[Double]
@@ -54,63 +46,31 @@ val ripleyA0 = Val[Double]
 val ripleyA1 = Val[Double]
 
 
-// Define a File variable
-val f = Val[File]
-
-// Task to create the file and write something in it
-val producer = ScalaTask("""
-    val f = newFile()
-    f.content = "t P N D A0 A1 Y nFrag meanSize maxSize stdSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
-    // f.content = ""
-""") set (
-    outputs += f
-)
-
-// Task to take file f, name it "love.txt", and display it
-val task = SystemExecTask("cat love.txt") set (
-    inputFiles += (f, "love.txt")
-)
-
-// Define the workflow: chain the two tasks
-// producer -- task
-
-
 ///////////////////////////////////////////////////////////////////////////////
-// model plugin with all the parameter inputs as well as the output files
-
-val produceReplicationFiles = ScalaTask("""
-    val repsAgre = newFile()
-    repsAgre.content = "t P N D A0 A1 Y nFrag meanSize maxSize stdSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1"
-""") set (
-    outputs += repsAgre
-)
+// 1- model plugin with all the parameter inputs as well as the output files
+///////////////////////////////////////////////////////////////////////////////
 
 val scriptTask =
   SystemExecTask(
     command = Seq(
       "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${e12} ${c12} ${d} ${dtsave} ${mySeed} "),
     )set(
-      inputs += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
-      // inputFiles+ = (repsAgre, "REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}.csv"),
-      inputFiles += (f, "REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}.csv"),
-      outputs += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
+      (inputs, outputs) += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
       outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
-      outputFiles += ("DATA_METR_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",metrOut),
-      outputFiles += ("DATA_RIPL_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",riplOut),
-      // outputFiles += ("REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}.csv", f),
       // resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
       resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
-      T:=10.0,
+      // default parameter and initialization values
+      T:=5000.0,
       dtp:=0.1,
-      L:=10,
+      L:=40,
       a0:=0.1,
       d0:=0.0,
       ksi:=1.0,
       sar:=0.25,
       a:=0.0,
       w:=0.0,
-      Tag:=0.1,
+      Tag:=0.01,
       Tab:=50.0,
       Tr:=5.0,
       Td:=50.0,
@@ -121,175 +81,175 @@ val scriptTask =
       mySeed:=1111
     )
 
-// val csvHook = CSVHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}.csv", values = Seq(""), header = "t P N D A0 A1 Y nFrag meanSize maxSize stdSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1", arrayOnRow=false)
+///////////////////////////////////////////////////////////////////////////////
+// 2 - hooks
+///////////////////////////////////////////////////////////////////////////////
+
+// hook to append the output across time of a simulation a replications file.
+// the name of the replication file contains the information on the parameter
+// values
 val hookAppend = AppendToFileHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}.csv", "${agreOut.content}")
-val hookAppend1 = AppendToFileHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}.csv", "t P N D A0 A1 Y nFrag meanSize maxSize stdSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n") when "emptyCheck == true"
 
-// val emptyFile = ScalaTask("""
-//     val emptyCheck =  scala.io.Source.fromFile(f).getLines.toList.isEmpty
-//     """
-// ) set (
-//   (inputs, outputs) += (f,agreOut, metrOut, riplOut, T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
-//   outputs += emptyCheck
-// )
+// hook to create and initialize the header of a replications file. file must
+// be previously created in a scalaTask
+// the name of the replication file contains the information on the parameter
+// values
+val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}.csv")
 
-// val moleTask3 = MoleTask(scriptTask -- emptyFile)
+///////////////////////////////////////////////////////////////////////////////
+// 3- ScalaTasks to read outputs or setup a replication experiment
+///////////////////////////////////////////////////////////////////////////////
 
-val setParameterValues=ScalaTask("""
+// initialize replication experiment and the replications data file
+val setParameterValues1=ScalaTask("""
+    // here set the parameter values for the replication experiment
     val ksi = 1.0
     val sar = 0.25
     val a = 0.0
     val w = 0.0
     val Tag = 0.01
-    val Tab = 10.0
+    val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
     val e12 = 0.3
     val c12 = 0.3
     val d = 1.0
-    val T = 10.0
+    val T = 5000.0
     val dtp = 0.1
-    val L = 10.0
+    val L = 40.0
     val d0 = 0.0
     val a0 = 0.1
     val dtsave = 1.0
-
+    // create a file with a header consisting of all the model macro outputs
     val f = newFile()
     f.content = "t P N D A0 A1 Y nFrag meanSize maxSize stdSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
 """) set(
     outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave)
 )
 
-val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_c12_${c12}_d_${d}_dtsave_${dtsave}.csv")
+// use this function when looking at the final state as an output
+val readOutputFinalState =
+    ScalaTask("""
+    // read file as an array of lines and get last line
+    val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
+    // split the string and store it in an array
+    val valuesAgre = lastLineAgre.split(" ")
 
+    // store each value of the values array independently to pass to outputs of
+    // scala function
+    val t = valuesAgre(0).toDouble
+
+    val P = valuesAgre(1).toDouble
+    val N = valuesAgre(2).toDouble
+    val D = valuesAgre(3).toDouble
+    val A0 = valuesAgre(4).toDouble
+    val A1 = valuesAgre(5).toDouble
+    val Y = valuesAgre(6).toDouble
+
+    val nFrag = valuesAgre(7).toDouble
+    val maxSize = valuesAgre(8).toDouble
+    val meanSize = valuesAgre(9).toDouble
+    val stdSize = valuesAgre(10).toDouble
+    val meanES = valuesAgre(11).toDouble
+    val stdES = valuesAgre(12).toDouble
+
+    val ripleyN = valuesAgre(13).toDouble
+    val ripleyD = valuesAgre(14).toDouble
+    val ripleyA0 = valuesAgre(15).toDouble
+    val ripleyA1 = valuesAgre(16).toDouble
+    """
+
+    )set(
+        inputs+=agreOut,
+        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
+        outputs+=(t,P,N,D,A0,A1,Y,nFrag,maxSize,meanSize,stdSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
+    )
+
+///////////////////////////////////////////////////////////////////////////////
+// 4 - compund moleTasks
+///////////////////////////////////////////////////////////////////////////////
+
+val finalStateTask= MoleTask(scriptTask -- readOutputFinalState)
+
+///////////////////////////////////////////////////////////////////////////////
+// 6- environment setup
+///////////////////////////////////////////////////////////////////////////////
+
+val env = LocalEnvironment(30)
+
+//////////////////////////////////////////////////////////////////////////////
+// 5- replication setups
+//////////////////////////////////////////////////////////////////////////////
+
+// use this function to get all the data across time stored
 val replicationsFullTime =
   Replication(
-    evaluation = scriptTask hook hookAppend,
+    evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 3
+    sample = 30
   )
 
+// use this function to get only the final state
+val replicationsFinal =
+  Replication(
+    evaluation = finalStateTask,
+    seed = mySeed,
+    sample = 5,
+    aggregation = Seq (
+      T aggregate average,
+      dtp aggregate average,
+      L aggregate average,
+      a0 aggregate average,
+      d0 aggregate average,
+      ksi aggregate average,
+      sar aggregate average,
+      a aggregate average,
+      w aggregate average,
+      Tag aggregate average,
+      Tab aggregate average,
+      Tr aggregate average,
+      Td aggregate average,
+      e12 aggregate average,
+      c12 aggregate average,
+      d aggregate average,
+      dtsave aggregate average,
+      mySeed aggregate average,
+      t aggregate average,
+      P aggregate average,
+      N aggregate average,
+      D aggregate average,
+      A0 aggregate average,
+      A1 aggregate average,
+      Y aggregate average,
+      nFrag aggregate average,
+      maxSize aggregate average,
+      meanSize aggregate average,
+      stdSize aggregate average,
+      meanES aggregate average,
+      stdES aggregate average,
+      ripleyN aggregate average,
+      ripleyD aggregate average,
+      ripleyA0 aggregate average,
+      ripleyA1 aggregate average)
+  )
 
-// replicationsFullTime
+///////////////////////////////////////////////////////////////////////////////
+// 7- experiments and workflows
+///////////////////////////////////////////////////////////////////////////////
+
 (setParameterValues hook copyHook) -- replicationsFullTime
-// produceReplicationFiles -- scriptTask
 
-// ///////////////////////////////////////////////////////////////////////////////
-// // file reading function for ouptut management
-//
-// // use this function when looking at the final state as an output
-// val readOutputFinalState =
-//     ScalaTask("""
-//     // read file as an array of lines and get last line
-//     val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
-//     val lastLineMetr = scala.io.Source.fromFile(metrOut).getLines.toList.last.mkString
-//     val lastLineRipl = scala.io.Source.fromFile(riplOut).getLines.toList.last.mkString
-//     // split the string and store it in an array
-//     val valuesAgre = lastLineAgre.split(" ")
-//     val valuesMetr = lastLineMetr.split(" ")
-//     val valuesRipl = lastLineRipl.split(" ")
-//
-//     // store each value of the values array independently to pass to outputs of
-//     // scala function
-//     val t = valuesAgre(0).toDouble
-//
-//     val P = valuesAgre(1).toDouble
-//     val N = valuesAgre(2).toDouble
-//     val D = valuesAgre(3).toDouble
-//     val A0 = valuesAgre(4).toDouble
-//     val A1 = valuesAgre(5).toDouble
-//     val Y = valuesAgre(6).toDouble
-//
-//     val nFrag = valuesMetr(1).toDouble
-//     val maxSize = valuesMetr(2).toDouble
-//     val meanSize = valuesMetr(3).toDouble
-//     val stdSize = valuesMetr(4).toDouble
-//     val meanES = valuesMetr(5).toDouble
-//     val stdES = valuesMetr(6).toDouble
-//
-//     val ripleyN = valuesRipl(1).toDouble
-//     val ripleyD = valuesRipl(2).toDouble
-//     val ripleyA0 = valuesRipl(3).toDouble
-//     val ripleyA1 = valuesRipl(4).toDouble
-//     """
-//
-//     )set(
-//         inputs+=(agreOut,metrOut,riplOut),
-//         (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave,mySeed),
-//         outputs+=(t,P,N,D,A0,A1,Y,nFrag,maxSize,meanSize,stdSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
-//     )
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// // creating a compound task merging the model plugin with the read output functions
-//
-// val moleTask= MoleTask(scriptTask -- readOutputFinalState)
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// // creating hook where the results of n replications are put across time
-//
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// // setting the environment in which tasks are going to be eecuted
-//
-// val env = LocalEnvironment(30)
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// // setting replications with different aggregation
-//
-// val moleTask2 = MoleTask(scriptTask hook hookAppend)
+samplingTimes = DirectSampling(
+  evaluation = replicationsFinal on env,
+  sampling =
+    (Tag in LogRange(0.01,1.0,20) ) x
+    (Tab in LogRange(0.1,200.0,20) ) x
+    (Tr in LogRange(1.0,100.0,20) )x
+    (Td in LogRange(1.0,100.0,20) ),
+) hook (workDirectory / "experimentTabTagTrTd.csv")
 
-//
-// // produceReplicationFiles -- replicationsFullTime
-//
-// val replicationsFinal =
-//   Replication(
-//     evaluation = moleTask,
-//     seed = mySeed,
-//     sample = 10,
-//     aggregation = Seq (
-//       T aggregate average,
-//       dtp aggregate average,
-//       L aggregate average,
-//       a0 aggregate average,
-//       d0 aggregate average,
-//       ksi aggregate average,
-//       sar aggregate average,
-//       a aggregate average,
-//       w aggregate average,
-//       Tag aggregate average,
-//       Tab aggregate average,
-//       Tr aggregate average,
-//       Td aggregate average,
-//       e12 aggregate average,
-//       c12 aggregate average,
-//       d aggregate average,
-//       dtsave aggregate average,
-//       mySeed aggregate average,
-//       t aggregate average,
-//       P aggregate average,
-//       N aggregate average,
-//       D aggregate average,
-//       A0 aggregate average,
-//       A1 aggregate average,
-//       Y aggregate average,
-//       nFrag aggregate average,
-//       maxSize aggregate average,
-//       meanSize aggregate average,
-//       stdSize aggregate average,
-//       meanES aggregate average,
-//       stdES aggregate average,
-//       ripleyN aggregate average,
-//       ripleyD aggregate average,
-//       ripleyA0 aggregate average,
-//       ripleyA1 aggregate average)
-//   )
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// // setting up the experiments
-//
-// val sampling = DirectSampling(
-//   evaluation = replicationsFinal on env,
-//   sampling =
-//     (Tag in LogRange(0.01,10.0,20) ) x
-//     (Tab in LogRange(0.1,100.0,20) ),
-// ) hook (workDirectory / "experimentTabTag3.csv")
+///////////////////////////////////////////////////////////////////////////////
+// 8 - workflow
+//////////////////////////////////////////////////////////////////////////////
+
+/// think about how to do 1-D sampling full time

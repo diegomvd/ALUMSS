@@ -898,81 +898,9 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 //       - saveAggregated
 //       - saveLandscape
 //       - saveComponents
-//       - saveLandMetrics
-//       - saveRipley
 ////////////////////////////////////////////////////////////////////////////////
 
-void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction)
-{
-  unsigned long ix;
-  double n=0,d=0,a0=0,a1=0;
-
-  for(ix=0;ix<landscape.size();ix++){
-    if (landscape[ix]==0){
-      n+=1;
-    }
-    else if (landscape[ix]==1){
-      d+=1;
-    }
-    else if (landscape[ix]==2){
-      a0+=1;
-    }
-    else{
-      a1+=1;
-    }
-  }
-  n/=landscape.size();d/=landscape.size();a0/=landscape.size();a1/=landscape.size();
-
-  double totalAgriculturalProduction=0;
-  for(ix=0;ix<agriculturalProduction.size();ix++){
-    totalAgriculturalProduction+=agriculturalProduction[ix];
-  }
-
-  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalAgriculturalProduction <<"\n";
-  return;
-}
-
-void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape)
-{
-  unsigned long ix;
-
-  file << t;
-  for (ix=0;ix<landscape.size();ix++){
-    file << " " << landscape[ix];
-  }
-  file << "\n";
-
-  return;
-}
-
-void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents)
-{
-  unsigned long ix,jx;
-  unsigned int test;
-  vector<int>::const_iterator it;
-
-  file << t;
-  for (ix=0;ix<landscape.size();ix++){
-    test=0;
-    for (jx=0;jx<naturalComponents.size();jx++){
-      it = find( naturalComponents[jx].begin(), naturalComponents[jx].end(), ix );
-      if (it!=naturalComponents[jx].end()){
-        file << " " << jx;
-        test = 1;
-        break;
-      }
-    }
-    if (test==0){
-      file << " " << nan("");
-    }
-  }
-
-  file << "\n";
-
-  return;
-}
-
-void saveLandMetrics(ofstream &file, double t, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices)
+void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int nn, double ripleyDistance)
 {
   unsigned long numComponents = naturalComponents.size();
   unsigned long ix;
@@ -1005,19 +933,40 @@ void saveLandMetrics(ofstream &file, double t, const vector<vector<int>> &natura
   squaredMeanES/=ecosystemServices.size();
   stdES=sqrt(squaredMeanES-meanES*meanES);
 
-  file << t << " " << numComponents << " " << maxSize << " " << meanSize << " " << stdSize << " " << meanES << " " << stdES << "\n";
+  /*
+  Second part is a copy of saveAggregated
+  */
+  double n=0,d=0,a0=0,a1=0;
 
-  return;
+  for(ix=0;ix<landscape.size();ix++){
+    if (landscape[ix]==0){
+      n+=1;
+    }
+    else if (landscape[ix]==1){
+      d+=1;
+    }
+    else if (landscape[ix]==2){
+      a0+=1;
+    }
+    else{
+      a1+=1;
+    }
+  }
+  n/=landscape.size();d/=landscape.size();a0/=landscape.size();a1/=landscape.size();
 
-}
+  double totalY;
+  for(ix=0; ix<agriculturalProduction.size(); ++ix){
+    totalY+=agriculturalProduction[ix];
+  }
 
-void saveRipley(ofstream &file, double t, unsigned int n, const vector<unsigned int> &landscape, double ripleyDistance)
-{
-  unsigned long ix;
+
+  /*
+  Last part is a copy of saveRipley
+  */
 
   // first get the neighbour matrix given a ripley distance, here it is 1
   vector<vector<unsigned int>> neighbourMatrix;
-  getNeighbourMatrix(neighbourMatrix,n,ripleyDistance);
+  getNeighbourMatrix(neighbourMatrix,nn,ripleyDistance);
 
   // then determine the number of points for each type of land
   double nN=0,nD=0,nA0=0,nA1=0;
@@ -1064,10 +1013,49 @@ void saveRipley(ofstream &file, double t, unsigned int n, const vector<unsigned 
   if (nA0>0){ripleyA0 *= landscape.size()/(nA0*nA0);}
   if (nA1>0){ripleyA1 *= landscape.size()/(nA1*nA1);}
 
-  file << t << " " << ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << "\n";
+  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalY << " " << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << "\n";
 
   return;
+}
 
+void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape)
+{
+  unsigned long ix;
+
+  file << t;
+  for (ix=0;ix<landscape.size();ix++){
+    file << " " << landscape[ix];
+  }
+  file << "\n";
+
+  return;
+}
+
+void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents)
+{
+  unsigned long ix,jx;
+  unsigned int test;
+  vector<int>::const_iterator it;
+
+  file << t;
+  for (ix=0;ix<landscape.size();ix++){
+    test=0;
+    for (jx=0;jx<naturalComponents.size();jx++){
+      it = find( naturalComponents[jx].begin(), naturalComponents[jx].end(), ix );
+      if (it!=naturalComponents[jx].end()){
+        file << " " << jx;
+        test = 1;
+        break;
+      }
+    }
+    if (test==0){
+      file << " " << nan("");
+    }
+  }
+
+  file << "\n";
+
+  return;
 }
 
 void saveSensitivityOutput(ofstream &file, unsigned int nn, double ripleyDistance, const vector<double> &population, const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices)
