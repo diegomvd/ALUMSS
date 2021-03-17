@@ -122,7 +122,7 @@ val setParameterValues=ScalaTask("""
     val dtsave = 1.0
     // create a file with a header consisting of all the model macro outputs
     val f = newFile()
-    f.content = "t P N D A0 A1 Y nFrag meanSize maxSize stdSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
+    f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
 """) set(
     outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d,dtsave)
 )
