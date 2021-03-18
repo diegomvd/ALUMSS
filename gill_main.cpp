@@ -61,7 +61,7 @@ int main(int argc, const char * argv[]){
   double Tag; // action probability per unit time per unit of consumption deficit
   double Tab; // mean fertility loss time
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
-  double e12,c12; // half saturation values for es provision and consumption deficit
+  double e12; // half saturation values for es provision and consumption deficit
   double d; // distance at which eecosystem services are delivered
 
   double dtsave; // timestep for saving data
@@ -103,16 +103,15 @@ int main(int argc, const char * argv[]){
 
         // half values for saturation functions
         e12 = strtod(argv[14], &pEnd);
-        c12 = strtod(argv[15], &pEnd);
 
         // distance for es provision
-        d = strtod(argv[16], &pEnd);
+        d = strtod(argv[15], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[17], &pEnd);
+        dtsave = strtod(argv[16], &pEnd);
 
         // save seed
-        seed = atoi(argv[18]);
+        seed = atoi(argv[17]);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -159,10 +158,9 @@ int main(int argc, const char * argv[]){
     filename += "_Tr_"+allArgs[12];
     filename += "_Td_"+allArgs[13];
     filename += "_e12_"+allArgs[14];
-    filename += "_c12_"+allArgs[15];
-    filename += "_d_"+allArgs[16];
-    filename += "_dtsave_"+allArgs[17];
-    filename += "_expid_"+allArgs[18];
+    filename += "_d_"+allArgs[15];
+    filename += "_dtsave_"+allArgs[16];
+    filename += "_expid_"+allArgs[17];
     filename+=".dat";
   }
 
@@ -302,7 +300,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab,e12,c12);
+    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab,e12);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
