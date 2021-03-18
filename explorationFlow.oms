@@ -105,13 +105,13 @@ val setParameterValues=ScalaTask("""
     val sar = 0.25
     val a = 0.0
     val w = 0.0
-    val Tag = 0.05
+    val Tag = 0.08
     val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
     val e12 = 0.3
     val d = 1.0
-    val T = 2500.0
+    val T = 4000.0
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
@@ -123,6 +123,33 @@ val setParameterValues=ScalaTask("""
 """) set(
     outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave)
 )
+
+// initialize replication experiment and the replications data file
+val setParameterValues1=ScalaTask("""
+    // here set the parameter values for the replication experiment
+    val ksi = 1.0
+    val sar = 0.25
+    val a = 0.0
+    val w = 0.0
+    val Tag = 0.1
+    val Tab = 50.0
+    val Tr = 5.0
+    val Td = 50.0
+    val e12 = 1.0
+    val d = 1.0
+    val T = 4000.0
+    val dtp = 0.1
+    val L = 40.0
+    val d0 = 0.0
+    val a0 = 0.2
+    val dtsave = 1.0
+    // create a file with a header consisting of all the model macro outputs
+    val f = newFile()
+    f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
+""") set(
+    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave)
+)
+
 
 // use this function when looking at the final state as an output
 val readOutputFinalState =
@@ -172,7 +199,7 @@ val finalStateTask= MoleTask(scriptTask -- readOutputFinalState)
 // 6- environment setup
 ///////////////////////////////////////////////////////////////////////////////
 
-val env = LocalEnvironment(30)
+val env = LocalEnvironment(40)
 
 //////////////////////////////////////////////////////////////////////////////
 // 5- replication setups
@@ -183,7 +210,7 @@ val replicationsFullTime =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 30
+    sample = 20
   )
 
 // use this function to get only the final state
@@ -234,6 +261,7 @@ val replicationsFinal =
 ///////////////////////////////////////////////////////////////////////////////
 
 (setParameterValues hook copyHook) -- replicationsFullTime
+(setParameterValues1 hook copyHook) -- replicationsFullTime
 
 // DirectSampling(
 //   evaluation = replicationsFinal on env,
