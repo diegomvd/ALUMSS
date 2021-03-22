@@ -54,14 +54,13 @@ int main(int argc, const char * argv[]){
   double a0; //number of agricultural patches at beggining
   double d0; // number of degraded patches at beggining
 
-  double ksi; // productivity per unit input or unit ecosystem service
+  double ksi; // relative producitivty between intense and optimum organic
   double sar; // ecosystem service saturation exponent
   double a; // intensification probability
   double w; // agricultural clustering parameter
   double Tag; // action probability per unit time per unit of consumption deficit
   double Tab; // mean fertility loss time
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
-  double e12; // half saturation values for es provision and consumption deficit
   double d; // distance at which eecosystem services are delivered
 
   double dtsave; // timestep for saving data
@@ -100,9 +99,6 @@ int main(int argc, const char * argv[]){
         // spontaneous evolution parameters
         Tr = strtod(argv[12], &pEnd);
         Td = strtod(argv[13], &pEnd);
-
-        // half values for saturation functions
-        e12 = strtod(argv[14], &pEnd);
 
         // distance for es provision
         d = strtod(argv[15], &pEnd);
@@ -157,10 +153,9 @@ int main(int argc, const char * argv[]){
     filename += "_Tab_"+allArgs[11];
     filename += "_Tr_"+allArgs[12];
     filename += "_Td_"+allArgs[13];
-    filename += "_e12_"+allArgs[14];
-    filename += "_d_"+allArgs[15];
-    filename += "_dtsave_"+allArgs[16];
-    filename += "_expid_"+allArgs[17];
+    filename += "_d_"+allArgs[14];
+    filename += "_dtsave_"+allArgs[15];
+    filename += "_expid_"+allArgs[16];
     filename+=".dat";
   }
 
@@ -268,7 +263,7 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,e12,sar,d,w,r);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,sar,d,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -282,7 +277,7 @@ int main(int argc, const char * argv[]){
   while(t<SimTime){
 
     // updating agricultural production
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, e12);
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
 
     ///////////////////////////////////////////////////////////////////////////
     // SAVING DATA
@@ -300,7 +295,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab,e12);
+    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT

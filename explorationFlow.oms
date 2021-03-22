@@ -14,7 +14,6 @@ val Tag = Val[Double]
 val Tab = Val[Double]
 val Tr = Val[Double]
 val Td = Val[Double]
-val e12 = Val[Double]
 val d = Val[Double]
 
 // simulation parameters
@@ -52,10 +51,10 @@ val ripleyA1 = Val[Double]
 val scriptTask =
   SystemExecTask(
     command = Seq(
-      "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${e12} ${d} ${dtsave} ${mySeed} "),
+      "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} ${dtsave} ${mySeed} "),
     )set(
-      (inputs, outputs) += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave,mySeed),
-      outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
+      (inputs, outputs) += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
+      outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
       resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
@@ -73,7 +72,6 @@ val scriptTask =
       Tab:=50.0,
       Tr:=5.0,
       Td:=50.0,
-      e12:=0.3,
       d:=1.0,
       dtsave:=1.0,
       mySeed:=1111
@@ -86,13 +84,13 @@ val scriptTask =
 // hook to append the output across time of a simulation a replications file.
 // the name of the replication file contains the information on the parameter
 // values
-val hookAppend = AppendToFileHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_d_${d}_dtsave_${dtsave}.csv", "${agreOut.content}")
+val hookAppend = AppendToFileHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}.csv", "${agreOut.content}")
 
 // hook to create and initialize the header of a replications file. file must
 // be previously created in a scalaTask
 // the name of the replication file contains the information on the parameter
 // values
-val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_e12_${e12}_d_${d}_dtsave_${dtsave}.csv")
+val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}.csv")
 
 ///////////////////////////////////////////////////////////////////////////////
 // 3- ScalaTasks to read outputs or setup a replication experiment
@@ -109,7 +107,6 @@ val setParameterValues=ScalaTask("""
     val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
-    val e12 = 0.3
     val d = 1.0
     val T = 4000.0
     val dtp = 0.1
@@ -121,7 +118,7 @@ val setParameterValues=ScalaTask("""
     val f = newFile()
     f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
 """) set(
-    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave)
+    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave)
 )
 
 // initialize replication experiment and the replications data file
@@ -135,7 +132,6 @@ val setParameterValues1=ScalaTask("""
     val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
-    val e12 = 1.0
     val d = 1.0
     val T = 4000.0
     val dtp = 0.1
@@ -147,7 +143,7 @@ val setParameterValues1=ScalaTask("""
     val f = newFile()
     f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
 """) set(
-    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave)
+    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave)
 )
 
 
@@ -185,7 +181,7 @@ val readOutputFinalState =
 
     )set(
         inputs+=agreOut,
-        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave,mySeed),
+        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
         outputs+=(t,P,N,D,A0,A1,Y,nFrag,maxSize,meanSize,stdSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
     )
 
@@ -233,7 +229,6 @@ val replicationsFinal =
       Tab aggregate average,
       Tr aggregate average,
       Td aggregate average,
-      e12 aggregate average,
       d aggregate average,
       dtsave aggregate average,
       mySeed aggregate average,

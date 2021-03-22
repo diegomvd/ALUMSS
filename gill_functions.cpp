@@ -404,7 +404,7 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
         // check if neighbour belongs to cluster jx
         if (find( naturalComponents[jx].begin(),naturalComponents[jx].end(),neighboursState[ix]) != naturalComponents[jx].end()){
           area=(double)naturalComponents[jx].size()/landscape.size();
-          ecosystemServiceProvision+=(double) pow(area,sar);
+          ecosystemServiceProvision+=(double) pow(area,sar)/4; // the division by four is to normalize by ESmax value which takes into account that the max value we can get
           break;
         }
       }
@@ -428,12 +428,7 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
 //       - getPropensityVector
 ////////////////////////////////////////////////////////////////////////////////
 
-double saturationFunction(double var, double halfVal)
-{
-  return var / ( var + halfVal );
-}
-
-void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double ksi, double esHalfSupply)
+void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double ksi)
 {
   /*
   returns the total agricultural production for a given "landscape" and
@@ -446,10 +441,10 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
-      agriculturalProduction.push_back( ksi * saturationFunction(ecosystemServices[ix],esHalfSupply) ) ;
+      agriculturalProduction.push_back( min(ecosystemServices[ix],1.0) ) ;
     }
     else if(landscape[ix]==3){ //intense
-      agriculturalProduction.push_back( 1 );
+      agriculturalProduction.push_back( ksi );
     }
     else{
       agriculturalProduction.push_back(0);
@@ -466,10 +461,10 @@ double getConsumptionDeficit(const vector<double> &agriculturalProduction, const
   for(ix=0;ix<agriculturalProduction.size();ix++){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  return population[0] - totalAgriculturalProduction;
+  return (population[0] - totalAgriculturalProduction)/population[0];
 }
 
-void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tr, double Td, double esHalfSupply)
+void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tr, double Td)
 {
   /*
   fills the recoveryPropensity vector and the degradationPropensity vector
@@ -482,12 +477,12 @@ void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double>
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if (landscape[ix] == 1) { // if patch ix is degraded
-      recoveryPropensity.push_back( 1/Tr * saturationFunction(ecosystemServices[ix],esHalfSupply) );
+      recoveryPropensity.push_back( 1/Tr * min(ecosystemServices[ix],1.0) );
       degradationPropensity.push_back(0);
     }
     else if(landscape[ix] == 0){
       recoveryPropensity.push_back( 0 );
-      degradationPropensity.push_back( 1/Td*( 1 - saturationFunction(ecosystemServices[ix],esHalfSupply) ) );
+      degradationPropensity.push_back( 1/Td*( 1 - min(ecosystemServices[ix],1.0) ) );
     }
     else{
       recoveryPropensity.push_back( 0 );
@@ -587,7 +582,7 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
   return;
 }
 
-void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tab, double esHalfSupply)
+void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tab)
 {
   /*
   fills the abandonment_propensity vector.
@@ -598,10 +593,10 @@ void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<d
   for (ix=0; ix<landscape.size(); ++ix){
     if (landscape[ix]==2){ // organic patch
       degradedAbandonPropensity.push_back(0);
-      naturalAbandonPropensity.push_back( 1/Tab * ( 1-saturationFunction(ecosystemServices[ix], esHalfSupply) ) );
+      naturalAbandonPropensity.push_back( 1/Tab * ( 1-min(ecosystemServices[ix], 1.0) ) );
     }
     else if(landscape[ix]==3){ //intensive patch
-      degradedAbandonPropensity.push_back( 1/Tab * ( 1-saturationFunction(ecosystemServices[ix], esHalfSupply) ) );
+      degradedAbandonPropensity.push_back( 1/Tab * ( 1-min(ecosystemServices[ix], 1.0) ) );
       naturalAbandonPropensity.push_back( 0 );
     }
     else{ // non cropped patches
@@ -613,7 +608,7 @@ void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<d
   return;
 }
 
-void getPropensityVector(vector<double> &propensityVector, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, const vector<double> &agriculturalProduction, const vector<double> &population, double Tr, double Td, double w, double a, double Tag, double Tab, double esHalfSupply)
+void getPropensityVector(vector<double> &propensityVector, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, const vector<double> &agriculturalProduction, const vector<double> &population, double Tr, double Td, double w, double a, double Tag, double Tab)
 {
   /*
   calls all the functions to calculate the propensity of each event and merges
@@ -627,9 +622,9 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
   vector<double> naturalAbandonPropensity;
   vector<double> degradedAbandonPropensity;
 
-  getSpontaneousPropensity(recoveryPropensity,degradationPropensity,landscape,ecosystemServices,Tr,Td,esHalfSupply);
+  getSpontaneousPropensity(recoveryPropensity,degradationPropensity,landscape,ecosystemServices,Tr,Td);
   getAgroPropensity(expansionPropensity,intensePropensity,neighbourMatrix,landscape,agriculturalProduction,population,w,a,Tag);
-  getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,landscape,ecosystemServices,Tab,esHalfSupply);
+  getAbandonmentPropensity(naturalAbandonPropensity,degradedAbandonPropensity,landscape,ecosystemServices,Tab);
 
   // clearing the previous propensity vector to refill it
   propensityVector.clear();
@@ -829,7 +824,7 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double esHalfSupply, double sar, double d, double w, gsl_rng  *r)
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double sar, double d, double w, gsl_rng  *r)
 {
 
   getNeighbourMatrix(neighbourMatrix,n,1);
@@ -837,7 +832,7 @@ void initializeSES( vector<unsigned int> &landscape, vector<double> &population,
   initializeLandscape(landscape,neighbourMatrix,n,a0,d0,a,w,r);
   getNaturalConnectedComponents(naturalComponents,landscape);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,sar);
-  getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, esHalfSupply);
+  getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
   initializePopulation(population,agriculturalProduction);
 
   return;
