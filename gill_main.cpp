@@ -101,13 +101,13 @@ int main(int argc, const char * argv[]){
         Td = strtod(argv[13], &pEnd);
 
         // distance for es provision
-        d = strtod(argv[15], &pEnd);
+        d = strtod(argv[14], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[16], &pEnd);
+        dtsave = strtod(argv[15], &pEnd);
 
         // save seed
-        seed = atoi(argv[17]);
+        seed = atoi(argv[16]);
   }
 
   /////////////////////////////////////////////////////////////////////////////
