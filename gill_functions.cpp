@@ -446,10 +446,10 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
-      agriculturalProduction.push_back( ksi * saturationFunction(ecosystemServices[ix],esHalfSupply) ) ;
+      agriculturalProduction.push_back( saturationFunction(ecosystemServices[ix],esHalfSupply) ) ;
     }
     else if(landscape[ix]==3){ //intense
-      agriculturalProduction.push_back( 1 );
+      agriculturalProduction.push_back( ksi );
     }
     else{
       agriculturalProduction.push_back(0);
@@ -466,7 +466,7 @@ double getConsumptionDeficit(const vector<double> &agriculturalProduction, const
   for(ix=0;ix<agriculturalProduction.size();ix++){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  return population[0] - totalAgriculturalProduction;
+  return (population[0] - totalAgriculturalProduction)/population[0];
 }
 
 void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tr, double Td, double esHalfSupply)
@@ -829,14 +829,12 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double esHalfSupply, double sar, double d, double w, gsl_rng  *r)
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double esHalfSupply, double sar, double w, gsl_rng  *r)
 {
 
-  getNeighbourMatrix(neighbourMatrix,n,1);
-  getNeighbourMatrix(neighbourMatrixES,n,d);
   initializeLandscape(landscape,neighbourMatrix,n,a0,d0,a,w,r);
   getNaturalConnectedComponents(naturalComponents,landscape);
-  getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,sar);
+  getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);
   getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, esHalfSupply);
   initializePopulation(population,agriculturalProduction);
 
