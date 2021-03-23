@@ -260,6 +260,7 @@ val replicationsFinal =
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 // (setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
@@ -271,6 +272,19 @@ DirectSampling(
     (Tr in LogRange(1.0,100.0,10) )x
     (Td in LogRange(1.0,100.0,10) ),
 ) hook (workDirectory / "experimentTabTagTrTd-2.csv")
+=======
+(setParameterValues hook copyHook) -- replicationsFullTime
+//(setParameterValues1 hook copyHook) -- replicationsFullTime
+
+// DirectSampling(
+//   evaluation = replicationsFinal on env,
+//   sampling =
+//     (Tag in LogRange(0.01,1.0,20) ) x
+//     (Tab in LogRange(0.1,200.0,20) ) x
+//     (Tr in LogRange(1.0,100.0,20) )x
+//     (Td in LogRange(1.0,100.0,20) ),
+// ) hook (workDirectory / "experimentTabTagTrTd.csv")
+>>>>>>> general-model3
 
 ///////////////////////////////////////////////////////////////////////////////
 // 8 - workflow
