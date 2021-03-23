@@ -59,10 +59,10 @@ val scriptTask =
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
       // default parameter and initialization values
-      T:=5000.0,
+      T:=4000.0,
       dtp:=0.1,
       L:=40,
-      a0:=0.1,
+      a0:=0.2,
       d0:=0.0,
       ksi:=1.0,
       sar:=0.25,
@@ -216,56 +216,53 @@ val replicationsFinal =
     seed = mySeed,
     sample = 5,
     aggregation = Seq (
-      T aggregate average,
-      dtp aggregate average,
-      L aggregate average,
-      a0 aggregate average,
-      d0 aggregate average,
-      ksi aggregate average,
-      sar aggregate average,
-      a aggregate average,
-      w aggregate average,
+      // T aggregate average,
+      // dtp aggregate average,
+      // L aggregate average,
+      // a0 aggregate average,
+      // d0 aggregate average,
+      // ksi aggregate average,
+      // sar aggregate average,
+      // a aggregate average,
+      // w aggregate average,
       Tag aggregate average,
-      Tab aggregate average,
-      Tr aggregate average,
-      Td aggregate average,
-      d aggregate average,
-      dtsave aggregate average,
-      mySeed aggregate average,
+      // Tab aggregate average,
+      // Tr aggregate average,
+      // Td aggregate average,
+      // d aggregate average,
+      // dtsave aggregate average,
+      // mySeed aggregate average,
       t aggregate average,
       P aggregate average,
       N aggregate average,
       D aggregate average,
       A0 aggregate average,
-      A1 aggregate average,
-      Y aggregate average,
-      nFrag aggregate average,
-      maxSize aggregate average,
-      meanSize aggregate average,
-      stdSize aggregate average,
-      meanES aggregate average,
-      stdES aggregate average,
-      ripleyN aggregate average,
-      ripleyD aggregate average,
-      ripleyA0 aggregate average,
-      ripleyA1 aggregate average)
+      A1 aggregate average
+      // Y aggregate average,
+      // nFrag aggregate average,
+      // maxSize aggregate average,
+      // meanSize aggregate average,
+      // stdSize aggregate average,
+      // meanES aggregate average,
+      // stdES aggregate average,
+      // ripleyN aggregate average,
+      // ripleyD aggregate average,
+      // ripleyA0 aggregate average,
+      // ripleyA1 aggregate average)
   )
 
 ///////////////////////////////////////////////////////////////////////////////
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
-(setParameterValues hook copyHook) -- replicationsFullTime
+// (setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
-// DirectSampling(
-//   evaluation = replicationsFinal on env,
-//   sampling =
-//     (Tag in LogRange(0.01,1.0,20) ) x
-//     (Tab in LogRange(0.1,200.0,20) ) x
-//     (Tr in LogRange(1.0,100.0,20) )x
-//     (Td in LogRange(1.0,100.0,20) ),
-// ) hook (workDirectory / "experimentTabTagTrTd.csv")
+DirectSampling(
+  evaluation = replicationsFinal on env,
+  sampling =
+    (Tag in LogRange(0.001,0.1,40) ) x
+) hook (workDirectory / "experimentTabTag230321.csv")
 
 ///////////////////////////////////////////////////////////////////////////////
 // 8 - workflow
