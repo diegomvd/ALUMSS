@@ -271,7 +271,7 @@ int main(int argc, const char * argv[]){
     getNeighbourMatrix(neighbourMatrix,n,1);
     getNeighbourMatrix(neighbourMatrixES,n,d);
     e12 = e12*neighbourMatrixES[0].size();
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,e12,sar,d,w,r);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,e12,sar,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
