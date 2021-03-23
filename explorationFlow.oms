@@ -262,7 +262,7 @@ val replicationsFinal =
 DirectSampling(
   evaluation = replicationsFinal on env,
   sampling =
-    (Tag in (0.0001 to 0.001 by 0.0001) ),
+    (Tag in (0.0005 to 0.001 by 0.0001) ),
 ) hook (workDirectory / "experimentTabTag230321-3.csv")
 
 ///////////////////////////////////////////////////////////////////////////////
