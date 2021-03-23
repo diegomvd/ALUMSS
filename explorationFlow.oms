@@ -214,7 +214,7 @@ val replicationsFinal =
   Replication(
     evaluation = finalStateTask,
     seed = mySeed,
-    sample = 2,
+    sample = 1,
     aggregation = Seq (
       // T aggregate average,
       // dtp aggregate average,
@@ -262,8 +262,8 @@ val replicationsFinal =
 DirectSampling(
   evaluation = replicationsFinal on env,
   sampling =
-    (Tag in (0.002 to 0.01 by 0.001) ),
-) hook (workDirectory / "experimentTabTag230321-2.csv")
+    (Tag in (0.0001 to 0.001 by 0.0001) ),
+) hook (workDirectory / "experimentTabTag230321-3.csv")
 
 ///////////////////////////////////////////////////////////////////////////////
 // 8 - workflow
