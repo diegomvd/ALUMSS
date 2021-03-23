@@ -248,7 +248,8 @@ val replicationsFinal =
       // ripleyN aggregate average,
       // ripleyD aggregate average,
       // ripleyA0 aggregate average,
-      // ripleyA1 aggregate average)
+      // ripleyA1 aggregate average
+      )
   )
 
 ///////////////////////////////////////////////////////////////////////////////
