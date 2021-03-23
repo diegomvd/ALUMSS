@@ -73,7 +73,7 @@ val scriptTask =
       Tab:=50.0,
       Tr:=5.0,
       Td:=50.0,
-      e12:=0.3,
+      e12:=0.05,
       d:=1.0,
       dtsave:=1.0,
       mySeed:=1111
@@ -260,7 +260,7 @@ val replicationsFinal =
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
+// <<<<<<< HEAD
 // (setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
@@ -272,8 +272,10 @@ DirectSampling(
     (Tr in LogRange(1.0,100.0,10) )x
     (Td in LogRange(1.0,100.0,10) ),
 ) hook (workDirectory / "experimentTabTagTrTd-2.csv")
-=======
-(setParameterValues hook copyHook) -- replicationsFullTime
+
+
+// =======
+// (setParameterValues hook copyHook) -- replicationsFullTime
 //(setParameterValues1 hook copyHook) -- replicationsFullTime
 
 // DirectSampling(
@@ -284,7 +286,7 @@ DirectSampling(
 //     (Tr in LogRange(1.0,100.0,20) )x
 //     (Td in LogRange(1.0,100.0,20) ),
 // ) hook (workDirectory / "experimentTabTagTrTd.csv")
->>>>>>> general-model3
+// >>>>>>> general-model3
 
 ///////////////////////////////////////////////////////////////////////////////
 // 8 - workflow
