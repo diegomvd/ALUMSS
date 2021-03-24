@@ -267,7 +267,7 @@ val replicationsFinal =
 DirectSampling(
   evaluation = replicationsFinal on env,
   sampling =
-    (Tag in LogRange(0.1,1.0,10) ) x
+    (Tag in LogRange(0.5,1.0,10) ) x
     (Tab in LogRange(1.0,100.0,10) ) x
     (Tr in LogRange(1.0,100.0,10) )x
     (Td in LogRange(1.0,100.0,10) ),
