@@ -63,7 +63,7 @@ val scriptTask =
       T:=5000.0,
       dtp:=0.1,
       L:=40,
-      a0:=0.1,
+      a0:=0.2,
       d0:=0.0,
       ksi:=1.0,
       sar:=0.25,
@@ -71,9 +71,9 @@ val scriptTask =
       w:=0.0,
       Tag:=0.01,
       Tab:=50.0,
-      Tr:=5.0,
-      Td:=50.0,
-      e12:=0.05,
+      Tr:=10.0,
+      Td:=20.0,
+      e12:=0.5,
       d:=1.0,
       dtsave:=1.0,
       mySeed:=1111
@@ -218,7 +218,7 @@ val replicationsFinal =
   Replication(
     evaluation = finalStateTask,
     seed = mySeed,
-    sample = 5,
+    sample = 1,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -260,33 +260,19 @@ val replicationsFinal =
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
-// <<<<<<< HEAD
-(setParameterValues hook copyHook) -- replicationsFullTime
+// (setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
-// DirectSampling(
-//   evaluation = replicationsFinal on env,
-//   sampling =
-//     (Tag in LogRange(0.7,1.0,10) ) x
-//     (Tab in LogRange(2.0,10.0,10) ) x
-//     (Tr in LogRange(2.0,10.0,10) )x
-//     (Td in LogRange(2.0,10.0,10) ),
-// ) hook (workDirectory / "experimentTabTagTrTd-2.csv")
+DirectSampling(
+  evaluation = replicationsFinal on env,
+  sampling =
+    (Tag in LogRange(0.001,1.0,10) ) x
+    (Tab in LogRange(1.0,50.0,10) ),
+    // (Tr in LogRange(1.0,50.0,10) )x
+    // (Td in LogRange(1.0,50.0,10) ),
+) hook (workDirectory / "experimentTabTagTrTd-2.csv")
 
 
-// =======
-// (setParameterValues hook copyHook) -- replicationsFullTime
-//(setParameterValues1 hook copyHook) -- replicationsFullTime
-
-// DirectSampling(
-//   evaluation = replicationsFinal on env,
-//   sampling =
-//     (Tag in LogRange(0.01,1.0,20) ) x
-//     (Tab in LogRange(0.1,200.0,20) ) x
-//     (Tr in LogRange(1.0,100.0,20) )x
-//     (Td in LogRange(1.0,100.0,20) ),
-// ) hook (workDirectory / "experimentTabTagTrTd.csv")
-// >>>>>>> general-model3
 
 ///////////////////////////////////////////////////////////////////////////////
 // 8 - workflow
