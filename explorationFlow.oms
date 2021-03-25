@@ -266,8 +266,8 @@ val replicationsFinal =
 DirectSampling(
   evaluation = replicationsFinal on env,
   sampling =
-    (Tag in LogRange(0.001,1.0,10) ) x
-    (Tab in LogRange(1.0,10.0,10) ),
+    (Tag in LogRange(0.001,0.01,6) ) x
+    (Tab in LogRange(1.0,2.0,6) ),
     // (Tr in LogRange(1.0,50.0,10) )x
     // (Td in LogRange(1.0,50.0,10) ),
 ) hook (workDirectory / "experimentTabTagTrTd-2.csv")
