@@ -161,32 +161,34 @@ val readOutputFinalState =
 
     // store each value of the values array independently to pass to outputs of
     // scala function
-    val t = valuesAgre(0).toDouble
+    // val t = valuesAgre(0).toDouble
 
-    val P = valuesAgre(1).toDouble
+    // val P = valuesAgre(1).toDouble
     val N = valuesAgre(2).toDouble
-    val D = valuesAgre(3).toDouble
-    val A0 = valuesAgre(4).toDouble
-    val A1 = valuesAgre(5).toDouble
-    val Y = valuesAgre(6).toDouble
-
-    val nFrag = valuesAgre(7).toDouble
-    val maxSize = valuesAgre(8).toDouble
-    val meanSize = valuesAgre(9).toDouble
-    val stdSize = valuesAgre(10).toDouble
-    val meanES = valuesAgre(11).toDouble
-    val stdES = valuesAgre(12).toDouble
-
-    val ripleyN = valuesAgre(13).toDouble
-    val ripleyD = valuesAgre(14).toDouble
-    val ripleyA0 = valuesAgre(15).toDouble
-    val ripleyA1 = valuesAgre(16).toDouble
+    // val D = valuesAgre(3).toDouble
+    // val A0 = valuesAgre(4).toDouble
+    // val A1 = valuesAgre(5).toDouble
+    // val Y = valuesAgre(6).toDouble
+    //
+    // val nFrag = valuesAgre(7).toDouble
+    // val maxSize = valuesAgre(8).toDouble
+    // val meanSize = valuesAgre(9).toDouble
+    // val stdSize = valuesAgre(10).toDouble
+    // val meanES = valuesAgre(11).toDouble
+    // val stdES = valuesAgre(12).toDouble
+    //
+    // val ripleyN = valuesAgre(13).toDouble
+    // val ripleyD = valuesAgre(14).toDouble
+    // val ripleyA0 = valuesAgre(15).toDouble
+    // val ripleyA1 = valuesAgre(16).toDouble
     """
 
     )set(
         inputs+=agreOut,
         (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave,mySeed),
-        outputs+=(t,P,N,D,A0,A1,Y,nFrag,maxSize,meanSize,stdSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
+        // outputs+=(t,P,N,D,A0,A1,Y,nFrag,maxSize,meanSize,stdSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
+        outputs+=(N)
+
     )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,23 +239,23 @@ val replicationsFinal =
       d aggregate average,
       dtsave aggregate average,
       mySeed aggregate average,
-      t aggregate average,
-      P aggregate average,
-      N aggregate average,
-      D aggregate average,
-      A0 aggregate average,
-      A1 aggregate average,
-      Y aggregate average,
-      nFrag aggregate average,
-      maxSize aggregate average,
-      meanSize aggregate average,
-      stdSize aggregate average,
-      meanES aggregate average,
-      stdES aggregate average,
-      ripleyN aggregate average,
-      ripleyD aggregate average,
-      ripleyA0 aggregate average,
-      ripleyA1 aggregate average)
+      // t aggregate average,
+      // P aggregate average,
+      N aggregate average)
+      // D aggregate average,
+      // A0 aggregate average,
+      // A1 aggregate average,
+      // Y aggregate average,
+      // nFrag aggregate average,
+      // maxSize aggregate average,
+      // meanSize aggregate average,
+      // stdSize aggregate average,
+      // meanES aggregate average,
+      // stdES aggregate average,
+      // ripleyN aggregate average,
+      // ripleyD aggregate average,
+      // ripleyA0 aggregate average,
+      // ripleyA1 aggregate average)
   )
 
 ///////////////////////////////////////////////////////////////////////////////
