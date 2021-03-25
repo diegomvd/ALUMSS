@@ -60,7 +60,7 @@ val scriptTask =
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
       // default parameter and initialization values
-      T:=5000.0,
+      T:=1.0,
       dtp:=0.1,
       L:=40,
       a0:=0.2,
