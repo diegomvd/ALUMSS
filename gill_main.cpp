@@ -278,8 +278,8 @@ int main(int argc, const char * argv[]){
   // BEGIN OF SIMULATION
   /////////////////////////////////////////////////////////////////////////////
 
-  // for the nopop experiment
-  unsigned int nat_cells;
+  unsigned int nat_cells=0;
+  unsigned int deg_cells=0;
 
   // entering the time loop
   while(t<SimTime){
@@ -319,8 +319,11 @@ int main(int argc, const char * argv[]){
       if(landscape[i]==0){
         nat_cells+=1;
       }
+      else if(landscape[i]==1){
+        deg_cells+=1;
+      }
     }
-    if(nat_cells==landscape.size()){
+    if(nat_cells==landscape.size() || deg_cells==landscape.size()){
       break;
     }
 
@@ -331,7 +334,7 @@ int main(int argc, const char * argv[]){
       }
       else{
         population[0]=0;
-        break;
+        // break;
       }
 
       // update the time as well as the timestep for ODE solving
