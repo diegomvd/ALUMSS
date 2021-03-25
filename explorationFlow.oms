@@ -240,7 +240,7 @@ val replicationsFinal =
       mySeed aggregate average,
       t aggregate average,
       P aggregate average,
-      N aggregate average
+      N aggregate average)
       // D aggregate average,
       // A0 aggregate average,
       // A1 aggregate average,
