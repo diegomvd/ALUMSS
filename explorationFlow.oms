@@ -137,7 +137,7 @@ val setParameterValues1=ScalaTask("""
     val Td = 10.0
     val e12 = 0.05
     val d = 1.0
-    val T = 4000.0
+    val T = 1.0
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
@@ -266,7 +266,7 @@ val replicationsFinal =
 DirectSampling(
   evaluation = replicationsFinal on env,
   sampling =
-    (Tag in LogRange(0.001,0.005,2) ) x
+    (Tag in LogRange(0.001,0.0012,2) ) x
     (Tab in LogRange(1.0,1.1,2) ),
     // (Tr in LogRange(1.0,50.0,10) )x
     // (Td in LogRange(1.0,50.0,10) ),
