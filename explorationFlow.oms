@@ -109,7 +109,7 @@ val setParameterValues=ScalaTask("""
     val Tab = 1.0
     val Tr = 10.0
     val Td = 20.0
-    val e12 = 0.5
+    val e12 = 0.25
     val d = 1.0
     val T = 1000.0
     val dtp = 0.1
@@ -261,17 +261,17 @@ val replicationsFinal =
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
-// (setParameterValues hook copyHook) -- replicationsFullTime
+(setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
-DirectSampling(
-  evaluation = replicationsFinal on env,
-  sampling =
-    (Tag in LogRange(0.001,0.0012,2) ) x
-    (Tab in LogRange(1.0,1.1,2) ),
-    // (Tr in LogRange(1.0,50.0,10) )x
-    // (Td in LogRange(1.0,50.0,10) ),
-) hook (workDirectory / "experimentTabTagTrTd-3.csv")
+// DirectSampling(
+//   evaluation = replicationsFinal on env,
+//   sampling =
+//     (Tag in LogRange(0.001,0.0012,2) ) x
+//     (Tab in LogRange(1.0,1.1,2) ),
+//     // (Tr in LogRange(1.0,50.0,10) )x
+//     // (Td in LogRange(1.0,50.0,10) ),
+// ) hook (workDirectory / "experimentTabTagTrTd-3.csv")
 
 
 
