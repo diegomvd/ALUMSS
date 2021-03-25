@@ -916,8 +916,10 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
       maxSize=componentSize;
     }
   }
-  meanSize/=numComponents;
-  squaredMeanSize/=numComponents;
+  if (numComponents>0){
+    meanSize/=numComponents;
+    squaredMeanSize/=numComponents;
+  }  
   stdSize=sqrt(squaredMeanSize-meanSize*meanSize);
 
   double meanES=0;
