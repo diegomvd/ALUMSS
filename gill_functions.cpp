@@ -462,11 +462,19 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
 double getConsumptionDeficit(const vector<double> &agriculturalProduction, const vector<double> &population)
 {
   double totalAgriculturalProduction=0;
+  double consumptionDeficit;
   unsigned long ix;
   for(ix=0;ix<agriculturalProduction.size();ix++){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  return (population[0] - totalAgriculturalProduction)/population[0];
+  if(population[0]>0){
+    consumptionDeficit=(population[0] - totalAgriculturalProduction)/population[0];
+  }
+  else{
+    consumptionDeficit=0;
+  }
+
+  return consumptionDeficit;
 }
 
 void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tr, double Td, double esHalfSupply)
@@ -740,7 +748,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
 
     // recalculating probintense
     // first initialize the vector to do the cumulative sum
-    if (jx>0){
+    if (landscape[0]==2){
       intenseNeighbours.clear();
       getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,0, 3);
       probIntense[0]=pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) ;
@@ -749,7 +757,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
       probIntense[0]=0;
     }
     for(lx=1;lx<probIntense.size();lx++){
-      if (jx!=lx){
+      if (landscape[lx]==2){
         intenseNeighbours.clear();
         getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,lx, 3);
         probIntense[lx]=probIntense[lx-1]+pow( max(0.1 , (double)intenseNeighbours.size() ) , w ) ;
@@ -769,6 +777,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   else{
     probDegradation.push_back(0);
   }
+
   // fill probDegradation for first pick
   for (ix=1; ix<landscape.size(); ix++){
     if (landscape[ix]==0){
@@ -778,20 +787,21 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
       probDegradation.push_back(probDegradation.back());
     }
   }
+
   // now start filling the landscape with the degraded cells
   vector<unsigned int> degradedNeighbours;
-  for (ix=0; ix<nd0; ix++){
+  for (ix=0; ix<nd0; ++ix){
     // select to be degraded cell
     jx=0;
     cumprob = gsl_rng_uniform(r)*probDegradation.back();
-    while (cumprob > probConversion[jx]){
+    while (cumprob > probDegradation[jx]){
       jx++;
     }
     landscape[jx]=1;
 
     // update the probDegradation
     // first initialize the vector
-    if (jx>0){
+    if (landscape[0]==0){
       degradedNeighbours.clear();
       getNeighboursState(degradedNeighbours,neighbourMatrix,landscape,0, 1);
       probDegradation[0]=pow( max(0.1 , (double)degradedNeighbours.size() ) , w ) ;
@@ -800,12 +810,13 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
       probDegradation[0]=0;
     }
     for(lx=1;lx<probDegradation.size();lx++){
-      if (jx!=lx){
+      if (landscape[lx]==0){
         degradedNeighbours.clear();
         getNeighboursState(degradedNeighbours,neighbourMatrix,landscape,lx, 1);
         probDegradation[lx]=probDegradation[lx-1]+pow( max(0.1 , (double)degradedNeighbours.size() ) , w ) ;
       }
       else{
+        // cout << "lx = " << lx << "\n";
         probDegradation[lx]=probDegradation[lx-1];
       }
     }

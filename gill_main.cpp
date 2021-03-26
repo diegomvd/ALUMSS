@@ -278,8 +278,20 @@ int main(int argc, const char * argv[]){
   // BEGIN OF SIMULATION
   /////////////////////////////////////////////////////////////////////////////
 
-  unsigned int nat_cells=0;
-  unsigned int deg_cells=0;
+  unsigned int nat_cells;
+  unsigned int deg_cells;
+
+  // calculate the number of natural cells for the nopop experiment
+  nat_cells = 0;
+  deg_cells = 0;
+  for(i=0;i<landscape.size();i++){
+    if(landscape[i]==0){
+      nat_cells+=1;
+    }
+    else if(landscape[i]==1){
+      deg_cells+=1;
+    }
+  }
 
   // entering the time loop
   while(t<SimTime){
@@ -315,6 +327,8 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
 
     // calculate the number of natural cells for the nopop experiment
+    nat_cells = 0;
+    deg_cells = 0;
     for(i=0;i<landscape.size();i++){
       if(landscape[i]==0){
         nat_cells+=1;
