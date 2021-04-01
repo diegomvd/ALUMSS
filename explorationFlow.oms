@@ -114,7 +114,7 @@ val setParameterValues=ScalaTask("""
     val T = 100.0
     val dtp = 0.1
     val L = 40.0
-    val d0 = 0.6
+    val d0 = 0.4
     val a0 = 0.0
     val dtsave = 1.0
     // create a file with a header consisting of all the model macro outputs
