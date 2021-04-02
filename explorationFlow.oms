@@ -60,7 +60,7 @@ val scriptTask =
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
       // default parameter and initialization values
-      T:=2500.0,
+      T:=50.0,
       dtp:=0.1,
       L:=40,
       a0:=0.0,
@@ -201,7 +201,7 @@ val finalStateTask= MoleTask(scriptTask -- readOutputFinalState)
 // 6- environment setup
 ///////////////////////////////////////////////////////////////////////////////
 
-val env = LocalEnvironment(20)
+val env = LocalEnvironment(30)
 
 //////////////////////////////////////////////////////////////////////////////
 // 5- replication setups
@@ -220,7 +220,7 @@ val replicationsFinal =
   Replication(
     evaluation = finalStateTask,
     seed = mySeed,
-    sample = 10,
+    sample = 2,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -262,16 +262,15 @@ val replicationsFinal =
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
-(setParameterValues hook copyHook) -- replicationsFullTime
+// (setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
-// DirectSampling(
-//   evaluation = replicationsFinal on env,
-//   sampling =
-//     (Tr in LogRange(0.01,1.0,10) ) x
-//     (d0 in (0.0 to 1.0 by 0.1) )x
-//     (e12 in (0.0 to 1.0 by 0.1) ),
-// ) hook (workDirectory / "experimentTrD0E12-nopop.csv")
+DirectSampling(
+  evaluation = replicationsFinal on env,
+  sampling =
+    (Tr in LogRange(0.1,10.0,10) ) x
+    (e12 in (0.1 to 1.0 by 0.1) ),
+) hook (workDirectory / "experimentTrD0E12-nopop-020421.csv")
 
 
 
