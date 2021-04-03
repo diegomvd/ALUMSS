@@ -163,7 +163,7 @@ val readOutputFinalState =
     // scala function
     // val t = valuesAgre(0).toDouble
 
-    // val P = valuesAgre(1).toDouble
+    val P = valuesAgre(1).toDouble
     val N = valuesAgre(2).toDouble
     // val D = valuesAgre(3).toDouble
     // val A0 = valuesAgre(4).toDouble
@@ -187,7 +187,7 @@ val readOutputFinalState =
         inputs+=agreOut,
         (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave,mySeed),
         // outputs+=(t,P,N,D,A0,A1,Y,nFrag,maxSize,meanSize,stdSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
-        outputs+=(N)
+        outputs+=(P,N)
 
     )
 
