@@ -468,7 +468,7 @@ double getConsumptionDeficit(const vector<double> &agriculturalProduction, const
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
   if(population[0]>0){
-    consumptionDeficit=(population[0] - totalAgriculturalProduction)/population[0];
+    consumptionDeficit=population[0] - totalAgriculturalProduction;
   }
   else{
     consumptionDeficit=0;
