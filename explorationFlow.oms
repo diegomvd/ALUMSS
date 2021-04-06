@@ -105,17 +105,17 @@ val setParameterValues=ScalaTask("""
     val sar = 0.25
     val a = 0.0
     val w = 0.0
-    val Tag = 0.2
-    val Tab = 3.0
+    val Tag = 0.1
+    val Tab = 5.0
     val Tr = 2.0
     val Td = 10.0
     val e12 = 0.5
     val d = 1.0
-    val T = 100.0
+    val T = 1000.0
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
-    val a0 = 0.3
+    val a0 = 0.2
     val dtsave = 1.0
     // create a file with a header consisting of all the model macro outputs
     val f = newFile()
@@ -262,7 +262,7 @@ val replicationsFinal =
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
-// (setParameterValues hook copyHook) -- replicationsFullTime
+(setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
 // DirectSampling(
@@ -272,12 +272,12 @@ val replicationsFinal =
 //     (e12 in (0.1 to 1.0 by 0.1) ),
 // ) hook (workDirectory / "experimentTrD0E12-nopop-020421.csv")
 
-DirectSampling(
-  evaluation = replicationsFinal on env,
-  sampling =
-    (Tag in LogRange(0.01,1.0,20) ) x
-    (Tab in (1.0 to 10.0 by 1.0) ),
-) hook (workDirectory / "experimentTabTag-060421.csv")
+// DirectSampling(
+//   evaluation = replicationsFinal on env,
+//   sampling =
+//     (Tag in LogRange(0.01,1.0,20) ) x
+//     (Tab in (1.0 to 10.0 by 1.0) ),
+// ) hook (workDirectory / "experimentTabTag-060421.csv")
 
 
 
