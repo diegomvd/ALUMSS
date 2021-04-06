@@ -63,7 +63,7 @@ val scriptTask =
       T:=1000.0,
       dtp:=0.1,
       L:=40,
-      a0:=0.3,
+      a0:=0.2,
       d0:=0.0,
       ksi:=1.0,
       sar:=0.25,
@@ -71,7 +71,7 @@ val scriptTask =
       w:=0.0,
       Tag:=0.01,
       Tab:=50.0,
-      Tr:=5.0,
+      Tr:=2.0,
       Td:=10.0,
       e12:=0.5,
       d:=1.0,
@@ -262,7 +262,7 @@ val replicationsFinal =
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
-(setParameterValues hook copyHook) -- replicationsFullTime
+// (setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
 // DirectSampling(
@@ -272,12 +272,12 @@ val replicationsFinal =
 //     (e12 in (0.1 to 1.0 by 0.1) ),
 // ) hook (workDirectory / "experimentTrD0E12-nopop-020421.csv")
 
-// DirectSampling(
-//   evaluation = replicationsFinal on env,
-//   sampling =
-//     (Tag in LogRange(0.01,1.0,20) ) x
-//     (Tab in (1.0 to 10.0 by 1.0) ),
-// ) hook (workDirectory / "experimentTabTag-050421.csv")
+DirectSampling(
+  evaluation = replicationsFinal on env,
+  sampling =
+    (Tag in LogRange(0.01,1.0,20) ) x
+    (Tab in (1.0 to 10.0 by 1.0) ),
+) hook (workDirectory / "experimentTabTag-060421.csv")
 
 
 
