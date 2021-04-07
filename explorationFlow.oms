@@ -53,26 +53,26 @@ val scriptTask =
     command = Seq(
       "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} ${dtsave} ${mySeed} "),
     )set(
-      (inputs, outputs) += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave,mySeed),
+      (inputs, outputs) += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
       outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
       resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
       // default parameter and initialization values
-      T:=1000.0,
+      T:=2500.0,
       dtp:=0.1,
       L:=40,
-      a0:=0.0,
+      a0:=0.25,
       d0:=0.0,
       ksi:=1.0,
       sar:=0.25,
       a:=0.0,
       w:=0.0,
-      Tag:=0.01,
-      Tab:=50.0,
-      Tr:=2.0,
-      Td:=1.0,
-      d:=1.0,
+      Tag:=0.05,
+      Tab:=20.0,
+      Tr:=10.0,
+      Td:=50.0,
+      d:=0.025,
       dtsave:=1.0,
       mySeed:=1111
     )
@@ -118,7 +118,7 @@ val setParameterValues=ScalaTask("""
     val f = newFile()
     f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
 """) set(
-    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave)
+    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave)
 )
 
 // initialize replication experiment and the replications data file
@@ -143,7 +143,7 @@ val setParameterValues1=ScalaTask("""
     val f = newFile()
     f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES ripleyN ripleyD ripleyA0 ripleyA1\n"
 """) set(
-    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,e12,d,dtsave)
+    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave)
 )
 
 
@@ -260,20 +260,20 @@ val replicationsFinal =
 // (setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
-DirectSampling(
-  evaluation = replicationsFinal on env,
-  sampling =
-    (Tr in LogRange(0.01,2.0,10) ) x
-    (d0 in (0.1 to 1.0 by 0.1) ) x
-    (d in LogRange(0.01,10.0,4)),
-) hook (workDirectory / "experimentTrD0-nopop-070421.csv")
-
 // DirectSampling(
 //   evaluation = replicationsFinal on env,
 //   sampling =
-//     (Tag in LogRange(0.01,1.0,20) ) x
-//     (Tab in (1.0 to 10.0 by 1.0) ),
-// ) hook (workDirectory / "experimentTabTag-060421.csv")
+//     (Tr in LogRange(0.01,2.0,10) ) x
+//     (d0 in (0.1 to 1.0 by 0.1) ) x
+//     (d in LogRange(0.01,10.0,4)),
+// ) hook (workDirectory / "experimentTrD0-nopop-070421.csv")
+
+DirectSampling(
+  evaluation = replicationsFinal on env,
+  sampling =
+    (Tag in LogRange(0.05,1.0,10) ) x
+    (Tab in (1.0 to 20.0 by 2.0) ),
+) hook (workDirectory / "experimentTabTag-070421.csv")
 
 
 
