@@ -61,8 +61,7 @@ int main(int argc, const char * argv[]){
   double Tag; // action probability per unit time per unit of consumption deficit
   double Tab; // mean fertility loss time
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
-  double e12; // half saturation values for es provision and consumption deficit
-  double d; // distance at which eecosystem services are delivered
+  double d; // decay distance for ecosystem service delivery
 
   double dtsave; // timestep for saving data
 
@@ -101,17 +100,14 @@ int main(int argc, const char * argv[]){
         Tr = strtod(argv[12], &pEnd);
         Td = strtod(argv[13], &pEnd);
 
-        // half values for saturation functions
-        e12 = strtod(argv[14], &pEnd);
-
         // distance for es provision
-        d = strtod(argv[15], &pEnd);
+        d = strtod(argv[14], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[16], &pEnd);
+        dtsave = strtod(argv[15], &pEnd);
 
         // save seed
-        seed = atoi(argv[17]);
+        seed = atoi(argv[16]);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -157,10 +153,9 @@ int main(int argc, const char * argv[]){
     filename += "_Tab_"+allArgs[11];
     filename += "_Tr_"+allArgs[12];
     filename += "_Td_"+allArgs[13];
-    filename += "_e12_"+allArgs[14];
-    filename += "_d_"+allArgs[15];
-    filename += "_dtsave_"+allArgs[16];
-    filename += "_expid_"+allArgs[17];
+    filename += "_d_"+allArgs[14];
+    filename += "_dtsave_"+allArgs[15];
+    filename += "_expid_"+allArgs[16];
     filename+=".dat";
   }
 
@@ -227,7 +222,7 @@ int main(int argc, const char * argv[]){
   // vector containing the landscape state
   vector<unsigned int> landscape;
   // vector containing neighbours
-  vector<vector<unsigned int>> neighbourMatrixES;
+  vector<vector<double>> esDecayMatrix;
   vector<vector<unsigned int>> neighbourMatrix;
   // vector containing the production of each patch
   vector<double> agriculturalProduction;
@@ -269,9 +264,8 @@ int main(int argc, const char * argv[]){
   }
   else{ // WITH ARGV PARAMETERS
     getNeighbourMatrix(neighbourMatrix,n,1);
-    getNeighbourMatrix(neighbourMatrixES,n,d);
-    e12 = e12*neighbourMatrixES[0].size();
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,e12,sar,w,r);
+    getESDecayMatrix(esDecayMatrix,n,d);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,esDecayMatrix,n,a0,d0,a,ksi,sar,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -297,7 +291,7 @@ int main(int argc, const char * argv[]){
   while(t<SimTime){
 
     // updating agricultural production
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, e12);
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
 
     ///////////////////////////////////////////////////////////////////////////
     // SAVING DATA
@@ -315,7 +309,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab,e12);
+    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
@@ -368,11 +362,11 @@ int main(int argc, const char * argv[]){
       patch=i%(n*n); // remainder from euclidian division
 
       // transform the landscape according to reaction and patch
-      if (reaction==0){landscape[patch]=0;count_events[0]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //recovery
-      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1; updateNCCremoving(naturalComponents,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //degradation
-      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1;updateNCCremoving(naturalComponents,landscape,patch);getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);} //expansion
+      if (reaction==0){landscape[patch]=0;count_events[0]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,esDecayMatrix,landscape,sar); } //recovery
+      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1; updateNCCremoving(naturalComponents,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,esDecayMatrix,landscape,sar); } //degradation
+      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1;updateNCCremoving(naturalComponents,landscape,patch);getEcosystemServiceProvision(ecosystemServices,naturalComponents,esDecayMatrix,landscape,sar);} //expansion
       else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
-      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //abandonment to natural
+      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,esDecayMatrix,landscape,sar); } //abandonment to natural
       else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
       else {cout << "Error: gill_main.cpp reaction " << reaction << " does not exist.\n";}
 
