@@ -76,12 +76,14 @@ void getESDecayMatrix(vector<vector<double>> &esDecayMatrix, unsigned int n, dou
 
   int ix,jx,xi,yi,xj,yj;
   unsigned int dx,dy;
-  double euclidianDist, normalizedDecay;
+  double euclidianDist, decay, normalization;
+  vector<double>::iterator it;
+  vector<vector<double>>::iterator it2;
 
   for (ix=0; ix<esDecayMatrix.size(); ++ix){
     xi = ix%n;
     yi = (int)ix/n;
-    for (jx=0; jx<=ix; ++jx){
+    for (jx=0; jx<ix; ++jx){
       xj = jx%n;
       yj = (int)jx/n;
       dx=abs(xi-xj);
@@ -94,10 +96,24 @@ void getESDecayMatrix(vector<vector<double>> &esDecayMatrix, unsigned int n, dou
         dy=n-dy;
       }
       euclidianDist = sqrt(dx*dx + dy*dy);
-      normalizedDecay = exp(- euclidianDist/d/n )/d/n;
-      esDecayMatrix[ix].push_back(normalizedDecay);
+      decay = exp(- euclidianDist/d/n );
+      esDecayMatrix[ix].push_back(decay);
+    }
+    esDecayMatrix[ix].push_back(0.0); // put 0 in diagonals to not account a cellcontribution to itself.
+  }
+
+  // to normalize go to last cell decay info and sum all the decays (could be done with any cell but the last one is simpler as all decays are in the same line)
+  normalization = 0;
+  for(it=esDecayMatrix.back().begin();it!=esDecayMatrix.back().end();++it){
+    normalization += *it;
+  }
+  // now divide everything by the normalization factor
+  for(it2=esDecayMatrix.begin();it2!=esDecayMatrix.end();++it2){
+    for(it=it2->begin();it!=it2->end();++it){
+      *it/=normalization;
     }
   }
+
   return;
 }
 
