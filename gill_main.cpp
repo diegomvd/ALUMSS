@@ -48,7 +48,7 @@ int main(int argc, const char * argv[]){
   ///////////////////////////////////////////////////////////////////////////////
 
   int n;  // lenght of the sides of the square landscape: number of cells=n*n
-  int SimTime; // total simulation time
+  double SimTime; // total simulation time
   double dtp; // timestep for population dynamics
 
   double a0; //number of agricultural patches at beggining
@@ -61,8 +61,7 @@ int main(int argc, const char * argv[]){
   double Tag; // action probability per unit time per unit of consumption deficit
   double Tab; // mean fertility loss time
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
-  double e12; // half saturation values for es provision and consumption deficit
-  double d; // distance at which eecosystem services are delivered
+  double d; // decay distance for ecosystem service delivery
 
   double dtsave; // timestep for saving data
 
@@ -77,7 +76,7 @@ int main(int argc, const char * argv[]){
         char * pEnd;
 
         // time and space specifications for the simulation
-        SimTime = atoi(argv[1]);
+        SimTime = strtod(argv[1], &pEnd);
         dtp = strtod(argv[2], &pEnd);
         n = atoi(argv[3]);
 
@@ -101,17 +100,14 @@ int main(int argc, const char * argv[]){
         Tr = strtod(argv[12], &pEnd);
         Td = strtod(argv[13], &pEnd);
 
-        // half values for saturation functions
-        e12 = strtod(argv[14], &pEnd);
-
         // distance for es provision
-        d = strtod(argv[15], &pEnd);
+        d = strtod(argv[14], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[16], &pEnd);
+        dtsave = strtod(argv[15], &pEnd);
 
         // save seed
-        seed = atoi(argv[17]);
+        seed = atoi(argv[16]);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -157,10 +153,9 @@ int main(int argc, const char * argv[]){
     filename += "_Tab_"+allArgs[11];
     filename += "_Tr_"+allArgs[12];
     filename += "_Td_"+allArgs[13];
-    filename += "_e12_"+allArgs[14];
-    filename += "_d_"+allArgs[15];
-    filename += "_dtsave_"+allArgs[16];
-    filename += "_expid_"+allArgs[17];
+    filename += "_d_"+allArgs[14];
+    filename += "_dtsave_"+allArgs[15];
+    filename += "_expid_"+allArgs[16];
     filename+=".dat";
   }
 
@@ -270,8 +265,7 @@ int main(int argc, const char * argv[]){
   else{ // WITH ARGV PARAMETERS
     getNeighbourMatrix(neighbourMatrix,n,1);
     getNeighbourMatrix(neighbourMatrixES,n,d);
-    e12 = e12*neighbourMatrixES[0].size();
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,e12,sar,w,r);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,sar,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -297,7 +291,7 @@ int main(int argc, const char * argv[]){
   while(t<SimTime){
 
     // updating agricultural production
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, e12);
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
 
     ///////////////////////////////////////////////////////////////////////////
     // SAVING DATA
@@ -315,7 +309,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab,e12);
+    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT

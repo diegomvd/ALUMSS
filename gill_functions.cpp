@@ -383,6 +383,9 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
   double ecosystemServiceProvision;
   vector<unsigned int> neighboursState;
   unsigned long i,ix,jx;
+  unsigned int nNeighbours;
+
+  nNeighbours = neighbourMatrix[0].size();
 
   ecosystemServices.clear();
 
@@ -404,7 +407,7 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
         // check if neighbour belongs to cluster jx
         if (find( naturalComponents[jx].begin(),naturalComponents[jx].end(),neighboursState[ix]) != naturalComponents[jx].end()){
           area=(double)naturalComponents[jx].size()/landscape.size();
-          ecosystemServiceProvision+=(double) pow(area,sar);
+          ecosystemServiceProvision+=(double) pow(area,sar)/nNeighbours;
           break;
         }
       }
