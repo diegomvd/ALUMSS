@@ -107,8 +107,8 @@ val setParameterValues=ScalaTask("""
     val Tab = 10.0
     val Tr = 10.0
     val Td = 50.0
-    val d = 0.05
-    val T = 100.0
+    val d = 1.0
+    val T = 2000.0
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
@@ -208,7 +208,7 @@ val replicationsFullTime =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 6
+    sample = 10
   )
 
 // use this function to get only the final state
