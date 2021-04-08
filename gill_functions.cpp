@@ -530,7 +530,6 @@ void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double>
   */
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
-    cout << "ES= " << ecosystemServices[ix] << "\n";
     if (landscape[ix] == 1) { // if patch ix is degraded
       recoveryPropensity.push_back( 1/Tr * ecosystemServices[ix] );
       degradationPropensity.push_back(0);
