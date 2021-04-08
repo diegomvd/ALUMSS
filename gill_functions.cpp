@@ -446,7 +446,7 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
           // check if neighbour belongs to cluster jx
           if (find( naturalComponents[jx].begin(),naturalComponents[jx].end(),ix) != naturalComponents[jx].end()){
             area=(double)naturalComponents[jx].size()/landscape.size();
-            if(i<=ix){
+            if(i>=ix){
               decay = esDecayMatrix[i][ix];
             }
             else{
@@ -530,6 +530,7 @@ void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double>
   */
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
+    cout << "ES= " << ecosystemServices[ix] << "\n";
     if (landscape[ix] == 1) { // if patch ix is degraded
       recoveryPropensity.push_back( 1/Tr * ecosystemServices[ix] );
       degradationPropensity.push_back(0);

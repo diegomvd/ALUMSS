@@ -48,7 +48,7 @@ int main(int argc, const char * argv[]){
   ///////////////////////////////////////////////////////////////////////////////
 
   int n;  // lenght of the sides of the square landscape: number of cells=n*n
-  int SimTime; // total simulation time
+  double SimTime; // total simulation time
   double dtp; // timestep for population dynamics
 
   double a0; //number of agricultural patches at beggining
@@ -76,7 +76,7 @@ int main(int argc, const char * argv[]){
         char * pEnd;
 
         // time and space specifications for the simulation
-        SimTime = atoi(argv[1]);
+        SimTime = strtod(argv[1], &pEnd);
         dtp = strtod(argv[2], &pEnd);
         n = atoi(argv[3]);
 
@@ -314,6 +314,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
     ///////////////////////////////////////////////////////////////////////////
+    cout << "max propensity: " << propensityVector.back() << "\n";
     dtg=-1/propensityVector.back()*log(ranMT());
     ///////////////////////////////////////////////////////////////////////////
     // LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION AND CONSUMPTION OR
