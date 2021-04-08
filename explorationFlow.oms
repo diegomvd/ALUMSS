@@ -59,10 +59,10 @@ val scriptTask =
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
       // default parameter and initialization values
-      T:=2500.0,
+      T:=1000.0,
       dtp:=0.1,
       L:=40,
-      a0:=0.25,
+      a0:=0.0,
       d0:=0.0,
       ksi:=1.0,
       sar:=0.25,
@@ -71,7 +71,7 @@ val scriptTask =
       Tag:=0.05,
       Tab:=20.0,
       Tr:=10.0,
-      Td:=50.0,
+      Td:=1.0,
       d:=0.025,
       dtsave:=1.0,
       mySeed:=1111
@@ -260,20 +260,20 @@ val replicationsFinal =
 // (setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
-// DirectSampling(
-//   evaluation = replicationsFinal on env,
-//   sampling =
-//     (Tr in LogRange(0.01,2.0,10) ) x
-//     (d0 in (0.1 to 1.0 by 0.1) ) x
-//     (d in LogRange(0.01,10.0,4)),
-// ) hook (workDirectory / "experimentTrD0-nopop-070421.csv")
-
 DirectSampling(
   evaluation = replicationsFinal on env,
   sampling =
-    (Tag in LogRange(0.05,1.0,10) ) x
-    (Tab in (1.0 to 20.0 by 2.0) ),
-) hook (workDirectory / "experimentTabTag-070421.csv")
+    (Tr in LogRange(0.01,2.0,10) ) x
+    (d0 in (0.1 to 1.0 by 0.1) ) x
+    (d in LogRange(0.01,10.0,4)),
+) hook (workDirectory / "experimentTrD0D-nopop-080421.csv")
+
+// DirectSampling(
+//   evaluation = replicationsFinal on env,
+//   sampling =
+//     (Tag in LogRange(0.05,1.0,10) ) x
+//     (Tab in (1.0 to 20.0 by 2.0) ),
+// ) hook (workDirectory / "experimentTabTag-070421.csv")
 
 
 
