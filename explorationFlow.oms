@@ -99,7 +99,7 @@ val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}
 // initialize replication experiment and the replications data file
 val setParameterValues=ScalaTask("""
     // here set the parameter values for the replication experiment
-    val ksi = 1.2
+    val ksi = 1.05
     val sar = 0.25
     val a = 0.0
     val w = 0.0
