@@ -99,11 +99,11 @@ val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}
 // initialize replication experiment and the replications data file
 val setParameterValues=ScalaTask("""
     // here set the parameter values for the replication experiment
-    val ksi = 1.0
+    val ksi = 1.5
     val sar = 0.25
     val a = 0.0
     val w = 0.0
-    val Tag = 0.0001
+    val Tag = 0.1
     val Tab = 10.0
     val Tr = 10.0
     val Td = 50.0
@@ -112,7 +112,7 @@ val setParameterValues=ScalaTask("""
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
-    val a0 = 0.1
+    val a0 = 0.2
     val dtsave = 1.0
     // create a file with a header consisting of all the model macro outputs
     val f = newFile()
@@ -208,7 +208,7 @@ val replicationsFullTime =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 10
+    sample = 20
   )
 
 // use this function to get only the final state

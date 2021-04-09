@@ -444,7 +444,8 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   unsigned long ix;
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
-      agriculturalProduction.push_back( ecosystemServices[ix] ) ;
+      // putting baseline production 0.5 as a test...
+      agriculturalProduction.push_back( 0.5 + ecosystemServices[ix] ) ;
     }
     else if(landscape[ix]==3){ //intense
       agriculturalProduction.push_back( ksi );
@@ -466,7 +467,7 @@ double getConsumptionDeficit(const vector<double> &agriculturalProduction, const
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
   if(population[0]>0){
-    consumptionDeficit=(population[0] - totalAgriculturalProduction)/population[0];
+    consumptionDeficit=population[0] - totalAgriculturalProduction;
   }
   else{
     consumptionDeficit=0;
