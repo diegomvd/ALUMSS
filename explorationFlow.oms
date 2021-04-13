@@ -108,7 +108,7 @@ val setParameterValues=ScalaTask("""
     val Tr = 5.0
     val Td = 50.0
     val d = 1.0
-    val T = 1000.0
+    val T = 3000.0
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
@@ -197,7 +197,7 @@ val finalStateTask= MoleTask(scriptTask -- readOutputFinalState)
 // 6- environment setup
 ///////////////////////////////////////////////////////////////////////////////
 
-val env = LocalEnvironment(30)
+val env = LocalEnvironment(40)
 
 //////////////////////////////////////////////////////////////////////////////
 // 5- replication setups
@@ -208,7 +208,7 @@ val replicationsFullTime =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 30
+    sample = 40
   )
 
 // use this function to get only the final state
