@@ -66,7 +66,7 @@ val scriptTask =
       d0:=0.0,
       ksi:=1.2,
       sar:=0.25,
-      a:=0.0,
+      a:=0.2,
       w:=0.0,
       Tag:=0.05,
       Tab:=50.0,
@@ -279,7 +279,7 @@ DirectSampling(
   evaluation = replicationsFinal on env,
   sampling =
     (Tag in LogRange(0.01,1.0,40) ),
-) hook (workDirectory / "experimentTag-140421.csv")
+) hook (workDirectory / "experimentTagInt-140421.csv")
 
 
 
