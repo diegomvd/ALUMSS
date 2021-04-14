@@ -278,8 +278,9 @@ val replicationsFinal =
 DirectSampling(
   evaluation = replicationsFinal on env,
   sampling =
-    (Tag in LogRange(0.01,1.0,40) ),
-) hook (workDirectory / "experimentTagInt-140421.csv")
+    (Tag in LogRange(0.01,1.0,40) ) x
+    (a in (0.2 to 0.8 by 0.2) ),
+) hook (workDirectory / "experimentTagA-140421.csv")
 
 
 
