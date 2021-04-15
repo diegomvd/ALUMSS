@@ -101,18 +101,18 @@ val setParameterValues=ScalaTask("""
     // here set the parameter values for the replication experiment
     val ksi = 1.2
     val sar = 0.25
-    val a = 0.2
-    val w = 0.0
+    val a = 0.0
+    val w = 6.0
     val Tag = 0.1
     val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
-    val d = 1.0
+    val d = 4.0
     val T = 3000.0
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
-    val a0 = 0.1
+    val a0 = 0.25
     val dtsave = 1.0
     // create a file with a header consisting of all the model macro outputs
     val f = newFile()
@@ -208,7 +208,7 @@ val replicationsFullTime =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 40
+    sample = 20
   )
 
 // use this function to get only the final state
@@ -257,7 +257,7 @@ val replicationsFinal =
 // 7- experiments and workflows
 ///////////////////////////////////////////////////////////////////////////////
 
-// (setParameterValues hook copyHook) -- replicationsFullTime
+(setParameterValues hook copyHook) -- replicationsFullTime
 // (setParameterValues1 hook copyHook) -- replicationsFullTime
 
 // DirectSampling(
@@ -275,12 +275,12 @@ val replicationsFinal =
 //     (Tab in (1.0 to 20.0 by 2.0) ),
 // ) hook (workDirectory / "experimentTabTag-080421.csv")
 
-DirectSampling(
-  evaluation = replicationsFinal on env,
-  sampling =
-    (Tag in LogRange(0.01,1.0,40) ) x
-    (a in (0.2 to 0.8 by 0.2) ),
-) hook (workDirectory / "experimentTagA-140421.csv")
+// DirectSampling(
+//   evaluation = replicationsFinal on env,
+//   sampling =
+//     (Tag in LogRange(0.01,1.0,40) ) x
+//     (a in (0.2 to 0.8 by 0.2) ),
+// ) hook (workDirectory / "experimentTagA-140421.csv")
 
 
 
