@@ -287,18 +287,57 @@ int main(int argc, const char * argv[]){
     }
   }
 
+  unsigned int nMin=nat_cells;
+  unsigned int nMax=nat_cells;
+  double pMin=population[0];
+  double pMax=population[0];
+
   // entering the time loop
   while(t<SimTime){
 
     // updating agricultural production
     getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
 
+    // STOPPING EXECUTION AS SOON AS LANDSCAPE IS FULLY NATURAL OR DEGRADED
+    nat_cells = 0;
+    deg_cells = 0;
+    for(i=0;i<landscape.size();i++){
+      if(landscape[i]==0){
+        nat_cells+=1;
+      }
+      else if(landscape[i]==1){
+        deg_cells+=1;
+      }
+    }
+    if(nat_cells==landscape.size() || deg_cells==landscape.size()){
+      break;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CALCULATING THE MINIMUM AND MAXIMUM VARAIBLE VALUES TO GET CYCLES
+    // FOR THIS EXPERIMENT I SET UP THE INITIAL CONDITIONS AT THE TRANSITION POINT
+    //////////////////////////////////////////////////////////////////////////
+
+    // i only save the natural area and population for instance
+    if (nat_cells>nMax){
+      nMax=nat_cells; // reset the maximum value
+    }
+    if (nat_cells<nMin){
+      nMin=nat_cells; // reset the minimum value
+    }
+    if (population[0]>pMax){
+      pMax=population[0]; // reset the maximum value
+    }
+    if (population[0]<pMin){
+      pMin=population[0]; // reset the minimum value
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // SAVING DATA
     ///////////////////////////////////////////////////////////////////////////
     if(t>=t_save)
     {
-      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1);
+      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1,(double)nMax/n,(double)nMin/n,pMax,pMin);
       saveLandscape(tofile_land,t,landscape);
       saveComponents(tofile_clus,t,landscape,naturalComponents);
 
@@ -319,21 +358,6 @@ int main(int argc, const char * argv[]){
     // LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION AND CONSUMPTION OR
     // THE REALIZATION OF A STOCHASTIC EVENT
     ///////////////////////////////////////////////////////////////////////////
-
-    // calculate the number of natural cells for the nopop experiment
-    nat_cells = 0;
-    deg_cells = 0;
-    for(i=0;i<landscape.size();i++){
-      if(landscape[i]==0){
-        nat_cells+=1;
-      }
-      else if(landscape[i]==1){
-        deg_cells+=1;
-      }
-    }
-    if(nat_cells==landscape.size() || deg_cells==landscape.size()){
-      break;
-    }
 
     if (dtg>dt){ // if the time until next event is larger than the ODE timestep
       // update population and consumption
@@ -386,7 +410,7 @@ int main(int argc, const char * argv[]){
 
   // saving files so ifdtsave was largest than execution time one gets the final
   // values for every output we look at
-  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1);
+  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1,(double)nMax/n,(double)nMin/n,pMax,pMin);
   saveLandscape(tofile_land,t,landscape);
   saveComponents(tofile_clus,t,landscape,naturalComponents);
 

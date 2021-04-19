@@ -915,7 +915,7 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 //       - saveComponents
 ////////////////////////////////////////////////////////////////////////////////
 
-void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int nn, double ripleyDistance)
+void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int nn, double ripleyDistance, double nMax, double nMin, double pMax, double pMin)
 {
   unsigned long numComponents = naturalComponents.size();
   unsigned long ix;
@@ -1056,7 +1056,7 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
   if (nA0>0){ripleyA0 *= landscape.size()/(nA0*nA0);}
   if (nA1>0){ripleyA1 *= landscape.size()/(nA1*nA1);}
 
-  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalY << " " << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << connectance << " " << ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << "\n";
+  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalY << " " << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << connectance << " " << nMax << " " << nMin << " " << pMax << " " << pMin << " " <<  ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << "\n";
 
   return;
 }

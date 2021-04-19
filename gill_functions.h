@@ -86,7 +86,7 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 //       - saveComponents
 ////////////////////////////////////////////////////////////////////////////////
 
-void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int n, double ripleyDistance);
+void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int n, double ripleyDistance, double nMax, double nMin, double pMax, double pMin);
 void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape);
 void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents);
 void saveSensitivityOutput(ofstream &file, unsigned int nn, double ripleyDistance, const vector<double> &population, const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices);
