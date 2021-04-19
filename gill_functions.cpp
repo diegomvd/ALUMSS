@@ -982,6 +982,26 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
     totalY+=agriculturalProduction[ix];
   }
 
+  /*
+  Save the connectance of the natural environment
+  */
+  double connectance;
+  unsigned int realizedConnections=0;
+  unsigned int totalConnections=0;
+  vector<unsigned int> naturalNeighbours;
+  vector<vector<unsigned int>> neighbourMooreMatrix;
+  getNeighbourMatrix(neighbourMooreMatrix,nn,1);
+
+  for(ix=0; ix<landscape.size(); ++ix){
+    if(landscape[ix]==0){// natural cell
+      // check the number of natural neighburs
+      getNeighboursState(naturalNeighbours,neighbourMooreMatrix,landscape,ix, 0);
+      realizedConnections += naturalNeighbours.size();
+      totalConnections += 4; // sum 4 foreach natural patch you encounter
+      naturalNeighbours.clear();
+    }
+  }
+  connectance = (double)realizedConnections/totalConnections;
 
   /*
   Last part is a copy of saveRipley
@@ -1036,7 +1056,7 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
   if (nA0>0){ripleyA0 *= landscape.size()/(nA0*nA0);}
   if (nA1>0){ripleyA1 *= landscape.size()/(nA1*nA1);}
 
-  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalY << " " << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << "\n";
+  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalY << " " << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << connectance << " " << ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << "\n";
 
   return;
 }
