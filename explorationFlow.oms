@@ -101,7 +101,7 @@ val setParameterValues=ScalaTask("""
     // here set the parameter values for the replication experiment
     val ksi = 1.2
     val sar = 0.25
-    val a = 0.05
+    val a = 0.01
     val w = 0.0
     val Tag = 0.1
     val Tab = 50.0
