@@ -222,7 +222,7 @@ val replicationsFinal =
   Replication(
     evaluation = finalStateTask,
     seed = mySeed,
-    sample = 1,
+    sample = 10,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
