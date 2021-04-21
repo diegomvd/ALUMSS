@@ -287,10 +287,11 @@ int main(int argc, const char * argv[]){
     }
   }
 
-  unsigned int nMin=nat_cells;
-  unsigned int nMax=nat_cells;
-  double pMin=population[0];
-  double pMax=population[0];
+  unsigned int nMin=0;
+  unsigned int nMax=0;
+  double pMin=0;
+  double pMax=0;
+  unsigned int first_time=0;
 
   // entering the time loop
   while(t<SimTime){
@@ -318,26 +319,39 @@ int main(int argc, const char * argv[]){
     // FOR THIS EXPERIMENT I SET UP THE INITIAL CONDITIONS AT THE TRANSITION POINT
     //////////////////////////////////////////////////////////////////////////
 
-    // i only save the natural area and population for instance
-    if (nat_cells>nMax){
-      nMax=nat_cells; // reset the maximum value
+    if(t>SimTime/6){ // let some time for a transient before the cycles
+
+      if (first_time==0){ // to initialize the value after the transient
+        nMax = nat_cells;
+        nMin = nat_cells;
+        pMax = population[0];
+        pMin = population[0];
+        first_time=1;
+      }
+
+      // i only save the natural area and population for instance
+      if (nat_cells>nMax){
+        nMax=nat_cells; // reset the maximum value
+      }
+      if (nat_cells<nMin){
+        nMin=nat_cells; // reset the minimum value
+      }
+      if (population[0]>pMax){
+        pMax=population[0]; // reset the maximum value
+      }
+      if (population[0]<pMin){
+        pMin=population[0]; // reset the minimum value
+      }
+
     }
-    if (nat_cells<nMin){
-      nMin=nat_cells; // reset the minimum value
-    }
-    if (population[0]>pMax){
-      pMax=population[0]; // reset the maximum value
-    }
-    if (population[0]<pMin){
-      pMin=population[0]; // reset the minimum value
-    }
+
 
     ///////////////////////////////////////////////////////////////////////////
     // SAVING DATA
     ///////////////////////////////////////////////////////////////////////////
     if(t>=t_save)
     {
-      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1,(double)nMax/n,(double)nMin/n,pMax,pMin);
+      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
       saveLandscape(tofile_land,t,landscape);
       saveComponents(tofile_clus,t,landscape,naturalComponents);
 
