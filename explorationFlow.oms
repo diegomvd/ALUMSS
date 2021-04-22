@@ -113,7 +113,7 @@ val setParamClusteringExp=ScalaTask("""
     val ksi = 1.2
     val sar = 0.25
     val a = 0.0
-    val Tag = 0.2
+    val Tag = 0.1
     val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
@@ -136,7 +136,7 @@ val replicationsClustering =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 20
+    sample = 1
   )
 val clusteringExploration = ExplorationTask( w in Seq(0.0,1.0,2.0,4.0,8.0,16.0) )
 // end of clustering experiment for figure 3
@@ -291,7 +291,7 @@ DirectSampling(
 // end of longterm sampling for intensification
 //////////////////////////////////////////
 
-// clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
-intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
+clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
+// intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
 // longTermIntensification hook (workDirectory / "experimentTagA-210421.csv")
