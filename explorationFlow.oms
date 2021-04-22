@@ -153,9 +153,9 @@ val setParamIntenseExp=ScalaTask("""
     val Tr = 5.0
     val Td = 50.0
     val d = 1.0
-    val T = 1.0
+    val T = 4000.0
     val dtp = 0.1
-    val L = 4.0
+    val L = 40.0
     val d0 = 0.0
     val a0 = 0.1
     val dtsave = 1.0
@@ -171,7 +171,7 @@ val replicationsIntensification =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 1
+    sample = 40
   )
 val intensificationExploration = ExplorationTask( a in Seq(0.0,0.2) )
 // end of intensification exploration fig 1
@@ -189,9 +189,9 @@ val setParamZoomPerco=ScalaTask("""
     val Tr = 5.0
     val Td = 50.0
     val d = 1.0
-    val T = 1.0
+    val T = 100.0
     val dtp = 0.1
-    val L = 4.0
+    val L = 40.0
     val d0 = 0.0
     val a0 = 0.35
     val dtsave = 0.01
@@ -206,7 +206,7 @@ val replicationsZoomPerco =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 1
+    sample = 40
   )
 // end of perco zoom fig 2
 ///////////////////////////////////////////
@@ -291,7 +291,7 @@ DirectSampling(
 // end of longterm sampling for intensification
 //////////////////////////////////////////
 
-clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
-// intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
+// clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
+intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
 // longTermIntensification hook (workDirectory / "experimentTagA-210421.csv")
