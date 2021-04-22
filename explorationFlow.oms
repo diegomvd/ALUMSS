@@ -148,7 +148,7 @@ val setParamIntenseExp=ScalaTask("""
     val ksi = 1.2
     val sar = 0.25
     val w = 0.0
-    val Tag = 0.2
+    val Tag = 0.1
     val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
@@ -171,7 +171,7 @@ val replicationsIntensification =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 40
+    sample = 10
   )
 val intensificationExploration = ExplorationTask( a in Seq(0.0,0.2) )
 // end of intensification exploration fig 1
@@ -291,7 +291,88 @@ DirectSampling(
 // end of longterm sampling for intensification
 //////////////////////////////////////////
 
-clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
-// intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
+//////////////////////////////////////////
+// begin of longterm sampling for clustering
+
+val readFinalStateClustering =
+    ScalaTask("""
+    // read file as an array of lines and get last line
+    val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
+    // split the string and store it in an array
+    val valuesAgre = lastLineAgre.split(" ")
+
+    val P = valuesAgre(1).toDouble
+    val N = valuesAgre(2).toDouble
+    val nMax = valuesAgre(14).toDouble
+    val nMin = valuesAgre(15).toDouble
+    val pMax = valuesAgre(16).toDouble
+    val pMin = valuesAgre(17).toDouble
+    """
+
+    )set(
+        inputs+=agreOut,
+        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
+        outputs+=(P,N,nMax,nMin,pMax,pMin)
+    )
+
+val finalStateClusteringTask = MoleTask(scriptTask -- readFinalStateClustering)
+
+val replicationsFinalStateClustering =
+  Replication(
+    evaluation = finalStateClusteringTask,
+    seed = mySeed,
+    sample = 1,
+    aggregation = Seq (
+      T aggregate average,
+      dtp aggregate average,
+      L aggregate average,
+      a0 aggregate average,
+      d0 aggregate average,
+      ksi aggregate average,
+      sar aggregate average,
+      a aggregate average,
+      w aggregate average,
+      Tag aggregate average,
+      Tab aggregate average,
+      Tr aggregate average,
+      Td aggregate average,
+      d aggregate average,
+      dtsave aggregate average,
+      mySeed aggregate average,
+      P aggregate average,
+      N aggregate average,
+      nMax aggregate average,
+      nMin aggregate average,
+      pMax aggregate average,
+      pMin aggregate average)
+  )
+
+val longTermClustering =
+DirectSampling(
+  evaluation = replicationsFinalStateClustering on env,
+  sampling =
+    (T is 1.0) x
+    (dtp is 0.1) x
+    (L is 4.0) x
+    (a0 is 0.1) x
+    (d0 is 0.0) x
+    (ksi is 1.2) x
+    (sar is 0.25) x
+    (w is 0.0) x
+    (Tab is 50.0) x
+    (Tr is 5.0) x
+    (Td is 50.0) x
+    (d is 1.0) x
+    (dtsave is "T") x
+    (Tag in LogRange(0.01,1.0,40)) x
+    (w in Seq(0.0,2.0,4.0,8.0)),
+)
+
+// end of longterm sampling for clustering
+//////////////////////////////////////////
+
+// clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
+intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
-// longTermIntensification hook (workDirectory / "experimentTagA-210421.csv")
+// longTermIntensification hook (workDirectory / "experimentTagA-220421.csv")
+// longTermClustering hook (workDirectory / "experimentTagW-220421.csv")
