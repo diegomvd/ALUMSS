@@ -184,7 +184,7 @@ val setParamZoomPerco=ScalaTask("""
     val sar = 0.25
     val a = 0.0
     val w = 0.0
-    val Tag = 0.2
+    val Tag = 0.1
     val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
@@ -206,7 +206,7 @@ val replicationsZoomPerco =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 40
+    sample = 10
   )
 // end of perco zoom fig 2
 ///////////////////////////////////////////
@@ -372,7 +372,7 @@ DirectSampling(
 //////////////////////////////////////////
 
 // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
-intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
-// (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
+// intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
+(setParamZoomPerco hook copyHook) -- replicationsZoomPerco
 // longTermIntensification hook (workDirectory / "experimentTagA-220421.csv")
 // longTermClustering hook (workDirectory / "experimentTagW-220421.csv")
