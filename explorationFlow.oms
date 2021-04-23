@@ -284,7 +284,7 @@ DirectSampling(
     (Td is 50.0) x
     (d is 1.0) x
     (dtsave is "T") x
-    ( ( (Tag in LogRange(0.01,1.0,40)) x (a in Seq(0.0,0.333,0.666)) ) :: ( (Tag in (0.17 to 0.28 by 0.01)) x (a in Seq(0.0,0.333,0.666)) ) ),
+    ( ( (Tag in LogRange(0.02,1.0,40)) x (a in Seq(0.0,0.333,0.666)) ) :: ( (Tag in (0.24 to 0.28 by 0.005)) x (a in Seq(0.0,0.333,0.666)) ) ),
 )
 
 

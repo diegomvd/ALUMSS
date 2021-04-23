@@ -424,7 +424,7 @@ int main(int argc, const char * argv[]){
 
   // saving files so ifdtsave was largest than execution time one gets the final
   // values for every output we look at
-  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1,(double)nMax/n,(double)nMin/n,pMax,pMin);
+  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
   saveLandscape(tofile_land,t,landscape);
   saveComponents(tofile_clus,t,landscape,naturalComponents);
 
