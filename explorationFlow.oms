@@ -118,11 +118,11 @@ val setParamClusteringExp=ScalaTask("""
     val Tr = 5.0
     val Td = 50.0
     val d = 1.0
-    val T = 6000.0
+    val T = 4000.0
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
-    val a0 = 0.1
+    val a0 = 0.2
     val dtsave = 1.0
     // create a file with a header consisting of all the model macro outputs
     val f = newFile()
@@ -136,9 +136,9 @@ val replicationsClustering =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 1
+    sample = 5
   )
-val clusteringExploration = ExplorationTask( w in Seq(0.0,1.0,2.0,4.0,8.0,16.0) )
+val clusteringExploration = ExplorationTask( w in Seq(1.0,2.0,4.0,8.0) )
 // end of clustering experiment for figure 3
 /////////////////////////////////////////////
 
@@ -360,7 +360,6 @@ DirectSampling(
     (d0 is 0.0) x
     (ksi is 1.2) x
     (sar is 0.25) x
-    (w is 0.0) x
     (Tab is 50.0) x
     (Tr is 5.0) x
     (Td is 50.0) x
@@ -452,9 +451,9 @@ DirectSampling(
 // end of longterm sampling for clustering2
 //////////////////////////////////////////
 
-// clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
+clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
 // longTermIntensification hook (workDirectory / "experimentTagA-220421.csv")
-longTermClustering hook (workDirectory / "experimentTagW-260421.csv")
+// longTermClustering hook (workDirectory / "experimentTagW-260421.csv")
 // longTermClustering2 hook (workDirectory / "experimentA0W-220421.csv")
