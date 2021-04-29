@@ -284,16 +284,18 @@ DirectSampling(
     (Td is 50.0) x
     (d is 1.0) x
     (dtsave is "T") x
-    (( Tag in LogRange(0.15,0.3,10) ) x ( a is 0.1 )) ::
-    (( Tag in LogRange(0.12,0.25,10) ) x ( a is 0.2 )) ::
-    (( Tag in LogRange(0.05,0.13,10) ) x ( a is 0.3 )) ::
-    (( Tag in LogRange(0.03,1.0,10) ) x ( a is 0.4 )) ::
-    (( Tag in LogRange(0.03,0.06,10) ) x ( a is 0.5 )) ::
-    (( Tag in LogRange(0.02,0.05,10) ) x ( a is 0.6 )) ::
-    (( Tag in LogRange(0.01,0.04,10) ) x ( a is 0.7 )) ::
-    (( Tag in LogRange(0.01,0.04,10) ) x ( a is 0.8 )) ::
-    (( Tag in LogRange(0.01,0.04,10) ) x ( a is 0.9 )) ::
-    (( Tag in LogRange(0.01,0.04,10) ) x ( a is 1.0 )),
+    ( a in Seq(0.0,0.025,0.05,0.1) ) x
+    (Tag in LogRange(0.03,0.3,20)),
+    // (( Tag in LogRange(0.15,0.3,10) ) x ( a is 0.1 )) ::
+    // (( Tag in LogRange(0.12,0.25,10) ) x ( a is 0.2 )) ::
+    // (( Tag in LogRange(0.05,0.13,10) ) x ( a is 0.3 )) ::
+    // (( Tag in LogRange(0.03,0.1,10) ) x ( a is 0.4 )) ::
+    // (( Tag in LogRange(0.03,0.06,10) ) x ( a is 0.5 )) ::
+    // (( Tag in LogRange(0.02,0.05,10) ) x ( a is 0.6 )) ::
+    // (( Tag in LogRange(0.01,0.04,10) ) x ( a is 0.7 )) ::
+    // (( Tag in LogRange(0.01,0.04,10) ) x ( a is 0.8 )) ::
+    // (( Tag in LogRange(0.01,0.04,10) ) x ( a is 0.9 )) ::
+    // (( Tag in LogRange(0.01,0.04,10) ) x ( a is 1.0 )),
     // ( a in Seq(0.0,0.25,0.5) ),
     // ( ( (Tag in LogRange(0.02,1.0,40)) x (a in Seq(0.0,0.333,0.666)) ) :: ( (Tag in (0.24 to 0.28 by 0.005)) x (a in Seq(0.0,0.333,0.666)) ) ),
 )
@@ -463,6 +465,6 @@ DirectSampling(
 // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
-longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif.csv")
+longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif-2.csv")
 // longTermClustering hook (workDirectory / "experimentTagW-280421.csv")
 // longTermClustering2 hook (workDirectory / "experimentA0W-220421.csv")
