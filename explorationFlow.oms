@@ -64,7 +64,7 @@ val scriptTask =
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
       // default parameter and initialization values
-      T:=6000.0,
+      T:=2000.0,
       dtp:=0.1,
       L:=40,
       a0:=0.1,
@@ -73,7 +73,7 @@ val scriptTask =
       sar:=0.25,
       a:=0.2,
       w:=0.0,
-      Tag:=0.05,
+      Tag:=0.1,
       Tab:=50.0,
       Tr:=5.0,
       Td:=50.0,
@@ -497,7 +497,43 @@ val a0Exploration = ExplorationTask( a0 in Seq(0.6,0.7,0.8,0.9,1.0) )
 // end of figure4
 /////////////////////////////////////////////
 
-a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
+/////////////////////////////////////////////
+// ose for irreversible collapse figure4
+
+val readFinalStateOSE =
+    ScalaTask("""
+    // read file as an array of lines and get last line
+    val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
+    // split the string and store it in an array
+    val valuesAgre = lastLineAgre.split(" ")
+
+    val N = valuesAgre(2).toDouble
+    val P = valuesAgre(1).toDouble
+    """
+
+    )set(
+        inputs+=agreOut,
+        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
+        outputs+=(N,P)
+    )
+
+val finalStateOSE = MoleTask(scriptTask -- readFinalStateOSE)
+
+OSEEvolution(
+  evaluation = finalStateOSE,
+  parallelism = 40,
+  termination = 100,
+  origin = Seq(
+    a0  in (0.0 to 1.0 by 0.1),
+    a in (0.0 to 1.0 by 0.1),
+    w in (LogRange(0.0,8.0,10))),
+  objective = Seq(
+    P under 10.0,
+    N under 0.01),
+  stochastic = Stochastic(seed = myseed)
+) hook (workDirectory / "resultsOSE", frequency = 100)
+
+// a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
 // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
