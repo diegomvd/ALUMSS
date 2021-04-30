@@ -462,7 +462,43 @@ DirectSampling(
 // end of longterm sampling for clustering2
 //////////////////////////////////////////
 
-clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
+/////////////////////////////////////////////
+// begin of ci conditions for figure 4
+val setParamA0Exp=ScalaTask("""
+    val ksi = 1.2
+    val sar = 0.25
+    val a = 0.0
+    val w = 8.0
+    val Tag = 0.1
+    val Tab = 50.0
+    val Tr = 5.0
+    val Td = 50.0
+    val d = 1.0
+    val T = 2000.0
+    val dtp = 0.1
+    val L = 40.0
+    val d0 = 0.0
+    val dtsave = 1.0
+    // create a file with a header consisting of all the model macro outputs
+    val f = newFile()
+    f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1\n"
+""") set(
+    inputs += a0,
+    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave)
+)
+// use this function to get all the data across time stored
+val replicationsA0 =
+  Replication(
+    evaluation = scriptTask hook hookAppend on env,
+    seed = mySeed,
+    sample = 5
+  )
+val a0Exploration = ExplorationTask( a0 in Seq(0.6,0.7,0.8,0.9,1.0) )
+// end of figure4
+/////////////////////////////////////////////
+
+a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
+// clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
 // longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif-3.csv")
