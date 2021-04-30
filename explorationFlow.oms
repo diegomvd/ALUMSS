@@ -284,7 +284,7 @@ DirectSampling(
     (Td is 50.0) x
     (d is 1.0) x
     (dtsave is "T") x
-    ( a in Seq(0.0,0.025,0.05,0.1) ) x
+    ( a in Seq(0.05,0.06,0.07,0.08,0.09,0.1) ) x
     (Tag in LogRange(0.03,0.3,20)),
     // (( Tag in LogRange(0.15,0.3,10) ) x ( a is 0.1 )) ::
     // (( Tag in LogRange(0.12,0.25,10) ) x ( a is 0.2 )) ::
@@ -465,6 +465,6 @@ DirectSampling(
 // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
-longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif-2.csv")
+longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif-3.csv")
 // longTermClustering hook (workDirectory / "experimentTagW-280421.csv")
 // longTermClustering2 hook (workDirectory / "experimentA0W-220421.csv")
