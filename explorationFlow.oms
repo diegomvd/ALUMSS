@@ -136,9 +136,9 @@ val replicationsClustering =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 20
+    sample = 5
   )
-val clusteringExploration = ExplorationTask( w in Seq(1.0,2.0,4.0,8.0) )
+val clusteringExploration = ExplorationTask( w in Seq(0.0,4.0,8.0) )
 // end of clustering experiment for figure 3
 /////////////////////////////////////////////
 
