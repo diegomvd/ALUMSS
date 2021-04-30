@@ -462,9 +462,9 @@ DirectSampling(
 // end of longterm sampling for clustering2
 //////////////////////////////////////////
 
-// clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
+clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
-longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif-3.csv")
+// longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif-3.csv")
 // longTermClustering hook (workDirectory / "experimentTagW-280421.csv")
 // longTermClustering2 hook (workDirectory / "experimentA0W-220421.csv")
