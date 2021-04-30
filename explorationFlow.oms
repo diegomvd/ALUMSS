@@ -530,7 +530,7 @@ OSEEvolution(
   objective = Seq(
     P under 10.0,
     N under 0.01),
-  stochastic = Stochastic(seed = myseed)
+  stochastic = Stochastic(seed = mySeed)
 ) hook (workDirectory / "resultsOSE", frequency = 100)
 
 // a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
