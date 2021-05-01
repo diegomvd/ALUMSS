@@ -585,40 +585,40 @@ val longTerm4  =
 /////////////////////////////////////////////
 // ose for irreversible collapse figure4
 
-val readFinalStateOSE =
-    ScalaTask("""
-    // read file as an array of lines and get last line
-    val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
-    // split the string and store it in an array
-    val valuesAgre = lastLineAgre.split(" ")
-
-    val N = valuesAgre(2).toDouble
-    val P = valuesAgre(1).toDouble
-    """
-
-    )set(
-        inputs+=agreOut,
-        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
-        outputs+=(N,P)
-    )
-
-val finalStateOSE = MoleTask(scriptTask -- readFinalStateOSE)
-
-val a0Exploration2 = ExplorationTask( a0 in Seq(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9) )
-
-val a0OSE = OSEEvolution(
-  evaluation = finalStateOSE on env,
-  parallelism = 40,
-  termination = 100,
-  origin = Seq(
-    a0 is a0,
-    a in (0.0 to 1.0 by 0.1),
-    w in (0.0 to 8.0 by 1.0)),
-  objective = Seq(
-    P under 10.0,
-    N under 0.01),
-  stochastic = Stochastic(seed = mySeed, reevaluate = 0.2, sample = 10),
-)
+// val readFinalStateOSE =
+//     ScalaTask("""
+//     // read file as an array of lines and get last line
+//     val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
+//     // split the string and store it in an array
+//     val valuesAgre = lastLineAgre.split(" ")
+//
+//     val N = valuesAgre(2).toDouble
+//     val P = valuesAgre(1).toDouble
+//     """
+//
+//     )set(
+//         inputs+=agreOut,
+//         (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
+//         outputs+=(N,P)
+//     )
+//
+// val finalStateOSE = MoleTask(scriptTask -- readFinalStateOSE)
+//
+// val a0Exploration2 = ExplorationTask( a0 in Seq(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9) )
+//
+// val a0OSE = OSEEvolution(
+//   evaluation = finalStateOSE on env,
+//   parallelism = 40,
+//   termination = 100,
+//   origin = Seq(
+//     a0 is a0,
+//     a in (0.0 to 1.0 by 0.1),
+//     w in (0.0 to 8.0 by 1.0)),
+//   objective = Seq(
+//     P under 10.0,
+//     N under 0.01),
+//   stochastic = Stochastic(seed = mySeed, reevaluate = 0.2, sample = 10),
+// )
 
 // a0Exploration2 -< ( a0OSE hook (workDirectory / "resultsOSE") )
 longTerm4 hook (workDirectory / "experiment4-010521.csv")
