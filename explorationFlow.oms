@@ -519,20 +519,22 @@ val readFinalStateOSE =
 
 val finalStateOSE = MoleTask(scriptTask -- readFinalStateOSE)
 
-OSEEvolution(
+val a0Exploration2 = ExplorationTask( a0 in Seq(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9) )
+
+val a0OSE = OSEEvolution(
   evaluation = finalStateOSE on env,
   parallelism = 40,
   termination = 100,
   origin = Seq(
-    a0  in (0.0 to 1.0 by 0.1),
     a in (0.0 to 1.0 by 0.1),
     w in (0.0 to 8.0 by 1.0)),
   objective = Seq(
     P under 10.0,
     N under 0.01),
-  stochastic = Stochastic(seed = mySeed)
-) hook (workDirectory / "resultsOSE")
+  stochastic = Stochastic(seed = mySeed, reevaluate = 0.2, sample = 10),
+)
 
+a0Exploration2 -< a0OSE hook (workDirectory / "resultsOSE")
 // a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
 // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
