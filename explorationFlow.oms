@@ -534,7 +534,8 @@ val a0OSE = OSEEvolution(
   stochastic = Stochastic(seed = mySeed, reevaluate = 0.2, sample = 10),
 )
 
-a0Exploration2 -< a0OSE hook (workDirectory / "resultsOSE")
+a0Exploration2 -< ( a0OSE hook (workDirectory / "resultsOSE_a0_${a0}") )
+
 // a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
 // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
