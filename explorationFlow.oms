@@ -532,6 +532,8 @@ val a0OSE = OSEEvolution(
     P under 10.0,
     N under 0.01),
   stochastic = Stochastic(seed = mySeed, reevaluate = 0.2, sample = 10),
+) set(
+    (inputs, outputs)+=(a0),
 )
 
 a0Exploration2 -< ( a0OSE hook (workDirectory / "resultsOSE_a0_${a0}") )
