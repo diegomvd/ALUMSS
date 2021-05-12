@@ -7,6 +7,7 @@ val mySeed = Val[Int]
 
 // model parameters
 val ksi = Val[Double]
+val y0 = Val[Double]
 val sar = Val[Double]
 val a = Val[Double]
 val w = Val[Double]
