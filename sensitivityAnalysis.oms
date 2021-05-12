@@ -97,7 +97,7 @@ val readOutput =
     val D = valuesAgre(3).toDouble
     val A0 = valuesAgre(4).toDouble
     val A1 = valuesAgre(5).toDouble
-    val Y = valuesAgre(6).toDouble
+    // val Y = valuesAgre(6).toDouble
     val nFrag = valuesAgre(7).toDouble
     val meanSize = valuesAgre(8).toDouble
     val stdSize = valuesAgre(9).toDouble
@@ -105,10 +105,10 @@ val readOutput =
     val meanES = valuesAgre(11).toDouble
     val stdES = valuesAgre(12).toDouble
     // val C = valuesAgre(13).toDouble
-    val nMax = valuesAgre(14).toDouble
-    val nMin = valuesAgre(15).toDouble
-    val pMax = valuesAgre(16).toDouble
-    val pMin = valuesAgre(17).toDouble
+    // val nMax = valuesAgre(14).toDouble
+    // val nMin = valuesAgre(15).toDouble
+    // val pMax = valuesAgre(16).toDouble
+    // val pMin = valuesAgre(17).toDouble
     val ripleyN = valuesAgre(18).toDouble
     val ripleyD = valuesAgre(19).toDouble
     val ripleyA0 = valuesAgre(20).toDouble
@@ -117,7 +117,7 @@ val readOutput =
     """
     )set(
         inputs+=agreOut,
-        outputs+=(P,N,D,A0,A1,Y,nFrag,meanSize,stdSize,maxSize,meanES,stdES,nMax,nMin,pMax,pMin,ripleyN,ripleyD,ripleyA0,ripleyA1)
+        outputs+=(P,N,D,A0,A1,nFrag,meanSize,stdSize,maxSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
     )
 
 val moleTask = MoleTask(scriptTask -- readOutput)
@@ -144,17 +144,12 @@ SensitivityMorris(
         D,
         A0,
         A1,
-        Y,
         nFrag,
         meanSize,
         stdSize,
         maxSize,
         meanES,
         stdES,
-        nMax,
-        nMin,
-        pMax,
-        pMin,
         ripleyN,
         ripleyD,
         ripleyA0,
