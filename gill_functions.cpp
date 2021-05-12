@@ -431,7 +431,7 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
 //       - getPropensityVector
 ////////////////////////////////////////////////////////////////////////////////
 
-void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double ksi)
+void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double ksi, double y0)
 {
   /*
   returns the total agricultural production for a given "landscape" and
@@ -445,7 +445,7 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
       // putting baseline production 0.5 as a test...
-      agriculturalProduction.push_back( 0.2 + ecosystemServices[ix] ) ;
+      agriculturalProduction.push_back( y0 + ecosystemServices[ix] ) ;
     }
     else if(landscape[ix]==3){ //intense
       agriculturalProduction.push_back( ksi );
@@ -846,13 +846,13 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double sar, double w, gsl_rng  *r)
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double y0, double sar, double w, gsl_rng  *r)
 {
 
   initializeLandscape(landscape,neighbourMatrix,n,a0,d0,a,w,r);
   getNaturalConnectedComponents(naturalComponents,landscape);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);
-  getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
+  getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, y0);
   initializePopulation(population,agriculturalProduction);
 
   return;

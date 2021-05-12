@@ -54,7 +54,8 @@ int main(int argc, const char * argv[]){
   double a0; //number of agricultural patches at beggining
   double d0; // number of degraded patches at beggining
 
-  double ksi; // productivity per unit input or unit ecosystem service
+  double ksi; // productivity of intense agriculture per es productivity
+  double y0; // baseline productivity of low intense agri per es productivity
   double sar; // ecosystem service saturation exponent
   double a; // intensification probability
   double w; // agricultural clustering parameter
@@ -86,28 +87,29 @@ int main(int argc, const char * argv[]){
 
         // agricultural production parameters
         ksi = strtod(argv[6], &pEnd);
-        sar = strtod(argv[7], &pEnd);
+        y0 = strtod(argv[7], &pEnd);
+        sar = strtod(argv[8], &pEnd);
 
         // human action parameters
-        a = strtod(argv[8], &pEnd);
-        w = strtod(argv[9], &pEnd);
-        Tag = strtod(argv[10], &pEnd);
+        a = strtod(argv[9], &pEnd);
+        w = strtod(argv[10], &pEnd);
+        Tag = strtod(argv[11], &pEnd);
 
         // abandonment parameters
-        Tab = strtod(argv[11], &pEnd);
+        Tab = strtod(argv[12], &pEnd);
 
         // spontaneous evolution parameters
-        Tr = strtod(argv[12], &pEnd);
-        Td = strtod(argv[13], &pEnd);
+        Tr = strtod(argv[13], &pEnd);
+        Td = strtod(argv[14], &pEnd);
 
         // distance for es provision
-        d = strtod(argv[14], &pEnd);
+        d = strtod(argv[15], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[15], &pEnd);
+        dtsave = strtod(argv[16], &pEnd);
 
         // save seed
-        seed = atoi(argv[16]);
+        seed = atoi(argv[17]);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -146,16 +148,17 @@ int main(int argc, const char * argv[]){
     filename += "_a0_"+allArgs[4];
     filename += "_d0_"+allArgs[5];
     filename += "_ksi_"+allArgs[6];
-    filename += "_sar_"+allArgs[7];
-    filename += "_a_"+allArgs[8];
-    filename += "_w_"+allArgs[9];
-    filename += "_Tag_"+allArgs[10];
-    filename += "_Tab_"+allArgs[11];
-    filename += "_Tr_"+allArgs[12];
-    filename += "_Td_"+allArgs[13];
-    filename += "_d_"+allArgs[14];
-    filename += "_dtsave_"+allArgs[15];
-    filename += "_expid_"+allArgs[16];
+    filename += "_y0_"+allArgs[7];
+    filename += "_sar_"+allArgs[8];
+    filename += "_a_"+allArgs[9];
+    filename += "_w_"+allArgs[10];
+    filename += "_Tag_"+allArgs[11];
+    filename += "_Tab_"+allArgs[12];
+    filename += "_Tr_"+allArgs[13];
+    filename += "_Td_"+allArgs[14];
+    filename += "_d_"+allArgs[15];
+    filename += "_dtsave_"+allArgs[16];
+    filename += "_expid_"+allArgs[17];
     filename+=".dat";
   }
 
@@ -265,7 +268,7 @@ int main(int argc, const char * argv[]){
   else{ // WITH ARGV PARAMETERS
     getNeighbourMatrix(neighbourMatrix,n,1);
     getNeighbourMatrix(neighbourMatrixES,n,d);
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,sar,w,r);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,y0,sar,w,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -297,7 +300,7 @@ int main(int argc, const char * argv[]){
   while(t<SimTime){
 
     // updating agricultural production
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi);
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, y0);
 
     // STOPPING EXECUTION AS SOON AS LANDSCAPE IS FULLY NATURAL OR DEGRADED
     nat_cells = 0;

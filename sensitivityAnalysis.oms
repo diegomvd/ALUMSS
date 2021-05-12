@@ -1,5 +1,11 @@
-val sensitivityOut = Val[File]
+// output files
+val agreOut = Val[File]
+val f = Val[File]
 
+// random number generator seed
+val mySeed = Val[Int]
+
+// model parameters
 val ksi = Val[Double]
 val sar = Val[Double]
 val a = Val[Double]
@@ -8,12 +14,18 @@ val Tag = Val[Double]
 val Tab = Val[Double]
 val Tr = Val[Double]
 val Td = Val[Double]
-val e12 = Val[Double]
-val c12 = Val[Double]
 val d = Val[Double]
 
-val oString = Val[String]
+// simulation parameters
+val T = Val[Double]
+val dtp = Val[Double]
+val L = Val[Double]
+val d0 = Val[Double]
+val a0 = Val[Double]
+val dtsave = Val[Double]
 
+// variable outputs
+val t = Val[Double]
 val nFrag = Val[Double]
 val meanSize = Val[Double]
 val stdSize = Val[Double]
@@ -25,84 +37,129 @@ val N = Val[Double]
 val D = Val[Double]
 val A0 = Val[Double]
 val A1 = Val[Double]
+val Y = Val[Double]
+val C = Val[Double]
+val nMax = Val[Double]
+val nMin = Val[Double]
+val pMax = Val[Double]
+val pMin = Val[Double]
 val ripleyN = Val[Double]
 val ripleyD = Val[Double]
 val ripleyA0 = Val[Double]
 val ripleyA1 = Val[Double]
 
 
+///////////////////////////////////////////////////////////////////////////////
+// 1- model plugin with all the parameter inputs as well as the output files
+///////////////////////////////////////////////////////////////////////////////
+
 val scriptTask =
   SystemExecTask(
     command = Seq(
-      "./gillespie-ses 5000 0.1 40 0.1 0 ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${e12} ${c12} ${d} 7000 OM "),
+      "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${y0} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} ${dtsave} ${mySeed} "),
     )set(
-      inputs+=(ksi,sar,a,w,Tag,Tab,Tr,Td,e12,c12,d),
-      outputFiles += ("sensitivityOut.dat",sensitivityOut) ,
-      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses"
-      // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses"
+      (inputs, outputs) += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
+      outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
+      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
+      // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
+
+      // default parameter and initialization values
+      T:=5000.0,
+      dtp:=0.1,
+      L:=40,
+      a0:=0.1,
+      d0:=0.0,
+      ksi:=1.2,
+      y0:=0.2
+      sar:=0.25,
+      a:=0.2,
+      w:=0.0,
+      Tag:=0.1,
+      Tab:=50.0,
+      Tr:=5.0,
+      Td:=50.0,
+      d:=1.0,
+      dtsave:=1.0,
+      mySeed:=1111
     )
 
 val readOutput =
     ScalaTask("""
-    val oString = scala.io.Source.fromFile(sensitivityOut).mkString
-    val outputs = oString.split(" ")
-    val nFrag = outputs(0).toDouble
-    val meanSize = outputs(1).toDouble
-    val stdSize = outputs(2).toDouble
-    val maxSize = outputs(3).toDouble
-    val meanES = outputs(4).toDouble
-    val stdES = outputs(5).toDouble
-    val P = outputs(6).toDouble
-    val N = outputs(7).toDouble
-    val D = outputs(8).toDouble
-    val A0 = outputs(9).toDouble
-    val A1 = outputs(10).toDouble
-    val ripleyN = outputs(11).toDouble
-    val ripleyD = outputs(12).toDouble
-    val ripleyA0 = outputs(13).toDouble
-    val ripleyA1 = outputs(14).toDouble
+
+    // read file as an array of lines and get last line
+    val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
+    // split the string and store it in an array
+    val valuesAgre = lastLineAgre.split(" ")
+
+    val P = valuesAgre(1).toDouble
+    val N = valuesAgre(2).toDouble
+    val D = valuesAgre(3).toDouble
+    val A0 = valuesAgre(4).toDouble
+    val A1 = valuesAgre(5).toDouble
+    val Y = valuesAgre(6).toDouble
+    val nFrag = valuesAgre(7).toDouble
+    val meanSize = valuesAgre(8).toDouble
+    val stdSize = valuesAgre(9).toDouble
+    val maxSize = valuesAgre(10).toDouble
+    val meanES = valuesAgre(11).toDouble
+    val stdES = valuesAgre(12).toDouble
+    val C = valuesAgre(13).toDouble
+    val nMax = valuesAgre(14).toDouble
+    val nMin = valuesAgre(15).toDouble
+    val pMax = valuesAgre(16).toDouble
+    val pMin = valuesAgre(17).toDouble
+    val ripleyN = valuesAgre(18).toDouble
+    val ripleyD = valuesAgre(19).toDouble
+    val ripleyA0 = valuesAgre(20).toDouble
+    val ripleyA1 = valuesAgre(21).toDouble
+
     """
     )set(
         inputs+=sensitivityOut,
-        outputs+=(nFrag,meanSize,stdSize,maxSize,meanES,stdES,P,N,D,A0,A1,ripleyN,ripleyD,ripleyA0,ripleyA1)
+        outputs+=(P,N,D,A0,A1,Y,nFrag,meanSize,stdSize,maxSize,meanES,stdES,C,nMax,nMin,pMax,pMin,ripleyN,ripleyD,ripleyA0,ripleyA1)
     )
 
 val moleTask = MoleTask(scriptTask -- readOutput)
 
-val env = LocalEnvironment(30)
+val env = LocalEnvironment(35)
 
 SensitivityMorris(
     evaluation = moleTask on env,
     inputs = Seq(
-        ksi in (0.5,1.0),
+        ksi in (0.5,2.0),
         sar in (0.0,1.0),
         a in (0.0,1.0),
         w in (0.0,8.0),
-        Tag in (0.05,5.0),
+        Tag in (0.01,1.0),
         Tab in (0.1,100.0),
-        Tr in (1.0,10.0),
-        Td in (10.0,100.0),
-        e12 in (0.2,1.0),
-        c12 in (0.1,1.0),
-        d in (1.0,10.0)
+        Tr in (0.1,10.0),
+        Td in (1.0,100.0),
+        a0 in (0.0,1.0),
+        y0 in (0.05,1.0)
         ),
     outputs = Seq(
+        P,
+        N,
+        D,
+        A0,
+        A1,
+        Y,
         nFrag,
         meanSize,
         stdSize,
         maxSize,
         meanES,
         stdES,
-        P,
-        N,
-        D,
-        A0,
-        A1,
+        C,
+        nMax,
+        nMin,
+        pMax,
+        pMin,
         ripleyN,
         ripleyD,
         ripleyA0,
         ripleyA1
         ),
-    sample = 30,
-    level = 30
-) hook (workDirectory / "gillespieSensitivityResults2")
+    sample = 100,
+    level = 100
+) hook (workDirectory / "gillespieSensitivityResults3")

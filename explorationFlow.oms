@@ -56,10 +56,10 @@ val ripleyA1 = Val[Double]
 val scriptTask =
   SystemExecTask(
     command = Seq(
-      "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} ${dtsave} ${mySeed} "),
+      "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${y0} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} ${dtsave} ${mySeed} "),
     )set(
       (inputs, outputs) += (T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
-      outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
+      outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
       resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
 
@@ -70,6 +70,7 @@ val scriptTask =
       a0:=0.1,
       d0:=0.0,
       ksi:=1.2,
+      y0:=0.2
       sar:=0.25,
       a:=0.2,
       w:=0.0,
@@ -89,13 +90,13 @@ val scriptTask =
 // hook to append the output across time of a simulation a replications file.
 // the name of the replication file contains the information on the parameter
 // values
-val hookAppend = AppendToFileHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}.csv", "${agreOut.content}")
+val hookAppend = AppendToFileHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}.csv", "${agreOut.content}")
 
 // hook to create and initialize the header of a replications file. file must
 // be previously created in a scalaTask
 // the name of the replication file contains the information on the parameter
 // values
-val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}.csv")
+val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}.csv")
 
 ///////////////////////////////////////////////////////////////////////////////
 // 3- environment setup
