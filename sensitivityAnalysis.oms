@@ -116,7 +116,7 @@ val readOutput =
 
     """
     )set(
-        inputs+=sensitivityOut,
+        inputs+=agreOut,
         outputs+=(P,N,D,A0,A1,Y,nFrag,meanSize,stdSize,maxSize,meanES,stdES,C,nMax,nMin,pMax,pMin,ripleyN,ripleyD,ripleyA0,ripleyA1)
     )
 
