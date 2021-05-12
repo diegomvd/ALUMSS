@@ -80,7 +80,7 @@ val scriptTask =
       Tr:=5.0,
       Td:=50.0,
       d:=1.0,
-      dtsave:=1.0,
+      dtsave:=7000.0,
       mySeed:=1111
     )
 
@@ -104,7 +104,7 @@ val readOutput =
     val maxSize = valuesAgre(10).toDouble
     val meanES = valuesAgre(11).toDouble
     val stdES = valuesAgre(12).toDouble
-    val C = valuesAgre(13).toDouble
+    // val C = valuesAgre(13).toDouble
     val nMax = valuesAgre(14).toDouble
     val nMin = valuesAgre(15).toDouble
     val pMax = valuesAgre(16).toDouble
@@ -117,7 +117,7 @@ val readOutput =
     """
     )set(
         inputs+=agreOut,
-        outputs+=(P,N,D,A0,A1,Y,nFrag,meanSize,stdSize,maxSize,meanES,stdES,C,nMax,nMin,pMax,pMin,ripleyN,ripleyD,ripleyA0,ripleyA1)
+        outputs+=(P,N,D,A0,A1,Y,nFrag,meanSize,stdSize,maxSize,meanES,stdES,nMax,nMin,pMax,pMin,ripleyN,ripleyD,ripleyA0,ripleyA1)
     )
 
 val moleTask = MoleTask(scriptTask -- readOutput)
