@@ -151,7 +151,6 @@ SensitivityMorris(
         maxSize,
         meanES,
         stdES,
-        C,
         nMax,
         nMin,
         pMax,
