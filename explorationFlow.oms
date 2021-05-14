@@ -641,7 +641,7 @@ val readFinalStateNoPop =
         outputs+=(N)
     )
 
-val finalStateTaskNoPop = MoleTask(scriptTask -- readFinalState)
+val finalStateTaskNoPop = MoleTask(scriptTask -- readFinalStateNoPop)
 
 val replicationsFinalStateNoPop=
   Replication(
