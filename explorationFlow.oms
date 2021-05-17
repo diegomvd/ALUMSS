@@ -693,9 +693,45 @@ val longTermNoPop =
   )
 
 
+///////////////////////////////////////////////////////////////////////////////////
+// begin of exploration with otherrange values for processes compared to demography
+
+val setParamExplo=ScalaTask("""
+    val ksi = 1.2
+    val sar = 0.25
+    val y0 = 0.2
+    val a = 0.0
+    val w = 0.0
+    val Tag = 0.1
+    val Tab = 1.0
+    val Tr = 0.1
+    val Td = 1.0
+    val d = 1.0
+    val T = 100.0
+    val dtp = 0.1
+    val L = 40.0
+    val d0 = 0.0
+    val a0 = 0.3
+    val dtsave = 0.01
+    // create a file with a header consisting of all the model macro outputs
+    val f = newFile()
+    f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1\n"
+""") set(
+    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,y0,a,w,Tag,Tab,Tr,Td,d,dtsave)
+)
+// use this function to get all the data across time stored
+val replicationsExplo =
+  Replication(
+    evaluation = scriptTask hook hookAppend on env,
+    seed = mySeed,
+    sample = 10
+  )
+// end of perco zoom fig 2
+///////////////////////////////////////////
+
 // a0Exploration2 -< ( a0OSE hook (workDirectory / "resultsOSE") )
 // longTerm4 hook (workDirectory / "experiment4-010521.csv")
-longTermNoPop hook (workDirectory / "experimentNoPop-2-140521.csv")
+// longTermNoPop hook (workDirectory / "experimentNoPop-2-140521.csv")
 // a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
 // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
 // intensificationExploration -< (setParamIntenseExp hook copyHook) -- replicationsIntensification
@@ -703,3 +739,5 @@ longTermNoPop hook (workDirectory / "experimentNoPop-2-140521.csv")
 // longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif-3.csv")
 // longTermClustering hook (workDirectory / "experimentTagW-280421.csv")
 // longTermClustering2 hook (workDirectory / "experimentA0W-220421.csv")
+
+(setParamExplo hook copyHook) -- replicationsZoomExplo
