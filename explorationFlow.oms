@@ -702,7 +702,7 @@ val setParamExplo=ScalaTask("""
     val y0 = 0.2
     val a = 0.0
     val w = 0.0
-    val Tag = 0.1
+    val Tag = 0.01
     val Tab = 1.0
     val Tr = 0.1
     val Td = 1.0
@@ -712,7 +712,7 @@ val setParamExplo=ScalaTask("""
     val L = 40.0
     val d0 = 0.0
     val a0 = 0.3
-    val dtsave = 0.01
+    val dtsave = 0.1
     // create a file with a header consisting of all the model macro outputs
     val f = newFile()
     f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1\n"
