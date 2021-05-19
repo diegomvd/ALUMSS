@@ -698,7 +698,7 @@ val longTermNoPop =
 
 val setParamExplo=ScalaTask("""
     val ksi = 1.2
-    val sar = 0.1
+    val sar = 0.2
     val y0 = 0.2
     val a = 0.0
     val w = 0.0
