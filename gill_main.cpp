@@ -135,7 +135,7 @@ int main(int argc, const char * argv[]){
     // don't need to create it
   }
   else{
-    fs::create_directory(dirname);
+    // fs::create_directory(dirname); // commenting to see if avoids problem with sensitivity OM
   }
 
   //creating vector of strings to store all the input arguments
