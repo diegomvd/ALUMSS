@@ -128,14 +128,14 @@ SensitivityMorris(
     evaluation = moleTask on env,
     inputs = Seq(
         ksi in (0.5,2.0),
-        sar in (0.0,1.0),
+        sar in (0.1,1.0),
         a in (0.0,1.0),
         w in (0.0,8.0),
         Tag in (0.01,1.0),
         Tab in (0.1,100.0),
         Tr in (0.1,10.0),
         Td in (1.0,100.0),
-        a0 in (0.0,1.0),
+        a0 in (0.1,0.9),
         y0 in (0.05,1.0)
         ),
     outputs = Seq(
@@ -155,6 +155,6 @@ SensitivityMorris(
         ripleyA0,
         ripleyA1
         ),
-    sample = 100,
-    level = 100
-) hook (workDirectory / "gillespieSensitivityResults3")
+    sample = 40,
+    level = 40
+) hook (workDirectory / "gillespieSensitivityResults5")
