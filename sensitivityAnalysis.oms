@@ -154,7 +154,6 @@ SensitivityMorris(
         ripleyA0,
         ripleyA1
         ),
-    stochastic = Stochastic(seed = mySeed),
     sample = 40,
     level = 40
 ) hook (workDirectory / "gillespieSensitivityResults5")
