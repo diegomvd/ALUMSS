@@ -354,7 +354,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     if(t>=t_save)
     {
-      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
       saveLandscape(tofile_land,t,landscape);
       saveComponents(tofile_clus,t,landscape,naturalComponents);
 
@@ -419,17 +419,23 @@ int main(int argc, const char * argv[]){
   }
 
   // saving CONF file to re start other simulations from this point
-  tofile_conf << t << " " << population[0];
-  for(i=0 ; i<landscape.size() ; i++){
-    tofile_conf << " " << landscape[i];
-  }
-  tofile_conf << "\n";
+  // tofile_conf << t << " " << population[0];
+  // for(i=0 ; i<landscape.size() ; i++){
+  //   tofile_conf << " " << landscape[i];
+  // }
+  // tofile_conf << "\n";
 
   // saving files so ifdtsave was largest than execution time one gets the final
   // values for every output we look at
-  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,1,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
-  saveLandscape(tofile_land,t,landscape);
-  saveComponents(tofile_clus,t,landscape,naturalComponents);
+  string filename_AGRE="DATA_AGRE"+filename;
+  // string filename_AGRE="DATA_AGRE";
+  ofstream tofile_sens(DATA_SENSITIVITY);
+  tofile_sens.precision(5);
+  tofile_sens.setf(ios::scientific,ios::floatfield);
+  saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+
+  // saveLandscape(tofile_land,t,landscape);
+  // saveComponents(tofile_clus,t,landscape,naturalComponents);
 
   // saving output for sensitivity analysis
   // saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
@@ -438,7 +444,7 @@ int main(int argc, const char * argv[]){
 
   auto stop = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::minutes>(stop - start);
-  cout << "simulation time " << t << "\n";
+  // cout << "simulation time " << t << "\n";
   cout << "total execution time " << duration.count() << endl;
 
   return 0;

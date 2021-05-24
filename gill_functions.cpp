@@ -551,7 +551,7 @@ void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &inte
 
       }
       else if (landscape[ix] == 2 ){ // if patch is organic it can be intensifyed
-        // get the indexes of the organic neighbours
+        // get the indexes of the intense neighbours
         intenseNeighbours.clear();
         getNeighboursState(intenseNeighbours,neighbourMatrix,landscape,ix, 3); // state 3 is intense
 
