@@ -427,8 +427,6 @@ int main(int argc, const char * argv[]){
 
   // saving files so ifdtsave was largest than execution time one gets the final
   // values for every output we look at
-  string filename_AGRE="DATA_AGRE"+filename;
-  // string filename_AGRE="DATA_AGRE";
   ofstream tofile_sens("DATA_SENSITIVITY");
   tofile_sens.precision(5);
   tofile_sens.setf(ios::scientific,ios::floatfield);
