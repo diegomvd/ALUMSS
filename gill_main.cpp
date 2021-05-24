@@ -429,7 +429,7 @@ int main(int argc, const char * argv[]){
   // values for every output we look at
   string filename_AGRE="DATA_AGRE"+filename;
   // string filename_AGRE="DATA_AGRE";
-  ofstream tofile_sens(DATA_SENSITIVITY);
+  ofstream tofile_sens("DATA_SENSITIVITY");
   tofile_sens.precision(5);
   tofile_sens.setf(ios::scientific,ios::floatfield);
   saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
