@@ -944,8 +944,6 @@ double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n)
       radiusOfGyration+=sqrt((xi-xMean)*(xi-xMean)+(yi-yMean)*(yi-yMean));
     }
     radiusOfGyration/= (double) naturalComponent.size();
-    // this is to rescale to landscape caracteristic length
-    radiusOfGyration/= (double) n;
   }
 
   return radiusOfGyration;
