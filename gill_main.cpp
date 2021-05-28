@@ -428,10 +428,12 @@ int main(int argc, const char * argv[]){
 
   // saving files so ifdtsave was largest than execution time one gets the final
   // values for every output we look at
-  ofstream tofile_sens("DATA_SENSITIVITY");
-  tofile_sens.precision(5);
-  tofile_sens.setf(ios::scientific,ios::floatfield);
-  saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+  // ofstream tofile_sens("DATA_SENSITIVITY");
+  // tofile_sens.precision(5);
+  // tofile_sens.setf(ios::scientific,ios::floatfield);
+  // saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+
+  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
 
   // saveLandscape(tofile_land,t,landscape);
   // saveComponents(tofile_clus,t,landscape,naturalComponents);
