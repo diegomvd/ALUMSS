@@ -981,15 +981,16 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
 
   double meanES=0;
   double squaredMeanES=0;
-  double stdES;
-  for (ix=0;ix<ecosystemServices.size();ix++){
-    meanES+=ecosystemServices[ix];
-    squaredMeanES+=ecosystemServices[ix]*ecosystemServices[ix];
+  double stdES=0;
+  if (ecosystemServices.size()>0){
+    for (ix=0;ix<ecosystemServices.size();ix++){
+      meanES+=ecosystemServices[ix];
+      squaredMeanES+=ecosystemServices[ix]*ecosystemServices[ix];
+    }
+    meanES/=ecosystemServices.size();
+    squaredMeanES/=ecosystemServices.size();
+    stdES=sqrt(squaredMeanES-meanES*meanES);
   }
-  meanES/=ecosystemServices.size();
-  squaredMeanES/=ecosystemServices.size();
-  stdES=sqrt(squaredMeanES-meanES*meanES);
-
   /*
   Second part is a copy of saveAggregated
   */
@@ -1100,21 +1101,22 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
   double meanRadiusOfGyration = 0;
   double squaredRadiusOfGyration = 0;
 
-  for(it=naturalComponents.begin();it!=naturalComponents.end();++it){
-    radiusOfGyration = getRadiusOfGyration(*it,nn);
-    // division by nn is to rescale by landscape size
-    meanRadiusOfGyration += (double)radiusOfGyration/nn;
-    squaredRadiusOfGyration += (double)radiusOfGyration*radiusOfGyration/(nn*nn);
-    correlationLength += (*it).size() * radiusOfGyration;
+  if (naturalComponents.size()>0){
+    for(it=naturalComponents.begin();it!=naturalComponents.end();++it){
+      radiusOfGyration = getRadiusOfGyration(*it,nn);
+      // division by nn is to rescale by landscape size
+      meanRadiusOfGyration += (double)radiusOfGyration/nn;
+      squaredRadiusOfGyration += (double)radiusOfGyration*radiusOfGyration/(nn*nn);
+      correlationLength += (*it).size() * radiusOfGyration;
+    }
+    squaredRadiusOfGyration /= (double) naturalComponents.size();
+    meanRadiusOfGyration /= (double) naturalComponents.size();
+    stdRadiusOfGyration = squaredRadiusOfGyration - meanRadiusOfGyration*meanRadiusOfGyration;
+    // use the fact that we already calculated the number of natural cells and rescale it by landscape size nn
+    if (nN>0){
+      correlationLength /= (double) (nN*nn);
+    }
   }
-  squaredRadiusOfGyration /= (double)naturalComponents.size();
-  meanRadiusOfGyration /= (double)naturalComponents.size();
-  stdRadiusOfGyration = (double)squaredRadiusOfGyration - meanRadiusOfGyration*meanRadiusOfGyration;
-  // use the fact that we already calculated the number of natural cells and rescale it by landscape size nn
-  if (nN>0){
-    correlationLength /= (double) (nN*nn);
-  }
-
   file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalY << " " << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << connectance << " " << nMax << " " << nMin << " " << pMax << " " << pMin << " " <<  ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << " " << meanRadiusOfGyration << " " << stdRadiusOfGyration << " " << correlationLength << "\n";
 
   return;
