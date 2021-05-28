@@ -163,7 +163,8 @@ int main(int argc, const char * argv[]){
   }
 
   // string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
-  string filename_AGRE="DATA_AGRE"+filename;
+  // string filename_AGRE="DATA_AGRE"+filename;
+  string filename_AGRE="DATA_AGRE";
   // string filename_AGRE="DATA_AGRE";
   ofstream tofile_agre(filename_AGRE);
   tofile_agre.precision(5);
