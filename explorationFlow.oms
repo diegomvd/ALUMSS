@@ -762,7 +762,7 @@ val replicationsFinalStatePercoMeasure =
   Replication(
     evaluation = finalStatePercoMeasureTask,
     seed = mySeed,
-    sample = 20,
+    sample = 1,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -807,7 +807,7 @@ DirectSampling(
     (Td is 50.0) x
     (d is 1.0) x
     (dtsave is 1.0) x
-    (a0 in (0.0 to 0.99 by 0.01)) x
+    (a0 in (0.1 to 0.9 by 0.1)) x
     (w in Seq(0.0,1.0,2.0,4.0)),
 )
 
