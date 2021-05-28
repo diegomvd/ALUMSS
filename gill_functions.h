@@ -81,11 +81,13 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 
 ////////////////////////////////////////////////////////////////////////////////
 // 6- Outputs:
+//       - getRadiusOfGyration
 //       - saveAggregated
 //       - saveLandscape
 //       - saveComponents
 ////////////////////////////////////////////////////////////////////////////////
 
+double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n);
 void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int n, double ripleyDistance, double nMax, double nMin, double pMax, double pMin);
 void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape);
 void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents);

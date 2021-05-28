@@ -910,10 +910,44 @@ void rungeKutta4(vector<double> &population, vector<double> &agriculturalProduct
 
 ////////////////////////////////////////////////////////////////////////////////
 // 6- Outputs:
+//       - getRadiusOfGyration
 //       - saveAggregated
 //       - saveLandscape
 //       - saveComponents
 ////////////////////////////////////////////////////////////////////////////////
+
+double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n)
+{
+
+  vector<int>::const_iterator it;
+  unsigned int xi,yi;
+  double radiusOfGyration=0;
+  double xMean,yMean;
+
+  xMean=0;
+  yMean=0;
+  // iterate over the cells of the natural component to get their mean position
+  for(it=naturalComponent.begin();it!=naturalComponent.end();it++){
+    xi=(int)*it%n;
+    yi=(int)*it/n;
+    xMean+=xi;
+    yMean+=yi;
+  }
+  xMean/= (double) naturalComponent.size();
+  yMean/= (double) naturalComponent.size();
+
+  // now iterate again to calculate the radius of gyration
+  for(it=naturalComponent.begin();it!=naturalComponent.end();it++){
+    xi=(int)*it%n;
+    yi=(int)*it/n;
+    radiusOfGyration+=sqrt((xi-xMean)*(xi-xMean)+(yi-yMean)*(yi-yMean));
+  }
+  radiusOfGyration/= (double) naturalComponent.size();
+  // this is to rescale to landscape caracteristic length
+  radiusOfGyration/= (double) n;
+
+  return radiusOfGyration;
+}
 
 void saveAggregated(ofstream &file, double t, const vector<double> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int nn, double ripleyDistance, double nMax, double nMin, double pMax, double pMin)
 {
@@ -1056,7 +1090,29 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
   if (nA0>0){ripleyA0 *= landscape.size()/(nA0*nA0);}
   if (nA1>0){ripleyA1 *= landscape.size()/(nA1*nA1);}
 
-  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalY << " " << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << connectance << " " << nMax << " " << nMin << " " << pMax << " " << pMin << " " <<  ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << "\n";
+  /////////////////////////////////////////////////////////////////////////////
+  // get radius of gyration and correlation length
+
+  vector<vector<int>>::const_iterator it;
+  double radiusOfGyration,stdRadiusOfGyration;
+  double correlationLength = 0;
+  double meanRadiusOfGyration = 0;
+  double squaredRadiusOfGyration = 0;
+
+  for(it=naturalComponents.begin();it!=naturalComponents.end();++it){
+    radiusOfGyration = getRadiusOfGyration(*it,nn);
+    // division by nn is to rescale by landscape size
+    meanRadiusOfGyration += (double)radiusOfGyration/nn;
+    squaredRadiusOfGyration += (double)radiusOfGyration*radiusOfGyration/(nn*nn);
+    correlationLength += (*it).size() * radiusOfGyration;
+  }
+  squaredRadiusOfGyration /= (double)naturalComponents.size();
+  meanRadiusOfGyration /= (double)naturalComponents.size();
+  stdRadiusOfGyration = (double)squaredRadiusOfGyration - meanRadiusOfGyration*meanRadiusOfGyration;
+  // use the fact that we already calculated the number of natural cells and rescale it by landscape size nn
+  correlationLength /= (double) (nN*nn);
+
+  file << t << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << totalY << " " << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << connectance << " " << nMax << " " << nMin << " " << pMax << " " << pMin << " " <<  ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 << " " << meanRadiusOfGyration << " " << stdRadiusOfGyration << " " << correlationLength << "\n";
 
   return;
 }

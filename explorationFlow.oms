@@ -48,7 +48,9 @@ val ripleyN = Val[Double]
 val ripleyD = Val[Double]
 val ripleyA0 = Val[Double]
 val ripleyA1 = Val[Double]
-
+val meanR = Val[Double]
+val stdR = Val[Double]
+val corrLen = Val[Double]
 
 ///////////////////////////////////////////////////////////////////////////////
 // 1- model plugin with all the parameter inputs as well as the output files
@@ -450,15 +452,15 @@ DirectSampling(
     (Tag is 0.1) x
     (d0 is 0.0) x
     (ksi is 1.2) x
+    (y0 is 0.2)x
     (sar is 0.25) x
-    (w is 0.0) x
     (Tab is 50.0) x
     (Tr is 5.0) x
     (Td is 50.0) x
     (d is 1.0) x
-    (dtsave is "T") x
+    (dtsave is 1.0) x
     (a0 in (0.0 to 1.0 by 0.01)) x
-    (w in Seq(0.0,1.0,2.0,3.0,4.0,8.0,16.0)),
+    (w in Seq(0.0,1.0,2.0,4.0)),
 )
 
 // end of longterm sampling for clustering2
@@ -729,6 +731,89 @@ val replicationsExplo =
 // end of perco zoom fig 2
 ///////////////////////////////////////////
 
+//////////////////////////////////////////
+// begin percolation measure sampling to get correlation length and radius of gyration as a function of omega and N
+
+val readFinalStatePercoMeasure =
+    ScalaTask("""
+    // read file as an array of lines and get last line
+    val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
+    // split the string and store it in an array
+    val valuesAgre = lastLineAgre.split(" ")
+
+    val N = valuesAgre(2).toDouble
+    val meanES = valuesAgre(11).toDouble
+    val stdES = valuesAgre(12).toDouble
+    val meanR = valuesAgre(22).toDouble
+    val stdR = valuesAgre(23).toDouble
+    val corrLen = valuesAgre(24).toDouble
+    """
+
+    )set(
+        inputs+=agreOut,
+        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,y0,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
+        outputs+=(N,meanES,stdES,meanR,stdR,corrLen)
+    )
+
+val finalStatePercoMeasureTask = MoleTask(scriptTask -- readFinalStatePercoMeasure)
+
+val replicationsFinalStatePercoMeasure =
+  Replication(
+    evaluation = finalStatePercoMeasureTask,
+    seed = mySeed,
+    sample = 20,
+    aggregation = Seq (
+      T aggregate average,
+      dtp aggregate average,
+      L aggregate average,
+      a0 aggregate average,
+      d0 aggregate average,
+      ksi aggregate average,
+      y0 aggregate average,
+      sar aggregate average,
+      a aggregate average,
+      w aggregate average,
+      Tag aggregate average,
+      Tab aggregate average,
+      Tr aggregate average,
+      Td aggregate average,
+      d aggregate average,
+      dtsave aggregate average,
+      mySeed aggregate average,
+      N aggregate average,
+      meanES aggregate average,
+      stdES aggregate average,
+      meanR aggregate average,
+      stdR aggregate average,
+      corrLen aggregate average)
+  )
+
+val samplingPercoMeasure =
+DirectSampling(
+  evaluation = replicationsFinalStatePercoMeasure on env,
+  sampling =
+    (T is 0.0) x
+    (dtp is 0.1) x
+    (L is 100.0) x
+    (a is 40.0) x
+    (Tag is 0.1) x
+    (d0 is 0.0) x
+    (ksi is 1.2) x
+    (y0 is 0.2)x
+    (sar is 0.25) x
+    (Tab is 50.0) x
+    (Tr is 5.0) x
+    (Td is 50.0) x
+    (d is 1.0) x
+    (dtsave is 1.0) x
+    (a0 in (0.0 to 1.0 by 0.01)) x
+    (w in Seq(0.0,1.0,2.0,4.0)),
+)
+
+// end of longterm sampling for clustering2
+//////////////////////////////////////////
+
+
 // a0Exploration2 -< ( a0OSE hook (workDirectory / "resultsOSE") )
 // longTerm4 hook (workDirectory / "experiment4-010521.csv")
 // longTermNoPop hook (workDirectory / "experimentNoPop-2-140521.csv")
@@ -740,4 +825,6 @@ val replicationsExplo =
 // longTermClustering hook (workDirectory / "experimentTagW-280421.csv")
 // longTermClustering2 hook (workDirectory / "experimentA0W-220421.csv")
 
-(setParamExplo hook copyHook) -- replicationsExplo
+samplingPercoMeasure hook (workDirectory / "experimentPercoMeasure-280521.csv")
+
+// (setParamExplo hook copyHook) -- replicationsExplo
