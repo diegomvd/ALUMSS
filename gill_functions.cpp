@@ -1113,7 +1113,7 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
   meanRadiusOfGyration /= (double)naturalComponents.size();
   stdRadiusOfGyration = (double)squaredRadiusOfGyration - meanRadiusOfGyration*meanRadiusOfGyration;
   // use the fact that we already calculated the number of natural cells and rescale it by landscape size nn
-  if nN>0{
+  if (nN>0){
     correlationLength /= (double) (nN*nn);
   }
 
