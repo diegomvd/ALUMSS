@@ -48,6 +48,7 @@ val ripleyN = Val[Double]
 val ripleyD = Val[Double]
 val ripleyA0 = Val[Double]
 val ripleyA1 = Val[Double]
+val corrLen = Val[Double]
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +62,7 @@ val scriptTask =
     )set(
       inputs += (T,dtp,L,a0,d0,ksi,y0,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
       // outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
-      outputFiles += ("DATA_SENSITIVITY",agreOut),
+      outputFiles += ("DATA_AGRE",agreOut),
       resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
 
       // default parameter and initialization values
@@ -113,16 +114,52 @@ val readOutput =
     val ripleyD = valuesAgre(19).toDouble
     val ripleyA0 = valuesAgre(20).toDouble
     val ripleyA1 = valuesAgre(21).toDouble
+    val corrLen = valuesAgre(24).toDouble
 
     """
     )set(
         inputs+=agreOut,
-        outputs+=(P,N,D,A0,A1,nFrag,meanSize,stdSize,maxSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1)
+        outputs+=(P,N,D,A0,A1,nFrag,meanSize,stdSize,maxSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1,corrLen)
     )
 
 val moleTask = MoleTask(scriptTask -- readOutput)
 
-val env = LocalEnvironment(35)
+val env = LocalEnvironment(40)
+
+// SensitivityMorris(
+//     evaluation = moleTask on env,
+//     inputs = Seq(
+//         ksi in (0.5,2.0),
+//         sar in (0.1,1.0),
+//         a in (0.0,1.0),
+//         w in (0.0,8.0),
+//         Tag in (0.01,1.0),
+//         Tab in (0.1,100.0),
+//         Tr in (0.1,10.0),
+//         Td in (1.0,100.0),
+//         a0 in (0.1,0.9),
+//         y0 in (0.05,1.0)
+//         ),
+//     outputs = Seq(
+//         P,
+//         N,
+//         D,
+//         A0,
+//         A1,
+//         nFrag,
+//         meanSize,
+//         stdSize,
+//         maxSize,
+//         meanES,
+//         stdES,
+//         ripleyN,
+//         ripleyD,
+//         ripleyA0,
+//         ripleyA1
+//         ),
+//     sample = 100,
+//     level = 100
+// ) hook (workDirectory / "gillespieSensitivityResults6")
 
 SensitivityMorris(
     evaluation = moleTask on env,
@@ -132,10 +169,10 @@ SensitivityMorris(
         a in (0.0,1.0),
         w in (0.0,8.0),
         Tag in (0.01,1.0),
-        Tab in (0.1,100.0),
-        Tr in (0.1,10.0),
-        Td in (1.0,100.0),
-        a0 in (0.1,0.9),
+        Tab is 50.0,
+        Tr is 5.0,
+        Td is 50.0,
+        a0 is 0.2,
         y0 in (0.05,1.0)
         ),
     outputs = Seq(
@@ -155,6 +192,6 @@ SensitivityMorris(
         ripleyA0,
         ripleyA1
         ),
-    sample = 100,
-    level = 100
-) hook (workDirectory / "gillespieSensitivityResults6")
+    sample = 1000,
+    level = 20
+) hook (workDirectory / "gillespieSensitivityResults7")
