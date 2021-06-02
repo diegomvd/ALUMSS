@@ -110,19 +110,39 @@ val readOutput =
     // val nMin = valuesAgre(15).toDouble
     // val pMax = valuesAgre(16).toDouble
     // val pMin = valuesAgre(17).toDouble
-    val ripleyN = valuesAgre(18).toDouble
-    val ripleyD = valuesAgre(19).toDouble
-    val ripleyA0 = valuesAgre(20).toDouble
-    val ripleyA1 = valuesAgre(21).toDouble
+    // val ripleyN = valuesAgre(18).toDouble
+    // val ripleyD = valuesAgre(19).toDouble
+    // val ripleyA0 = valuesAgre(20).toDouble
+    // val ripleyA1 = valuesAgre(21).toDouble
     val corrLen = valuesAgre(24).toDouble
 
     """
     )set(
         inputs+=agreOut,
-        outputs+=(P,N,D,A0,A1,nFrag,meanSize,stdSize,maxSize,meanES,stdES,ripleyN,ripleyD,ripleyA0,ripleyA1,corrLen)
+        outputs+=(P,N,D,A0,A1,nFrag,meanSize,stdSize,maxSize,meanES,stdES,corrLen)
     )
 
 val moleTask = MoleTask(scriptTask -- readOutput)
+
+val replications = Replication(
+  evaluation = moleTask,
+  seed = mySeed,
+  sample = 10,
+  aggregation = Seq (
+    P aggregate average,
+    N aggregate average,
+    A0 aggregate average,
+    A1 aggregate average,
+    D aggregate average,
+    nFrag aggregate average,
+    meanSize aggregate average,
+    stdSize aggregate average,
+    maxSize aggregate average,
+    meanES aggregate average,
+    stdES aggregate average,
+    corrLen aggregate average)
+  )
+)
 
 val env = LocalEnvironment(40)
 
@@ -162,36 +182,67 @@ val env = LocalEnvironment(40)
 // ) hook (workDirectory / "gillespieSensitivityResults6")
 
 SensitivityMorris(
-    evaluation = moleTask on env,
+    evaluation = replications on env,
     inputs = Seq(
-        ksi in (0.5,2.0),
-        sar in (0.1,1.0),
+        ksi is "y0+1",
+        sar in (0.05,1.0),
         a in (0.0,1.0),
-        w in (0.0,8.0),
+        w in (0.0,10.0),
         Tag in (0.01,1.0),
         Tab is 50.0,
         Tr is 5.0,
         Td is 50.0,
         a0 is 0.2,
-        y0 in (0.05,1.0)
+        y0 in (0.01,2.0)
         ),
     outputs = Seq(
-        P,
-        N,
-        D,
-        A0,
-        A1,
-        nFrag,
-        meanSize,
-        stdSize,
-        maxSize,
-        meanES,
-        stdES,
-        ripleyN,
-        ripleyD,
-        ripleyA0,
-        ripleyA1
+        P ,
+        N ,
+        A0 ,
+        A1 ,
+        D ,
+        nFrag ,
+        meanSize ,
+        stdSize ,
+        maxSize ,
+        meanES ,
+        stdES ,
+        corrLen
         ),
     sample = 1000,
     level = 20
-) hook (workDirectory / "gillespieSensitivityResults7")
+) hook (workDirectory / "morrisSensitivityResults")
+
+// SensitivitySaltelli(
+//     evaluation = moleTask on env,
+//     inputs = Seq(
+//         ksi in (0.5,2.0),
+//         sar in (0.1,1.0),
+//         a in (0.0,1.0),
+//         w in (0.0,8.0),
+//         Tag in (0.01,1.0),
+//         Tab in (0.1,100.0),
+//         Tr in (0.1,10.0),
+//         Td in (1.0,100.0),
+//         a0 in (0.1,0.9),
+//         y0 in (0.05,1.0)
+//         ),
+//     outputs = Seq(
+//         P,
+//         N,
+//         D,
+//         A0,
+//         A1,
+//         nFrag,
+//         meanSize,
+//         stdSize,
+//         maxSize,
+//         meanES,
+//         stdES,
+//         ripleyN,
+//         ripleyD,
+//         ripleyA0,
+//         ripleyA1
+//         ),
+//     sample = 2000,
+// ) hook (workDirectory / "gillespieSensitivityResultsSaltelli")
