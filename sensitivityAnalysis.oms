@@ -184,7 +184,7 @@ val env = LocalEnvironment(40)
 SensitivityMorris(
     evaluation = replications on env,
     inputs = Seq(
-        ksi is "y0+1",
+        ksi is 3.0,
         sar in (0.05,1.0),
         a in (0.0,1.0),
         w in (0.0,10.0),
