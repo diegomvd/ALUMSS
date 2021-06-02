@@ -71,7 +71,7 @@ val scriptTask =
       L:=40,
       a0:=0.1,
       d0:=0.0,
-      ksi:=1.2,
+      ksi:=3.0,
       y0:=0.2,
       sar:=0.25,
       a:=0.2,
@@ -184,15 +184,10 @@ val env = LocalEnvironment(40)
 SensitivityMorris(
     evaluation = replications on env,
     inputs = Seq(
-        ksi is 3.0,
         sar in (0.05,1.0),
         a in (0.0,1.0),
         w in (0.0,10.0),
         Tag in (0.01,1.0),
-        Tab is 50.0,
-        Tr is 5.0,
-        Td is 50.0,
-        a0 is 0.2,
         y0 in (0.01,2.0)
         ),
     outputs = Seq(
