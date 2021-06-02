@@ -140,7 +140,7 @@ val replications = Replication(
     maxSize aggregate average,
     meanES aggregate average,
     stdES aggregate average,
-    corrLen aggregate average)
+    corrLen aggregate average
   )
 )
 
@@ -196,17 +196,17 @@ SensitivityMorris(
         y0 in (0.01,2.0)
         ),
     outputs = Seq(
-        P ,
-        N ,
-        A0 ,
-        A1 ,
-        D ,
-        nFrag ,
-        meanSize ,
-        stdSize ,
-        maxSize ,
-        meanES ,
-        stdES ,
+        P,
+        N,
+        A0,
+        A1,
+        D,
+        nFrag,
+        meanSize,
+        stdSize,
+        maxSize,
+        meanES,
+        stdES,
         corrLen
         ),
     sample = 1000,
