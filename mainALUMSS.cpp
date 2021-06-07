@@ -1,4 +1,5 @@
 // to compile: c++ mainALUMSS.cpp functionsALUMSS.cpp cokus3.c -o alumss-exec -lgsl -lgslcblas -lm -Wall -Weffc++ --std=c++17 -lstdc++fs
+//         or: ./compileALUMSS.sh
 
 /*
 Main program for the agricultural land-use management spatial simulation (ALUMSS).
