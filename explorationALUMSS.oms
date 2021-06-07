@@ -1,3 +1,5 @@
+// to execute from the command line: openmole -s explorationALUMSS.oms
+
 // output files
 val agreOut = Val[File]
 val f = Val[File]
@@ -53,19 +55,22 @@ val stdR = Val[Double]
 val corrLen = Val[Double]
 
 ///////////////////////////////////////////////////////////////////////////////
-// 1- model plugin with all the parameter inputs as well as the output files
+// 1- MODEL PLUGIN AS AN EXECUTABLE FILE
 ///////////////////////////////////////////////////////////////////////////////
 
 val scriptTask =
   SystemExecTask(
     command = Seq(
-      "./gillespie-ses ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${y0} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} ${dtsave} ${mySeed} "),
+      "./alumss-exec ${T} ${dtp} ${L} ${a0} ${d0} ${ksi} ${y0} ${sar} ${a} ${w} ${Tag} ${Tab} ${Tr} ${Td} ${d} ${dtsave} ${mySeed} "),
     )set(
       (inputs, outputs) += (T,dtp,L,a0,d0,ksi,y0,sar,a,w,Tag,Tab,Tr,Td,d,dtsave,mySeed),
+
+      // outputFiles is the path to the file containing the model outputs
       // outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
       outputFiles += ("DATA_AGRE",agreOut),
-      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/gillespie-ses",
-      // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/gillespie-ses",
+      // resources is the path to the executable that runs the simulations
+      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/alumss-exec",
+      // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/alumss-exec",
 
       // default parameter and initialization values
       T:=2000.0,
@@ -88,7 +93,7 @@ val scriptTask =
     )
 
 ///////////////////////////////////////////////////////////////////////////////
-// 2 - hooks
+// 2 - HOOKS FOR THE REPLICATION EXPERIMENTS
 ///////////////////////////////////////////////////////////////////////////////
 
 // hook to append the output across time of a simulation a replications file.
@@ -103,17 +108,19 @@ val hookAppend = AppendToFileHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_$
 val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}.csv")
 
 ///////////////////////////////////////////////////////////////////////////////
-// 3- environment setup
+// 3- ENVIRONMENT SETUP: USE 40 LOCAL CORES
 ///////////////////////////////////////////////////////////////////////////////
 
 val env = LocalEnvironment(40)
 
 ///////////////////////////////////////////////////////////////////////////////
-// 4 - workflow for paper
+// 4 - DECLARATION OF NUMERICAL EXPERIMENTS
 //////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////
-// begin of clustering experiment for figure 3
+///////////////////////////////////////////////////////////////////////////////
+// Begin of clustering experiment for figure 3:
+// Replications to get the time dynamics of the fragmentation measures
+///////////////////////////////////////////////////////////////////////////////
 val setParamClusteringExp=ScalaTask("""
     val ksi = 1.2
     val sar = 0.25
@@ -141,14 +148,17 @@ val replicationsClustering =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 5
+    sample = 20
   )
 val clusteringExploration = ExplorationTask( w in Seq(0.0,4.0,8.0) )
-// end of clustering experiment for figure 3
-/////////////////////////////////////////////
 
-//////////////////////////////////////////////////
-// begin of intensification exploration for fig 1
+///////////////////////////////////////////////////////////////////////////////
+// End of clustering experiment for figure 3
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Begin of intensification experiment for figure 1
+///////////////////////////////////////////////////////////////////////////////
 val setParamIntenseExp=ScalaTask("""
     val ksi = 1.2
     val sar = 0.25
@@ -176,7 +186,7 @@ val replicationsIntensification =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 5
+    sample = 20
   )
 val intensificationExploration = ExplorationTask( a in Seq(0.06,0.07,0.08,0.09) )
 // end of intensification exploration fig 1
@@ -211,7 +221,7 @@ val replicationsZoomPerco =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 10
+    sample = 30
   )
 // end of perco zoom fig 2
 ///////////////////////////////////////////
@@ -246,7 +256,7 @@ val replicationsFinalStateIntensification =
   Replication(
     evaluation = finalStateIntensificationTask,
     seed = mySeed,
-    sample = 1,
+    sample = 20,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -339,7 +349,7 @@ val replicationsFinalStateClustering =
   Replication(
     evaluation = finalStateClusteringTask,
     seed = mySeed,
-    sample = 10,
+    sample = 20,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -418,7 +428,7 @@ val replicationsFinalStateClustering2 =
   Replication(
     evaluation = finalStateClusteringTask2,
     seed = mySeed,
-    sample = 10,
+    sample = 20,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -496,7 +506,7 @@ val replicationsA0 =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 5
+    sample = 20
   )
 val a0Exploration = ExplorationTask( a0 in Seq(0.6,0.7,0.8,0.9,1.0) )
 // end of figure4
@@ -536,7 +546,7 @@ val replicationsFinalState=
   Replication(
     evaluation = finalStateTask,
     seed = mySeed,
-    sample = 5,
+    sample = 20,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -650,7 +660,7 @@ val replicationsFinalStateNoPop=
   Replication(
     evaluation = finalStateTaskNoPop,
     seed = mySeed,
-    sample = 5,
+    sample = 20,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -727,7 +737,7 @@ val replicationsExplo =
   Replication(
     evaluation = scriptTask hook hookAppend on env,
     seed = mySeed,
-    sample = 5
+    sample = 20
   )
 // end of perco zoom fig 2
 ///////////////////////////////////////////
@@ -762,7 +772,7 @@ val replicationsFinalStatePercoMeasure =
   Replication(
     evaluation = finalStatePercoMeasureTask,
     seed = mySeed,
-    sample = 10,
+    sample = 20,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,

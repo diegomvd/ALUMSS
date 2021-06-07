@@ -1,4 +1,9 @@
-#include "gill_functions.h"
+/*
+Implementation of all the functions required for the simulation and used in the
+main program.
+*/
+
+#include "functionsALUMSS.h"
 
 #include <boost/config.hpp>
 #include <iostream>

@@ -1,8 +1,59 @@
-// to compile: c++ gill_main.cpp gill_functions.cpp cokus3.c -o gillespie-ses -lgsl -lgslcblas -lm -Wall -Weffc++ --std=c++17 -lstdc++fs
+// to compile: c++ mainALUMSS.cpp functionsALUMSS.cpp cokus3.c -o alumss-exec -lgsl -lgslcblas -lm -Wall -Weffc++ --std=c++17 -lstdc++fs
 
-#include "gill_functions.h"
+/*
+Main program for the agricultural land-use management spatial simulation (ALUMSS).
+All the functions needed for execution are in functionsALUMS.h. Command to compile
+can be found in the first line of the program.
 
-// #include <sodium.h>
+0- EQUIVALENCE BETWEEN PARAMTER NAMES IN CODE AND IN PAPER
+      CODE    -   PAPER   -   MEANING
+      ksi     -   y1      -   productivity of intensive agriculture
+      sar     -   z       -   saturation exponent of ecosystem servicaes with area
+      a       -   alpha   -   preference for intensification
+      w       -   omega   -   clustering parameter
+      1/Tag   -   sigma   -   sensitivity to resource deficit
+      1/Tab   -   rho_L   -   fertility loss sensitivtiy to ecosystem service provision
+      1/Tr    -   rho_R   -   recovery sensitivity to ecosystem service provision
+      1/Td    -   rho_D   -   degradation sensitivity to ecosystem service provision
+
+The sensitivities are growth or decay rates with respect to ecosystem
+service provision of the transitions propensities (probabilities per unit time).
+Note that in the code we use the growth or decay rates of the average time for a transition.
+They are the inverse of the growth decay rates for the propensities.
+
+1- INITIALIZATION
+The agricultural landscape is initialized by specifying:
+  - n landscape size-length in number of cells. Total number of cells is n*n
+  - d0 the initial fraction of degraded land
+  - a0 the initial fraction of agricultural land
+  - a the preference for intensification: gives the fraction of agricultural
+    cells that are intensively cultivated
+  - w the clustering parameter: controls the level of clustering between same
+    land cover/use types
+The border conditions are periodic, hence there are not border effects in our
+simulations and we use the Von-Neumann neighbourhood.
+
+Human population density p is initialized at equilibrium with the resources
+produced Y by the landscape as it is initialized: p(t=0) = Y(t=0)
+
+The simulation can also be initialized via a CONF file that provides the exact
+landscape configuration and population density. This can be used to continue
+simulations that were too short or explore the impact of precise landscape
+configurations.
+
+2- SIMULATION
+We use the Gillespie's Stochastic Simulation Algortihm to simulate landscape
+dynamics in continuous time and obtain exact solutions of the Master Equation
+describing the system's dynamics. This means that we randomly choose the next
+land-use transition time and the land-use transition type given the per unit
+time probability distributions of each land-use transition. On the contrary, the
+human population density ODE is solved every timestep of length dtp.
+The total simulated time is SimTime.
+
+*/
+
+#include "functionsALUMSS.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <fstream>
@@ -245,13 +296,13 @@ int main(int argc, const char * argv[]){
   // BY CONF FILE
   if (LOAD_CONF==1){
     cout << "Starting from conf file \n";
-    ifstream conf_file("DATA_CONF_T_2000_dtp_0.1_n_40_p0_5_cg0_1_r0_1_y0_5_a_0.45_w_0_m_1_g_1_l_0.1_Ta_1_phi_3_Tr_1.5_Td_50_dtsave_1.dat");
+    ifstream conf_file("DATA_CONF");
     if(conf_file.is_open()) {
 
       // first extract the time and population
       double pop;
       if (!(conf_file >> t >> pop)){
-        cout << "Error: gill_main.cpp: time and population could not be loaded from CONF file. \n";
+        cout << "Error: mainALUMSS.cpp: time and population could not be loaded from CONF file. \n";
       }
       population.push_back(pop);
       SimTime+=t;
@@ -367,6 +418,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
+
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
     ///////////////////////////////////////////////////////////////////////////
@@ -409,7 +461,7 @@ int main(int argc, const char * argv[]){
       else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
       else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //abandonment to natural
       else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
-      else {cout << "Error: gill_main.cpp reaction " << reaction << " does not exist.\n";}
+      else {cout << "Error: mainALUMSS.cpp reaction " << reaction << " does not exist.\n";}
 
 
       // update the time and timestep for ODE solving
