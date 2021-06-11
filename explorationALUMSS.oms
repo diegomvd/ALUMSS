@@ -71,7 +71,7 @@ val scriptTask =
       // outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
       outputFiles += ("DATA_AGRE",agreOut),
       // resources is the path to the executable that runs the simulations
-      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/gillespie-land-use/alumss-exec",
+      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/ALUMSS/ALUMSS/alumss-exec",
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/alumss-exec",
 
       // default parameter and initialization values
