@@ -75,15 +75,15 @@ val scriptTask =
       // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/alumss-exec",
 
       // default parameter and initialization values
-      T:=2000.0,
+      T:=4000.0,
       dtp:=0.1,
       L:=40,
-      a0:=0.1,
+      a0:=0.2,
       d0:=0.0,
       ksi:=1.2,
       y0:=0.2,
       sar:=0.25,
-      a:=0.2,
+      a:=0.0,
       w:=0.0,
       Tag:=0.1,
       Tab:=50.0,
@@ -92,7 +92,7 @@ val scriptTask =
       d:=1.0,
       mdc:=1.1,
       ndc:=1.1,
-      dtsave:=1.0,
+      dtsave:=4000.0,
       mySeed:=1111
     )
 
@@ -162,17 +162,65 @@ val explorationNDC = ExplorationTask( ndc in Seq(1.1,2.1,3.1,4.1,5.1) )
 val explorationMDC = ExplorationTask( mdc in Seq(1.1,2.1,3.1,4.1,5.1) )
 
 // explorationNDC -< (parameterSet hook copyHook) -- replications
-explorationMDC -< (parameterSet hook copyHook) -- replications
+// explorationMDC -< (parameterSet hook copyHook) -- replications
 
 // i saw that ndc = 3.1 was interesting ! i now vary mdc to catch possible interactions
 // between them, I should think of a deeper question to ask with my OM tools
 
 // doing a couple of replications to see the dynamics emerging from changin mdc
 
+// direct sampling for bifurcation diagram as a function of ndc
 
+val readOutputFile =
+    ScalaTask("""
+    // read file as an array of lines and get last line
+    val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
+    // split the string and store it in an array
+    val valuesAgre = lastLineAgre.split(" ")
 
+    val P = valuesAgre(1).toDouble
+    val N = valuesAgre(2).toDouble
+    val nMax = valuesAgre(14).toDouble
+    val nMin = valuesAgre(15).toDouble
+    val pMax = valuesAgre(16).toDouble
+    val pMin = valuesAgre(17).toDouble
+    """
 
+    )set(
+        inputs+=agreOut,
+        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,y0,sar,a,w,Tag,Tab,Tr,Td,d,mdc,ndc,dtsave,mySeed),
+        outputs+=(P,N,nMax,nMin,pMax,pMin)
+    )
 
+val runAndRead = MoleTask(scriptTask -- readOutputFile)
+
+val replicationsLongTerm =
+  Replication(
+    evaluation = runAndRead,
+    seed = mySeed,
+    sample = 20,
+    aggregation = Seq (
+      w aggregate average,
+      ndc aggregate average,
+      P aggregate average as Pmean,
+      N aggregate average as Nmean,
+      P aggregate meanSquaredError as Pstd,
+      N aggregate meanSquaredError as Nstd,
+      nMax aggregate average,
+      nMin aggregate average,
+      pMax aggregate average,
+      pMin aggregate average)
+  )
+
+val longTermSampling =
+DirectSampling(
+  evaluation = replicationsLongTerm,
+  sampling =
+    (ndc in Seq(1.1,2.1,3.1,4.1,5.1,6.1,7.1,8.1,9.1,10.1))x
+    (w in (0.0 to 5.0by 0.5)),
+)
+
+longTermSampling on env hook (workDirectory / "experimentNDC-110621.csv")
 
 
 
