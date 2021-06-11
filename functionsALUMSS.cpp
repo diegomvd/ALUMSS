@@ -115,7 +115,7 @@ void getNeighboursState(vector<unsigned int> &neighboursState, const vector<vect
 //       - getEcosystemServiceProvision
 ////////////////////////////////////////////////////////////////////////////////
 
-void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape)
+void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, double distanceConnection)
 {
   /*
   fills a vector where each member is a vector containing the indexes of all the
@@ -175,7 +175,7 @@ void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, const
         }
         //
         manhattanDist=dx+dy;
-        if ( manhattanDist<2 ){
+        if ( manhattanDist<distanceConnection ){
           add_edge(i, j, G);
         }
       }
@@ -205,12 +205,18 @@ void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, const
 
 void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, unsigned int i)
 {
+
+  /*
+  note: updateNCCadding with non-local neighbourhood doesnt pose a problem as
+  long as there is a neighbourMatrix for natural cells that accounts for the
+  non-locality
+  */
   vector<unsigned int> neighboursNatural;
   getNeighboursState(neighboursNatural,neighbourMatrix,landscape,i,0); // state 0 is natural
   vector<int> newNaturalComponent, newNaturalComponent2;
   newNaturalComponent.push_back(i);
 
-  if(neighboursNatural.size()==0){ //no natural neighbour
+  if(neighboursNatural.size()==0){ //no natural neighbour: simplest case, just create a new component
       naturalComponents.push_back(newNaturalComponent); // add it to the list
   }
   else{
@@ -227,10 +233,10 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
     */
     unsigned int neighboursFound = 0;
     for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){ // traverse all the components
-      for(it1=neighboursNatural.begin();it1!=neighboursNatural.end();it1++){ // traverse all the natural neigbhours
+      for(it1=neighboursNatural.begin();it1!=neighboursNatural.end();it1++){ // traverse all the natural neigbhours of new natural cell
         if( find( it2->begin(), it2->end(), *it1) != it2->end() ){ // found a neighbour in this component
-          neighboursFound+=1;
-          if ( find( toErase.begin(), toErase.end(), it2 ) == toErase.end() ){
+          neighboursFound+=1; // store the amount of natural neighbours found  to stop search once all are
+          if ( find( toErase.begin(), toErase.end(), it2 ) == toErase.end() ){  // if the currently considered component hasn't been aded in the erase/merging list, then add it
             toErase.push_back(it2);
           }
         }
@@ -270,12 +276,18 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
   return;
 }
 
-void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, int l)
+void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, int l, double distanceConnection)
 {
+  /*
+  note: updateNCCremoving with non-local natural neighbourhoods requires only
+  having a parameter for the connection distance
+  */
+
   //cout <<"\n";
   unsigned int n = (unsigned int) sqrt(landscape.size());
 
   // find cluster of cell l
+
   unsigned long ix;
   // these iterators are to traverse the naturalComponents
   vector<vector<int>>::iterator it1;
@@ -290,7 +302,7 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
   for(it1=naturalComponents.begin();it1!=naturalComponents.end();it1++){
     // find whether natural cell l is in this natural component
     it2=find(it1->begin(), it1->end(),l);
-    // if it is then erase it and store the component
+    // if it is then erase natural cell l and store the component
     if(it2!=it1->end()){
       it1->erase(it2);
       itComp =it1;
@@ -298,14 +310,17 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
     }
   }
 
-  // fill natural patches to get connected natural components
+  // get all the natural cells of the component where the removed cell belonged
+  // we need to know if the removal of the cell caused the fragmentation of the
+  // component in several pieces
   vector<unsigned int> naturalPatches;
   for (it2=itComp->begin();it2!=itComp->end();it2++){
     naturalPatches.push_back(*it2);
   }
 
-
-  // erase concerned cluster from naturalComponents
+  // erase concerned cluster from naturalComponents, we will calculate the new
+  // component(s) and push them back. worst case scenario the component was not
+  // fragmentedand the following operation was useless computing time
   naturalComponents.erase(itComp);
 
   //get connected components from the naturalPatches
@@ -317,7 +332,8 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
   /*
   create an undirected graph with the set of natural patches to calculate
   the connected components. to estimate whether two patches are connected
-  we calculate the manhattan distance between them
+  we calculate the manhattan distance between them, this uses the same method
+  than getNaturalConnectedComponents
   */
 
   using namespace boost;
@@ -851,11 +867,11 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double y0, double sar, double w, gsl_rng  *r)
+void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double y0, double sar, double w, double distanceConnection, gsl_rng  *r)
 {
 
   initializeLandscape(landscape,neighbourMatrix,n,a0,d0,a,w,r);
-  getNaturalConnectedComponents(naturalComponents,landscape);
+  getNaturalConnectedComponents(naturalComponents,landscape,distanceConnection);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);
   getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, y0);
   initializePopulation(population,agriculturalProduction);

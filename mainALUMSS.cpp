@@ -116,6 +116,9 @@ int main(int argc, const char * argv[]){
   double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
   double d; // decay distance for ecosystem service delivery
 
+  double managementDC; // distance at which two patches are considered as connected from the manager's perspective
+  double naturalDC; // distance at which two patches are considered connective from an ecosystemic point of view
+
   double dtsave; // timestep for saving data
 
   int seed; // this is expid
@@ -157,11 +160,15 @@ int main(int argc, const char * argv[]){
         // distance for es provision
         d = strtod(argv[15], &pEnd);
 
+        // distance of conncetion
+        managementDC = strtod(argv[16], &pEnd);
+        naturalDC = strtod(argv[17], &pEnd);
+
         // save timespace just in case
-        dtsave = strtod(argv[16], &pEnd);
+        dtsave = strtod(argv[18], &pEnd);
 
         // save seed
-        seed = atoi(argv[17]);
+        seed = atoi(argv[19]);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -209,8 +216,10 @@ int main(int argc, const char * argv[]){
     filename += "_Tr_"+allArgs[13];
     filename += "_Td_"+allArgs[14];
     filename += "_d_"+allArgs[15];
-    filename += "_dtsave_"+allArgs[16];
-    filename += "_expid_"+allArgs[17];
+    filename += "_mdc_"+allArgs[16];
+    filename += "_ndc_"+allArgs[17];
+    filename += "_dtsave_"+allArgs[18];
+    filename += "_expid_"+allArgs[19];
     filename+=".dat";
   }
 
@@ -277,8 +286,9 @@ int main(int argc, const char * argv[]){
   // vector containing the landscape state
   vector<unsigned int> landscape;
   // vector containing neighbours
-  vector<vector<unsigned int>> neighbourMatrixES;
-  vector<vector<unsigned int>> neighbourMatrix;
+  vector<vector<unsigned int>> neighbourMatrixES; // this is for the ES flow
+  vector<vector<unsigned int>> neighbourAgroMatrix; // this is for the neighbours from an agricultural management perspective
+  vector<vector<unsigned int>> neighbourNaturalMatrix; // this is for the neighbours from a natural perspective
   // vector containing the production of each patch
   vector<double> agriculturalProduction;
   // vector containing the production of each patch
@@ -318,9 +328,10 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    getNeighbourMatrix(neighbourMatrix,n,1);
+    getNeighbourMatrix(neighbourAgroMatrix,n,managementDC);
     getNeighbourMatrix(neighbourMatrixES,n,d);
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,n,a0,d0,a,ksi,y0,sar,w,r);
+    getNeighbourMatrix(neighbourNaturalMatrix,n,naturalDC);
+    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourAgroMatrix,neighbourMatrixES,n,a0,d0,a,ksi,y0,sar,w,naturalDC,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -417,7 +428,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // CALCULATING PROPENSITY VECTOR
     ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,neighbourMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
+    getPropensityVector(propensityVector,neighbourAgroMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
     //cout << "size of pvector is " << propensityVector.size() << "\n";
 
     ///////////////////////////////////////////////////////////////////////////
@@ -456,11 +467,11 @@ int main(int argc, const char * argv[]){
       patch=i%(n*n); // remainder from euclidian division
 
       // transform the landscape according to reaction and patch
-      if (reaction==0){landscape[patch]=0;count_events[0]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //recovery
-      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1; updateNCCremoving(naturalComponents,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //degradation
-      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1;updateNCCremoving(naturalComponents,landscape,patch);getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);} //expansion
+      if (reaction==0){landscape[patch]=0;count_events[0]+=1; updateNCCadding(naturalComponents,neighbourNaturalMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //recovery
+      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1; updateNCCremoving(naturalComponents,landscape,patch,naturalDC); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //degradation
+      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1;updateNCCremoving(naturalComponents,landscape,patch,naturalDC);getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);} //expansion
       else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
-      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //abandonment to natural
+      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourNaturalMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //abandonment to natural
       else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
       else {cout << "Error: mainALUMSS.cpp reaction " << reaction << " does not exist.\n";}
 
