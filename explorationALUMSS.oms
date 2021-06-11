@@ -125,6 +125,7 @@ val env = LocalEnvironment(40)
 
 val parameterSet = ScalaTask("""
     val ksi = 1.2
+    val y0 = 0.2
     val sar = 0.25
     val a = 0.0
     val w = 0.0
@@ -145,7 +146,7 @@ val parameterSet = ScalaTask("""
     f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1 meanR stdR corrLen\n"
 """) set(
     inputs += ndc,
-    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,Td,d,mdc,ndc,dtsave)
+    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,y0,Td,d,mdc,ndc,dtsave)
 )
 
 val replicationsNDC =
