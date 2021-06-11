@@ -56,6 +56,11 @@ val meanR = Val[Double]
 val stdR = Val[Double]
 val corrLen = Val[Double]
 
+val Pmean = Val[Double]
+val Nmean = Val[Double]
+val Pstd = Val[Double]
+val Nstd = Val[Double] 
+
 ///////////////////////////////////////////////////////////////////////////////
 // 1- MODEL PLUGIN AS AN EXECUTABLE FILE
 ///////////////////////////////////////////////////////////////////////////////
