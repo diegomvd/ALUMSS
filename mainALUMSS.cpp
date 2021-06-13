@@ -223,6 +223,13 @@ int main(int argc, const char * argv[]){
     filename+=".dat";
   }
 
+  // this file is to output the land-metrics meanES, giniES, average distance
+  // between natural patches to analyze the role of naturalDC
+  string filename_OUT="DATA_OUT";
+  ofstream tofile_out(filename_OUT);
+  tofile_out.precision(5);
+  tofile_out.setf(ios::scientific,ios::floatfield);
+
   // string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
   // string filename_AGRE="DATA_AGRE"+filename;
   string filename_AGRE="DATA_AGRE";
@@ -496,7 +503,10 @@ int main(int argc, const char * argv[]){
   // tofile_sens.setf(ios::scientific,ios::floatfield);
   // saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
 
-  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+
+  // careful I commented the standard output!!
+  // saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+  saveLandscapeMetrics(tofile_out,n,landscape,ecosystemServices);
 
   // saveLandscape(tofile_land,t,landscape);
   // saveComponents(tofile_clus,t,landscape,naturalComponents);

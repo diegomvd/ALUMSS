@@ -44,6 +44,7 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
   unsigned int dx,dy;
   unsigned int manhattanDist;
 
+  neighbourMatrix.clear();
   neighbourMatrix.resize(n*n);
 
   for (ix=0; ix<neighbourMatrix.size(); ++ix){
@@ -416,7 +417,6 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
     /*
     getting the state neighbours indexes in neighboursState vector
     */
-
     getNeighboursState(neighboursState,neighbourMatrix,landscape,i,0); // state 0 is natural
 
     /*
@@ -1296,6 +1296,117 @@ void saveSensitivityOutput(ofstream &file, unsigned int nn, double ripleyDistanc
   if (nA1>0){ripleyA1 *= landscape.size()/(nA1*nA1);}
 
   file << numComponents << " " << meanSize << " " << stdSize << " " << maxSize << " " << meanES << " " << stdES << " " << population[0] << " " << n << " " << d << " " << a0 << " " << a1 << " " << ripleyN << " " << ripleyD << " " << ripleyA0 << " " << ripleyA1 <<"\n";
+
+  return;
+}
+
+void saveLandscapeMetrics(ofstream &file, unsigned int n, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices)
+{
+  /*
+  In this function we save the mean ES provision in the landscape as well as
+  the gini index for ES provision to quantify inequalities across the landscape.
+  It would be good to calculate Ripley's-K to see the spatial distribution of
+  ES i.e. at which scales it is homogeneous or not. To binarize the data check
+  which cells are above or beyond the mean provision. We also save the mean and
+  std distance between natural cells to compare with the natural distance connection
+  and check whether the larger NDC has an impact on the ES after percolation.
+  */
+
+  // here we calculate the mean and gini ecosystem service provision
+  double meanES=0;
+  double giniES=0;
+  vector<double>::const_iterator it,it2;
+  // check if the vector is not empty: it shoudn't but just in case...
+  if (ecosystemServices.size()>0){
+    for (it=ecosystemServices.begin();it!=ecosystemServices.end();it++){
+      // here we calculate the mean
+      meanES+=*it;
+      for (it2=ecosystemServices.begin();it2!=ecosystemServices.end();it2++){
+        // we add a loop to calculate the gini
+        giniES += abs(*it-*it2);
+      }
+    }
+    meanES/=ecosystemServices.size();
+    giniES/=ecosystemServices.size()*ecosystemServices.size()*2*meanES;
+  }
+  // comment on gini calculation: might be more efficient not to iterate the
+  // second loop over all the cells to avoid double counting and computing time.
+  // i guess that would require to remove the division by 2 at the end.
+
+  // here we calculate the average and std distance between natural cells
+  double avgDistance=0;
+  double squaredAvgDistance=0;
+  double stdDistance=0;
+  unsigned int ix,jx;
+  int xi,yi,xj,yj;
+  vector<unsigned int > naturalCells;
+  // check if the vector is not empty: it shoudn't but just in case...
+  if (landscape.size()>0){
+
+    // first store all the indexes of the natural cells
+    for(ix=0;ix<landscape.size();ix++){
+      // if the cell is natural store the index in another vector
+      if (landscape[ix]==0){
+        naturalCells.push_back(ix);
+      }
+    }
+
+    for(ix=1; ix<landscape.size(); ix++){
+      xi=naturalCells[ix]%n;
+      yi=(int)naturalCells[ix]/n;
+      for (jx=0; jx<ix ; jx ++){
+        xj=naturalCells[jx]%n;
+        yj=(int)naturalCells[jx]/n;
+        avgDistance += sqrt((xi-xj)*(xi-xj) + (yi-yj)*(yi-yj));
+        squaredAvgDistance+=(xi-xj)*(xi-xj) + (yi-yj)*(yi-yj);
+      }
+    }
+    avgDistance/=naturalCells.size();
+    squaredAvgDistance/=naturalCells.size();
+    stdDistance=sqrt(squaredAvgDistance-avgDistance*avgDistance);
+  }
+
+  file << meanES << " " << giniES << " " << avgDistance << " " << stdDistance <<"\n";
+
+  // here we calculate the ripley's coefficient for high and low ES provision,
+  // where high means above and low below the average
+  // note: this section is still under comments need to think in which case it will
+  // be interesting to analyze the ripleys k for ES
+
+  // vector <unsigned int> esIndicator;
+  // unsigned int nAbove=0;
+  // unsigned int dRipley;
+  // if (ecosystemServices.size()>0){
+  //
+  //   // get a vector with 0 where ES<meanES and 1 otherwise.
+  //   for (it=ecosystemServices.begin();it!=ecosystemServices.end();it++){
+  //     if(*it>meanES){
+  //       esIndicator.push_back(1);
+  //       nAbove+=1;
+  //     }
+  //     else{
+  //       esIndicator.push_back(0);
+  //     }
+  //   }
+  //
+  //   // iterate over several distance thresholds and calculate the ripley
+  //   vector<vector<unsigned int>> neighbourMatrix;
+  //   vector<unsigned int> stateNeighbours;
+  //   for(dRipley=1;dRipley<(int)n/2;dRipley++){
+  //     getNeighbourMatrix(neighbourMatrix,n,dRipley);
+  //     for(ix=0;ix<esIndicator.size();ix++){
+  //       // select only the cells with high ES provision
+  //       if(esIndicator[ix]>0){
+  //         getNeighboursState(stateNeighbours, neighbourMatrix, esIndicator, ix, 1);
+  //         ripleyES += stateNeighbours.size();
+  //       }
+  //     }
+  //     if (nAbove>0){ripleyES *= esIndicator.size()/(nAbove*nAbove);}
+  //     // save the ripley's K and the associated threshold distance
+  //     fileRipley << dRipley << " " << ripleyES << "\n";
+  //   }
+  //
+  // }
 
   return;
 }

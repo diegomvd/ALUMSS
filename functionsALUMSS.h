@@ -92,5 +92,6 @@ void saveAggregated(ofstream &file, double t, const vector<double> &population, 
 void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape);
 void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents);
 void saveSensitivityOutput(ofstream &file, unsigned int nn, double ripleyDistance, const vector<double> &population, const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices);
+void saveLandscapeMetrics(ofstream &file, unsigned int n, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices);
 
 #endif
