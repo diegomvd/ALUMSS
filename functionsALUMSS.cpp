@@ -1378,7 +1378,6 @@ void saveLandscapeMetrics(ofstream &file, unsigned int n, const vector<unsigned 
     }
   }
 
-  cout << meanES << " " << giniES << " " << avgDistance << " " << stdDistance <<"\n";
   file << meanES << " " << giniES << " " << avgDistance << " " << stdDistance <<"\n";
 
   // here we calculate the ripley's coefficient for high and low ES provision,
