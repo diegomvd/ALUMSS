@@ -1337,7 +1337,8 @@ void saveLandscapeMetrics(ofstream &file, unsigned int n, const vector<unsigned 
   double avgDistance=0;
   double squaredAvgDistance=0;
   double stdDistance=0;
-  unsigned int ix,jx;
+  unsigned int dx,dy, ix,jx, nCount;
+  nCount = 0 ;
   int xi,yi,xj,yj;
   vector<unsigned int > naturalCells;
   // check if the vector is not empty: it shoudn't but just in case...
@@ -1352,18 +1353,27 @@ void saveLandscapeMetrics(ofstream &file, unsigned int n, const vector<unsigned 
     }
 
     if (naturalCells.size()>0){
-      for(ix=1; ix<landscape.size(); ix++){
+      for(ix=0; ix<naturalCells.size(); ix++){
         xi=naturalCells[ix]%n;
         yi=(int)naturalCells[ix]/n;
         for (jx=0; jx<ix ; jx ++){
           xj=naturalCells[jx]%n;
           yj=(int)naturalCells[jx]/n;
-          avgDistance += sqrt((xi-xj)*(xi-xj) + (yi-yj)*(yi-yj));
-          squaredAvgDistance+=(xi-xj)*(xi-xj) + (yi-yj)*(yi-yj);
+          dx=abs(xi-xj);
+          dy=abs(yi-yj);
+          if (dx>n/2){
+            dx=n-dx;
+          }
+          if (dy>n/2){
+            dy=n-dy;
+          }
+          nCount+=1;
+          avgDistance += (dx + dy);
+          squaredAvgDistance += (dx + dy)*(dx+dy);
         }
       }
-      avgDistance/=naturalCells.size();
-      squaredAvgDistance/=naturalCells.size();
+      avgDistance/=nCount;
+      squaredAvgDistance/=nCount;
       stdDistance=sqrt(squaredAvgDistance-avgDistance*avgDistance);
     }
   }
