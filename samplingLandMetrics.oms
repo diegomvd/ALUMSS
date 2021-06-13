@@ -56,7 +56,7 @@ val scriptTask =
       // default parameter and initialization values
       T:=0.0,
       dtp:=0.1,
-      L:=40,
+      L:=100,
       a0:=0.2,
       d0:=0.0,
       ksi:=1.2,
