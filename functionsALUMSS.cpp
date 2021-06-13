@@ -1351,21 +1351,24 @@ void saveLandscapeMetrics(ofstream &file, unsigned int n, const vector<unsigned 
       }
     }
 
-    for(ix=1; ix<landscape.size(); ix++){
-      xi=naturalCells[ix]%n;
-      yi=(int)naturalCells[ix]/n;
-      for (jx=0; jx<ix ; jx ++){
-        xj=naturalCells[jx]%n;
-        yj=(int)naturalCells[jx]/n;
-        avgDistance += sqrt((xi-xj)*(xi-xj) + (yi-yj)*(yi-yj));
-        squaredAvgDistance+=(xi-xj)*(xi-xj) + (yi-yj)*(yi-yj);
+    if (naturalCells.size()>0){
+      for(ix=1; ix<landscape.size(); ix++){
+        xi=naturalCells[ix]%n;
+        yi=(int)naturalCells[ix]/n;
+        for (jx=0; jx<ix ; jx ++){
+          xj=naturalCells[jx]%n;
+          yj=(int)naturalCells[jx]/n;
+          avgDistance += sqrt((xi-xj)*(xi-xj) + (yi-yj)*(yi-yj));
+          squaredAvgDistance+=(xi-xj)*(xi-xj) + (yi-yj)*(yi-yj);
+        }
       }
+      avgDistance/=naturalCells.size();
+      squaredAvgDistance/=naturalCells.size();
+      stdDistance=sqrt(squaredAvgDistance-avgDistance*avgDistance);
     }
-    avgDistance/=naturalCells.size();
-    squaredAvgDistance/=naturalCells.size();
-    stdDistance=sqrt(squaredAvgDistance-avgDistance*avgDistance);
   }
 
+  cout << meanES << " " << giniES << " " << avgDistance << " " << stdDistance <<"\n";
   file << meanES << " " << giniES << " " << avgDistance << " " << stdDistance <<"\n";
 
   // here we calculate the ripley's coefficient for high and low ES provision,
