@@ -505,8 +505,8 @@ int main(int argc, const char * argv[]){
 
 
   // careful I commented the standard output!!
-  // saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
-  saveLandscapeMetrics(tofile_out,n,landscape,ecosystemServices);
+  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+  // saveLandscapeMetrics(tofile_out,n,landscape,ecosystemServices);
 
   // saveLandscape(tofile_land,t,landscape);
   // saveComponents(tofile_clus,t,landscape,naturalComponents);
