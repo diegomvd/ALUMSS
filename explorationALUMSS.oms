@@ -151,7 +151,7 @@ val parameterSet = ScalaTask("""
     val f = newFile()
     f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1 meanR stdR corrLen\n"
 """) set(
-    inputs += mdc,
+    inputs += a0,
     outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,y0,Td,d,mdc,ndc,dtsave)
 )
 
@@ -162,7 +162,7 @@ val replications =
     sample = 5
   )
 
-val explorationA0 = ExplorationTask( a0 in Seq(0.1,0.2,0.5))
+val explorationA0 = ExplorationTask( a0 in Seq(0.1,0.2,0.5) )
 
 val explorationNDC = ExplorationTask( ndc in Seq(1.1,2.1,3.1,4.1,5.1) )
 
