@@ -164,9 +164,9 @@ val replications =
 
 val explorationA0 = ExplorationTask( a0 in Seq(0.1,0.2,0.5) )
 
-val explorationNDC = ExplorationTask( ndc in Seq(1.1,2.1,3.1,4.1,5.1) )
-
-val explorationMDC = ExplorationTask( mdc in Seq(1.1,2.1,3.1,4.1,5.1) )
+// val explorationNDC = ExplorationTask( ndc in Seq(1.1,2.1,3.1,4.1,5.1) )
+//
+// val explorationMDC = ExplorationTask( mdc in Seq(1.1,2.1,3.1,4.1,5.1) )
 
 explorationA0 -< (parameterSet hook copyHook) -- replications
 // explorationNDC -< (parameterSet hook copyHook) -- replications
@@ -178,57 +178,57 @@ explorationA0 -< (parameterSet hook copyHook) -- replications
 // doing a couple of replications to see the dynamics emerging from changin mdc
 
 // direct sampling for bifurcation diagram as a function of ndc
-
-val readOutputFile =
-    ScalaTask("""
-    // read file as an array of lines and get last line
-    val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
-    // split the string and store it in an array
-    val valuesAgre = lastLineAgre.split(" ")
-
-    val P = valuesAgre(1).toDouble
-    val N = valuesAgre(2).toDouble
-    val D = valuesAgre(3).toDouble
-    val A0 = valuesAgre(4).toDouble
-    val nMax = valuesAgre(14).toDouble
-    val nMin = valuesAgre(15).toDouble
-    val pMax = valuesAgre(16).toDouble
-    val pMin = valuesAgre(17).toDouble
-    """
-
-    )set(
-        inputs+=agreOut,
-        (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,y0,sar,a,w,Tag,Tab,Tr,Td,d,mdc,ndc,dtsave,mySeed),
-        outputs+=(P,N,D,A0,nMax,nMin,pMax,pMin)
-    )
-
-val runAndRead = MoleTask(scriptTask -- readOutputFile)
-
-val replicationsLongTerm =
-  Replication(
-    evaluation = runAndRead,
-    seed = mySeed,
-    sample = 5,
-    aggregation = Seq (
-      d aggregate average,
-      ndc aggregate average,
-      P aggregate average,
-      N aggregate average,
-      D aggregate average,
-      A0 aggregate average,
-      nMax aggregate average,
-      nMin aggregate average,
-      pMax aggregate average,
-      pMin aggregate average)
-  )
-
-val longTermSampling =
-DirectSampling(
-  evaluation = replicationsLongTerm,
-  sampling =
-    (ndc in Seq(1.1,2.1,3.1,4.1,5.1))x
-    (d in Seq(1.1,2.1,3.1,4.1,5.1)),
-)
+//
+// val readOutputFile =
+//     ScalaTask("""
+//     // read file as an array of lines and get last line
+//     val lastLineAgre = scala.io.Source.fromFile(agreOut).getLines.toList.last.mkString
+//     // split the string and store it in an array
+//     val valuesAgre = lastLineAgre.split(" ")
+//
+//     val P = valuesAgre(1).toDouble
+//     val N = valuesAgre(2).toDouble
+//     val D = valuesAgre(3).toDouble
+//     val A0 = valuesAgre(4).toDouble
+//     val nMax = valuesAgre(14).toDouble
+//     val nMin = valuesAgre(15).toDouble
+//     val pMax = valuesAgre(16).toDouble
+//     val pMin = valuesAgre(17).toDouble
+//     """
+//
+//     )set(
+//         inputs+=agreOut,
+//         (inputs, outputs)+=(T,dtp,L,a0,d0,ksi,y0,sar,a,w,Tag,Tab,Tr,Td,d,mdc,ndc,dtsave,mySeed),
+//         outputs+=(P,N,D,A0,nMax,nMin,pMax,pMin)
+//     )
+//
+// val runAndRead = MoleTask(scriptTask -- readOutputFile)
+//
+// val replicationsLongTerm =
+//   Replication(
+//     evaluation = runAndRead,
+//     seed = mySeed,
+//     sample = 5,
+//     aggregation = Seq (
+//       d aggregate average,
+//       ndc aggregate average,
+//       P aggregate average,
+//       N aggregate average,
+//       D aggregate average,
+//       A0 aggregate average,
+//       nMax aggregate average,
+//       nMin aggregate average,
+//       pMax aggregate average,
+//       pMin aggregate average)
+//   )
+//
+// val longTermSampling =
+// DirectSampling(
+//   evaluation = replicationsLongTerm,
+//   sampling =
+//     (ndc in Seq(1.1,2.1,3.1,4.1,5.1))x
+//     (d in Seq(1.1,2.1,3.1,4.1,5.1)),
+// )
 
 // longTermSampling on env hook (workDirectory / "experimentNDCD-2-140621.csv")
 
