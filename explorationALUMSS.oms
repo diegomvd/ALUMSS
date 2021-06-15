@@ -133,18 +133,18 @@ val parameterSet = ScalaTask("""
     val y0 = 0.2
     val sar = 0.25
     val a = 0.0
-    val w = 4.0
+    val w = 0.0
     val Tag = 0.1
     val Tab = 50.0
     val Tr = 5.0
     val Td = 50.0
-    val d = 1.0
-    val T = 2000.0
+    val d = 3.1
+    val T = 3000.0
     val dtp = 0.1
     val L = 40.0
     val d0 = 0.0
-    val a0 = 0.2
-    // val mdc = 1.1
+    // val a0 = 0.2
+    val mdc = 1.1
     val ndc = 3.1
     val dtsave = 1.0
     // create a file with a header consisting of all the model macro outputs
@@ -162,10 +162,13 @@ val replications =
     sample = 5
   )
 
+val explorationA0 = ExplorationTask( a0 in Seq(0.1,0.2,0.5))
+
 val explorationNDC = ExplorationTask( ndc in Seq(1.1,2.1,3.1,4.1,5.1) )
 
 val explorationMDC = ExplorationTask( mdc in Seq(1.1,2.1,3.1,4.1,5.1) )
 
+explorationA0 -< (parameterSet hook copyHook) -- replications
 // explorationNDC -< (parameterSet hook copyHook) -- replications
 // explorationMDC -< (parameterSet hook copyHook) -- replications
 
@@ -227,7 +230,7 @@ DirectSampling(
     (d in Seq(1.1,2.1,3.1,4.1,5.1)),
 )
 
-longTermSampling on env hook (workDirectory / "experimentNDCD-2-140621.csv")
+// longTermSampling on env hook (workDirectory / "experimentNDCD-2-140621.csv")
 
 
 
