@@ -108,6 +108,34 @@ void getNeighboursState(vector<unsigned int> &neighboursState, const vector<vect
   return;
 }
 
+void getNeighboursStateInf(vector<unsigned int> &neighboursState, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, unsigned int i, unsigned int maxState)
+{
+  /*
+  fills the vector neighboursState so that it contains the indexes of all the
+  closest neighbours of i in a state larger than minState.
+  the landscape is passed as a constant reference so that the vector cannot be
+  modified by the function in main
+  */
+
+  /*
+  getting the neighbours indexes in neighbour_list vector
+  */
+  vector<unsigned int> neighboursList;
+  getNeighbours(neighboursList,neighbourMatrix,i);
+
+  /*
+  getting the index of neighbours in the wanted state
+  */
+  unsigned long ix;
+  for (ix=0 ; ix<neighboursList.size() ; ++ix){
+    if (landscape[neighboursList[ix]] < maxState) {
+      neighboursState.push_back( neighboursList[ix] );
+    }
+  }
+
+  return;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // 2- Calculation of Ecosystem Service provision:
 //       - getNaturalConnectedComponents
@@ -702,6 +730,127 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
 //       - initializePopulation
 //       - initializeSES
 ////////////////////////////////////////////////////////////////////////////////
+
+void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int nSide, unsigned int nFarms, gsl_rng  *r)
+{
+  /*
+  This function initializes the political subdivisions representing each farm
+  managed by a different agent. The information is stored in vector<vector<unsigned int>> &farms
+  where each "line" correspond to a farm and the cells' indexes belonging to it
+  are stored in the columns. To create the subdivisions we do Voronoi tesselation
+  of the landscape. The process is as follows:
+  1- randomly place nFarms points with uniform probability in the landscape
+  2- each point is the "seed" of the voronoi cell. Perform radial growth process
+    from each seed until fronts of different farms collide.
+  */
+
+  unsigned long ix,jx;
+  vector<double> voronoiSeedProbability(nSide*nSide,1.0);
+  vector<double> voronoiSeedCumulativeProbability;
+  voronoiSeedCumulativeProbability.resize(nSide*nSide);
+  double cumulativeSum;
+  vector<unsigned int> voronoiSeeds;
+
+  // initialize shape of farms vector
+  farms.clear();
+  farms.resize(nFarms);
+
+  // iterate over the number of farms to randomly place each voronoi farm seed
+  // on the landscape
+  for(ix=0;ix<nFarms;++ix){
+    // calculate the cumulative sum of each cell's probability to be chosen
+    partial_sum(voronoiSeedProbability.begin(),voronoiSeedProbability.end(),voronoiSeedCumulativeProbability);
+    jx=0;
+    // draw a random number between [0,nSide*nSide[ to uniformly choose one of
+    // the cells as a seed
+    while ( gsl_rng_uniform(r)*voronoiSeedCumulativeProbability.back() > voronoiSeedCumulativeProbability[jx] ){
+      // as long as the condition isn't fulfill pass to the next cell by incrementing jx
+      jx++ ;
+    }
+    // once out of the loop, asociate a probability 0 to the cell that has already
+    // been attributed and store the cell index in the voronoiSeeds vector
+    voronoiSeedProbability[jx]=0.0;
+    voronoiSeeds.push_back(jx);
+  }
+
+  // perform a continuous time stochastic process for the radial growth departing
+  // from the seeds
+
+  // create the political landscape initializing the seeds
+  // the value 0 indicate the cell hasn't been colonized
+  vector<unsigned int> politicalLandscape(nSide*nSide,nFarms);
+  // initializing farm count at 1 to let 0 be the non colonized
+  ix=1;
+  for(vector<unsigned int>::iterator it = voronoiSeeds.begin(); it != voronoiSeeds.end(); it++){
+    politcalLandscape[*it] = ix;
+    ix++;
+  }
+
+  vector<double> propensitiesRadialGrowth;
+  vector<unsigned int> neighbours;
+  vector<double> cumulativePropensitiesradialGrowth;
+  cumulativePropensitiesRadialGrowth.resize(nSide*nSide);
+
+  unsigned int nColonized = nFarms;
+  // iterate until the whole landscape is colonized
+  while (nColonized<politicalLandscape.size()){
+
+    // clear propensity vector, resize it and initialize to 0 everyone
+    propensitiesRadialGrowth.clear();
+    propensitiesRadialGrowth.resize(nSides*nSides);
+    fill(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),0.0)
+
+    // calculate propensities
+    for(ix = 0; ix < politicalLandscape.size(); ix++){
+      // check if cell ix is non-colonized
+      if(politicalLandscape[ix]==nFarms){
+        // get all the colonized neighbours
+        getNeighboursStateInf(neighbours, neighbourMatrix, politicalLandscape, ix, nFarms);
+        // update the propensity = number of colonized neighbours
+        propensitiesRadialGrowth[ix]=neighbours.size();
+      }
+    }
+
+
+    // get the cumulative propensity
+    partial_sum(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),cumulativePropensitiesRadialGrowth);
+    ix=0;
+    // choose the cell at which the colonization happens
+    while(gsl_rng_uniform(r)*cumulativePropensitiesRadialGrowth.back() > cumulativePropensitiesRadialGrowth[ix]){
+        ix++;
+    }
+
+
+    vector<unsigned int> farmNeighboursPropensity(nFarms,0.0);
+    vector<unsigned int> farmNeighboursCumulativePropensity;
+    farmNeighboursCumulativePropensity.resize(nFarms);
+
+    // get neighbours of cell ix and choose which farmer colonized the cell
+    getNeighboursStateInf(neighbours, neighbourMatrix, politicalLandscape, ix, nFarms);
+    // iterate neighbours and identify potential farmer colonizers
+    for(vector<unsigned int>::iterator it = neighbours.begin(); it != neighbours.end(); it++){
+      // increment the amount of neighbours from a given farm
+      farmNeighboursPropensity[*it]+=1;
+    }
+    // select the colonizing farm
+    partial_sum(farmNeighboursPropensity.begin(),farmNeighboursPropensity.end(),farmNeighboursCumulativePropensity);
+    jx=0;
+    while(gsl_rng_uniform(r)*farmNeighboursCumulativePropensity.back() > farmNeighboursCumulativePropensity[ix]){
+      jx++;
+    }
+
+    // update newly-colonized cell
+    politicalLandscape[ix] = jx;
+
+    // update counter to control end of simulation
+    nColonized+=1;
+
+    // store the newly colonized cell in the farms vector
+    farms[jx].push_back(ix);
+  }
+
+  return;
+}
 
 void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double a0, double d0, double a, double w, gsl_rng  *r)
 {
