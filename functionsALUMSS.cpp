@@ -10,6 +10,7 @@ main program.
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <utility>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
@@ -748,8 +749,8 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
   vector<double> voronoiSeedProbability(nSide*nSide,1.0);
   vector<double> voronoiSeedCumulativeProbability;
   voronoiSeedCumulativeProbability.resize(nSide*nSide);
-  double cumulativeSum;
   vector<unsigned int> voronoiSeeds;
+  vector<unsigned int>::iterator it;
 
   // initialize shape of farms vector
   farms.clear();
@@ -759,7 +760,7 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
   // on the landscape
   for(ix=0;ix<nFarms;++ix){
     // calculate the cumulative sum of each cell's probability to be chosen
-    partial_sum(voronoiSeedProbability.begin(),voronoiSeedProbability.end(),voronoiSeedCumulativeProbability);
+    partial_sum(voronoiSeedProbability.begin(),voronoiSeedProbability.end(),voronoiSeedCumulativeProbability.begin(), plus<double>());
     jx=0;
     // draw a random number between [0,nSide*nSide[ to uniformly choose one of
     // the cells as a seed
@@ -781,14 +782,14 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
   vector<unsigned int> politicalLandscape(nSide*nSide,nFarms);
   // initializing farm count at 1 to let 0 be the non colonized
   ix=1;
-  for(vector<unsigned int>::iterator it = voronoiSeeds.begin(); it != voronoiSeeds.end(); it++){
-    politcalLandscape[*it] = ix;
+  for(it = voronoiSeeds.begin(); it != voronoiSeeds.end(); it++){
+    politicalLandscape[*it] = ix;
     ix++;
   }
 
   vector<double> propensitiesRadialGrowth;
+  vector<double> cumulativePropensitiesRadialGrowth;
   vector<unsigned int> neighbours;
-  vector<double> cumulativePropensitiesradialGrowth;
   cumulativePropensitiesRadialGrowth.resize(nSide*nSide);
 
   unsigned int nColonized = nFarms;
@@ -797,8 +798,8 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
 
     // clear propensity vector, resize it and initialize to 0 everyone
     propensitiesRadialGrowth.clear();
-    propensitiesRadialGrowth.resize(nSides*nSides);
-    fill(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),0.0)
+    propensitiesRadialGrowth.resize(nSide*nSide);
+    fill(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),0.0);
 
     // calculate propensities
     for(ix = 0; ix < politicalLandscape.size(); ix++){
@@ -813,7 +814,7 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
 
 
     // get the cumulative propensity
-    partial_sum(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),cumulativePropensitiesRadialGrowth);
+    partial_sum(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),cumulativePropensitiesRadialGrowth.begin(), plus<double>());
     ix=0;
     // choose the cell at which the colonization happens
     while(gsl_rng_uniform(r)*cumulativePropensitiesRadialGrowth.back() > cumulativePropensitiesRadialGrowth[ix]){
@@ -821,19 +822,19 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
     }
 
 
-    vector<unsigned int> farmNeighboursPropensity(nFarms,0.0);
-    vector<unsigned int> farmNeighboursCumulativePropensity;
+    vector<double> farmNeighboursPropensity(nFarms,0.0);
+    vector<double> farmNeighboursCumulativePropensity;
     farmNeighboursCumulativePropensity.resize(nFarms);
 
     // get neighbours of cell ix and choose which farmer colonized the cell
     getNeighboursStateInf(neighbours, neighbourMatrix, politicalLandscape, ix, nFarms);
     // iterate neighbours and identify potential farmer colonizers
-    for(vector<unsigned int>::iterator it = neighbours.begin(); it != neighbours.end(); it++){
+    for(it = neighbours.begin(); it != neighbours.end(); it++){
       // increment the amount of neighbours from a given farm
       farmNeighboursPropensity[*it]+=1;
     }
     // select the colonizing farm
-    partial_sum(farmNeighboursPropensity.begin(),farmNeighboursPropensity.end(),farmNeighboursCumulativePropensity);
+    partial_sum(farmNeighboursPropensity.begin(),farmNeighboursPropensity.end(),farmNeighboursCumulativePropensity.begin(), plus<double>());
     jx=0;
     while(gsl_rng_uniform(r)*farmNeighboursCumulativePropensity.back() > farmNeighboursCumulativePropensity[ix]){
       jx++;
