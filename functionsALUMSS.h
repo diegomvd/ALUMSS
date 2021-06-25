@@ -70,8 +70,7 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
 void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int nSide, unsigned int nFarms, gsl_rng  *r);
 void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double a0, double d0, double a, double w, gsl_rng  *r);
 void initializePopulation( vector<double> &population, const vector<double> &agriculturalProduction);
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double y0, double sar, double w, double distanceConnection, gsl_rng  *r);
-
+void initializeSES( vector<vector<unsigned int>> &farms, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double y0, double sar, double w, double distanceConnection, unsigned int nFarms, gsl_rng  *r);
 ////////////////////////////////////////////////////////////////////////////////
 // 5- ODEs and solver:
 //       - populationEquation

@@ -812,7 +812,6 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
       }
     }
 
-
     // get the cumulative propensity
     partial_sum(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),cumulativePropensitiesRadialGrowth.begin(), plus<double>());
     ix=0;
@@ -820,7 +819,6 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
     while(gsl_rng_uniform(r)*cumulativePropensitiesRadialGrowth.back() > cumulativePropensitiesRadialGrowth[ix]){
         ix++;
     }
-
 
     vector<double> farmNeighboursPropensity(nFarms,0.0);
     vector<double> farmNeighboursCumulativePropensity;
@@ -1017,9 +1015,10 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
   return;
 }
 
-void initializeSES( vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double y0, double sar, double w, double distanceConnection, gsl_rng  *r)
+void initializeSES( vector<vector<unsigned int>> &farms, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double y0, double sar, double w, double distanceConnection, unsigned int nFarms, gsl_rng  *r)
 {
 
+  initializeVoronoiFarms(farms,neighbourMatrix,n,nFarms,r);
   initializeLandscape(landscape,neighbourMatrix,n,a0,d0,a,w,r);
   getNaturalConnectedComponents(naturalComponents,landscape,distanceConnection);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);
