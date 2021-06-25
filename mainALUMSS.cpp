@@ -1,4 +1,4 @@
-// to compile: c++ mainALUMSS.cpp functionsALUMSS.cpp cokus3.c -o alumss-exec -lgsl -lgslcblas -lm -Wall -Weffc++ --std=c++17 -lstdc++fs
+// to compile: c++ mainALUMSS.cpp functionsALUMSS.cpp -o alumss-exec -lgsl -lgslcblas -lm -Wall -Weffc++ --std=c++17 -lstdc++fs
 //         or: ./compileALUMSS.sh
 
 /*
@@ -77,13 +77,7 @@ using namespace std;
 
 namespace fs = std::filesystem;
 
-extern double ranMT(void);
-extern void seedMT(unsigned long int);
-extern void seedMT2(void);
-
-#define PI 3.14159265358979323846
 #define LOAD_CONF 0
-#define SEED_MT 1
 
 ///////////////////////////////////////////////////////////////////////////////
 // MAIN PROGRAM
@@ -118,6 +112,8 @@ int main(int argc, const char * argv[]){
 
   double managementDC; // distance at which two patches are considered as connected from the manager's perspective
   double naturalDC; // distance at which two patches are considered connective from an ecosystemic point of view
+
+  double nFarms; // number of farms in the landscape
 
   double dtsave; // timestep for saving data
 
@@ -263,16 +259,8 @@ int main(int argc, const char * argv[]){
   // tofile_spex.setf(ios::scientific,ios::floatfield);
 
   /////////////////////////////////////////////////////////////////////////////
-  // seeding the random number generator
-
+  // creating and seeding the random number generator
   seed2=abs(seed);
-  // seeding the random double generator: used for gillespie
-  if (SEED_MT==1){
-    seedMT(seed2);
-  }
-  seedMT2();
-
-  // creating the random integer generator and seeding it
   gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
   gsl_rng_set(r, seed2);
 
@@ -306,6 +294,8 @@ int main(int argc, const char * argv[]){
   vector<double> propensityVector;
   // vector to store the number of events of each kind
   vector<unsigned int> count_events={0,0,0,0,0,0};
+  // vector to store the farm information: which cells belong to which farm
+  vector<vector<unsigned int>> farms;
 
   ////////////////////////////////////////////////////////////////////////////
   // STATE INITIALISATION
@@ -338,7 +328,7 @@ int main(int argc, const char * argv[]){
     getNeighbourMatrix(neighbourAgroMatrix,n,managementDC);
     getNeighbourMatrix(neighbourMatrixES,n,d);
     getNeighbourMatrix(neighbourNaturalMatrix,n,naturalDC);
-    initializeSES(landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourAgroMatrix,neighbourMatrixES,n,a0,d0,a,ksi,y0,sar,w,naturalDC,r);
+    initializeSES(farms,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourAgroMatrix,neighbourMatrixES,n,a0,d0,a,ksi,y0,sar,w,naturalDC,nFarms,r);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -441,7 +431,7 @@ int main(int argc, const char * argv[]){
     ///////////////////////////////////////////////////////////////////////////
     // TIME UNTIL NEXT EVENT
     ///////////////////////////////////////////////////////////////////////////
-    dtg=-1/propensityVector.back()*log(ranMT());
+    dtg=-1/propensityVector.back()*log(gsl_rng_uniform(r));
     ///////////////////////////////////////////////////////////////////////////
     // LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION AND CONSUMPTION OR
     // THE REALIZATION OF A STOCHASTIC EVENT
@@ -463,7 +453,7 @@ int main(int argc, const char * argv[]){
     }
     else{ // if the time until next event is shorter than the ODE timestep
       // compute random number to select next reaction
-      x_rand = ranMT()*propensityVector.back();
+      x_rand = gsl_rng_uniform(r)*propensityVector.back();
       // traverse the propensity vector and stop once reaching the selceted cell
       i=0;
       while(x_rand>propensityVector[i]){
