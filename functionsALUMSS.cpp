@@ -41,24 +41,22 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
 
   /*fills a vector containing the neighbours indexes for each patch*/
 
-  int ix,jx,xi,yi,xj,yj;
-  unsigned int dx,dy;
-  unsigned int manhattanDist;
+  unsigned int ix,jx,xi,yi,xj,yj,dx,dy,manhattanDist;
 
   neighbourMatrix.clear();
   neighbourMatrix.resize(n*n);
 
   for (ix=0; ix<neighbourMatrix.size(); ++ix){
-    xi = ix%n;
-    yi = (int)ix/n;
+    xi = (unsigned int)ix%n;
+    yi = (unsigned int)ix/n;
     for (xj=0; xj<n; xj++){
-      dx=abs(xi-xj);
+      dx=(unsigned int)abs((int)(xi-xj));
       // calculating cyclic distances to account for periodic borders
       if (dx>n/2){
         dx=n-dx;
       }
       for (yj=0; yj<n; yj++){
-        dy=abs(yi-yj);
+        dy=(unsigned int)abs((int)(yi-yj));
         // calculating cyclic distances to account for periodic borders
         if (dy>n/2){
           dy=n-dy;
@@ -223,7 +221,7 @@ void getNaturalConnectedComponents(vector<vector<int>> &naturalComponents, const
     naturalComponents.resize(num);
     for (i=0 ; i<naturalComponents.size() ; ++i){
       for (j=0; j<component.size(); j++){
-        if(component[j]==i){
+        if(component[j]==(int)i){
           naturalComponents[i].push_back(naturalPatches[j]);
         }
       }
@@ -283,7 +281,7 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
     }
     else if(toErase.size()>1){ // if there are more, erase them and push back the merged ones
       // erasing components that are going to be merged
-      long ix;
+      unsigned int ix;
       for(ix=0;ix<toErase.size();ix++){
         for(it3=toErase[ix]->begin();it3!=toErase[ix]->end();it3++){
           newNaturalComponent.push_back(*it3);
@@ -317,8 +315,6 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
   unsigned int n = (unsigned int) sqrt(landscape.size());
 
   // find cluster of cell l
-
-  unsigned long ix;
   // these iterators are to traverse the naturalComponents
   vector<vector<int>>::iterator it1;
   vector<int>::iterator it2;
@@ -407,9 +403,9 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
 
     // adding the new components to naturalComponents
     vector<int> newComponent;
-    for(i=0; i<num; i++){
+    for(i=0; i<(unsigned int)num; i++){
       for(j=0; j<component.size(); j++){
-        if(i==component[j]){
+        if((int)i==component[j]){
           newComponent.push_back(naturalPatches[j]);
         }
       }
@@ -851,7 +847,7 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
   return;
 }
 
-void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double a0, double d0, double a, double w, gsl_rng  *r)
+void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double a0, double d0, double a, double w, gsl_rng  *r)
 {
   /*
   initializes the landscape given a fraction of initial agricultural patches a0 and degraded patches d0
