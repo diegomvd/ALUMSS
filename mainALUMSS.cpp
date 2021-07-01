@@ -8,14 +8,14 @@ can be found in the first line of the program.
 
 0- EQUIVALENCE BETWEEN PARAMTER NAMES IN CODE AND IN PAPER
       CODE    -   PAPER   -   MEANING
-      ksi     -   y1      -   productivity of intensive agriculture
-      sar     -   z       -   saturation exponent of ecosystem servicaes with area
+      y1     -   y1      -   productivity of intensive agriculture
+      z     -   z       -   saturation exponent of ecosystem servicaes with area
       a       -   alpha   -   preference for intensification
       w       -   omega   -   clustering parameter
       1/Tag   -   sigma   -   sensitivity to resource deficit
-      1/Tab   -   rho_L   -   fertility loss sensitivtiy to ecosystem service provision
-      1/Tr    -   rho_R   -   recovery sensitivity to ecosystem service provision
-      1/Td    -   rho_D   -   degradation sensitivity to ecosystem service provision
+      1/sFL   -   rho_L   -   fertility loss sensitivtiy to ecosystem service provision
+      1/sR    -   rho_R   -   recovery sensitivity to ecosystem service provision
+      1/sD    -   rho_D   -   degradation sensitivity to ecosystem service provision
 
 The sensitivities are growth or decay rates with respect to ecosystem
 service provision of the transitions propensities (probabilities per unit time).
@@ -24,7 +24,7 @@ They are the inverse of the growth decay rates for the propensities.
 
 1- INITIALIZATION
 The agricultural landscape is initialized by specifying:
-  - n landscape size-length in number of cells. Total number of cells is n*n
+  - nSide landscape size-length in number of cells. Total number of cells is nSide*nSide
   - d0 the initial fraction of degraded land
   - a0 the initial fraction of agricultural land
   - a the preference for intensification: gives the fraction of agricultural
@@ -66,6 +66,7 @@ The total simulated time is SimTime.
 #include <stdlib.h> //Allows DOS Commands (I only use "CLS" to clear the screen)
 #include <iterator>
 #include <filesystem>
+#include <numeric>
 #include <ctime>
 #include <math.h>
 #include <chrono>
@@ -79,9 +80,9 @@ namespace fs = std::filesystem;
 
 #define LOAD_CONF 0
 
-///////////////////////////////////////////////////////////////////////////////
-// MAIN PROGRAM
-///////////////////////////////////////////////////////////////////////////////
+/****************************************************************************
+ MAIN PROGRAM
+****************************************************************************/
 
 // time at beginning
 auto start = chrono::high_resolution_clock::now();
@@ -89,87 +90,80 @@ auto start2 = chrono::high_resolution_clock::now();
 
 int main(int argc, const char * argv[]){
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // PARAMETER DECLARATION
-  ///////////////////////////////////////////////////////////////////////////////
+  /****************************************************************************
+   PARAMETER DECLARATION
+  ****************************************************************************/
 
-  int n;  // lenght of the sides of the square landscape: number of cells=n*n
+  unsigned int nSide;  // lenght of the sides of the square landscape: number of cells=nSide*nSide
   double SimTime; // total simulation time
   double dtp; // timestep for population dynamics
 
   double a0; //number of agricultural patches at beggining
   double d0; // number of degraded patches at beggining
 
-  double ksi; // productivity of intense agriculture per es productivity
+  unsigned int nFarms; // number of farms in the landscape
+  double a; // fraction of managers doing land-sparing
+  double b; // fraction of managers highly sensitive to demand
+
+  double z; // saturation exponent of the ES-Area relationship
+  double dES; // distance relative to the landscape side length nSide at which ES flow and 2 natural cells are considered connected from a EF point of view
+
+  double y1; // productivity of intense agriculture per es productivity
   double y0; // baseline productivity of low intense agri per es productivity
-  double sar; // ecosystem service saturation exponent
-  double a; // intensification probability
-  double w; // agricultural clustering parameter
-  double Tag; // action probability per unit time per unit of consumption deficit
-  double Tab; // mean fertility loss time
-  double Tr,Td; // mean recovery and degradation time for max and min exposure to nature
-  double d; // decay distance for ecosystem service delivery
 
-  double managementDC; // distance at which two patches are considered as connected from the manager's perspective
-  double naturalDC; // distance at which two patches are considered connective from an ecosystemic point of view
+  double sFL; // sensitivity of average fertility loss time with respect to decrease in ES provision
+  double sR; // sensitivity of average land recovery time with respect to increases in ES provision
+  double sD; // sensitivity of average land degradation time with respect to decrease in ES provision
 
-  double nFarms; // number of farms in the landscape
+  double dtSave; // timestep for saving data
 
-  double dtsave; // timestep for saving data
+  unsigned long int seed; // this is expid
 
-  int seed; // this is expid
-  unsigned long int seed2;
+  /****************************************************************************
+   IMPORT PARAMETER VALUES
+  ****************************************************************************/
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // IMPORT PARAMETER VALUES
-  ///////////////////////////////////////////////////////////////////////////////
-
+  // if the program was exectuted with a command specifying parameter values
   if (argc>1) {
         char * pEnd;
 
         // time and space specifications for the simulation
         SimTime = strtod(argv[1], &pEnd);
         dtp = strtod(argv[2], &pEnd);
-        n = atoi(argv[3]);
+        nSide = (unsigned int) strtod(argv[3], &pEnd);
 
         // initial values of agricultural land use and consumption
         a0 = strtod(argv[4],&pEnd);
         d0 = strtod(argv[5],&pEnd);
 
+        // management parameters
+        nFarms = (unsigned int) strtod(argv[6], &pEnd);
+        a = strtod(argv[7], &pEnd);
+        b = strtod(argv[8], &pEnd);
+
+        //ES-provision parameters
+        z = strtod(argv[9], &pEnd);
+        dES = strtod(argv[10], &pEnd);
+
         // agricultural production parameters
-        ksi = strtod(argv[6], &pEnd);
-        y0 = strtod(argv[7], &pEnd);
-        sar = strtod(argv[8], &pEnd);
+        y0 = strtod(argv[11], &pEnd);
+        y1 = strtod(argv[12], &pEnd);
 
-        // human action parameters
-        a = strtod(argv[9], &pEnd);
-        w = strtod(argv[10], &pEnd);
-        Tag = strtod(argv[11], &pEnd);
-
-        // abandonment parameters
-        Tab = strtod(argv[12], &pEnd);
-
-        // spontaneous evolution parameters
-        Tr = strtod(argv[13], &pEnd);
-        Td = strtod(argv[14], &pEnd);
-
-        // distance for es provision
-        d = strtod(argv[15], &pEnd);
-
-        // distance of conncetion
-        managementDC = strtod(argv[16], &pEnd);
-        naturalDC = strtod(argv[17], &pEnd);
+        // spontaneous land-cover transitions
+        sFL = strtod(argv[13], &pEnd);
+        sR = strtod(argv[14], &pEnd);
+        sD = strtod(argv[15], &pEnd);
 
         // save timespace just in case
-        dtsave = strtod(argv[18], &pEnd);
+        dtSave = strtod(argv[16], &pEnd);
 
         // save seed
-        seed = atoi(argv[19]);
+        seed = (unsigned long int)abs(atoi(argv[17]));
   }
 
-  /////////////////////////////////////////////////////////////////////////////
-  // CREATION OF DATA FILES
-  /////////////////////////////////////////////////////////////////////////////
+  /****************************************************************************
+   CREATION OF DATA FILES
+  ****************************************************************************/
 
   //creating data directory with today's date
   auto tt = time(nullptr);
@@ -178,16 +172,7 @@ int main(int argc, const char * argv[]){
   oss << put_time(&tm, "%d-%m-%Y");
   string str_date = oss.str();
   string dirname = "DATA_"+str_date;
-  // not using this: adding a count if several simulation runs on the same day
-  // unsigned int count=0;
-  // string temp_dirname = dirname+"_"+to_string(count);
-  // while (fs::exists(temp_dirname)){
-  //   count+=1;
-  //   temp_dirname=dirname+to_string(count);
-  // }
-  // dirname=temp_dirname;
-  if (fs::exists(dirname)){
-    // don't need to create it
+  if (!(fs::exists(dirname))){
   }
   else{
     fs::create_directory(dirname); // commenting to see if avoids problem with sensitivity OM
@@ -202,25 +187,23 @@ int main(int argc, const char * argv[]){
     filename += "_n_"+allArgs[3];
     filename += "_a0_"+allArgs[4];
     filename += "_d0_"+allArgs[5];
-    filename += "_ksi_"+allArgs[6];
-    filename += "_y0_"+allArgs[7];
-    filename += "_sar_"+allArgs[8];
-    filename += "_a_"+allArgs[9];
-    filename += "_w_"+allArgs[10];
-    filename += "_Tag_"+allArgs[11];
-    filename += "_Tab_"+allArgs[12];
-    filename += "_Tr_"+allArgs[13];
-    filename += "_Td_"+allArgs[14];
-    filename += "_d_"+allArgs[15];
-    filename += "_mdc_"+allArgs[16];
-    filename += "_ndc_"+allArgs[17];
-    filename += "_dtsave_"+allArgs[18];
-    filename += "_expid_"+allArgs[19];
+    filename += "_nF_"+allArgs[6];
+    filename += "_a_"+allArgs[7];
+    filename += "_b_"+allArgs[8];
+    filename += "_z_"+allArgs[9];
+    filename += "_dES_"+allArgs[10];
+    filename += "_y0_"+allArgs[11];
+    filename += "_y1_"+allArgs[12];
+    filename += "_sFL_"+allArgs[13];
+    filename += "_sR_"+allArgs[14];
+    filename += "_sD_"+allArgs[15];
+    filename += "_dtSave_"+allArgs[16];
+    filename += "_seed_"+allArgs[17];
     filename+=".dat";
   }
 
   // this file is to output the land-metrics meanES, giniES, average distance
-  // between natural patches to analyze the role of naturalDC
+  // between natural patches to analyze the role of dES
   string filename_OUT="DATA_OUT";
   ofstream tofile_out(filename_OUT);
   tofile_out.precision(5);
@@ -258,59 +241,84 @@ int main(int argc, const char * argv[]){
   // tofile_spex.precision(5);
   // tofile_spex.setf(ios::scientific,ios::floatfield);
 
-  /////////////////////////////////////////////////////////////////////////////
-  // creating and seeding the random number generator
-  seed2=abs(seed);
+  /****************************************************************************
+   CREATING AND SEEDING RNG
+  ****************************************************************************/
   gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
-  gsl_rng_set(r, seed2);
+  gsl_rng_set(r, seed);
 
-  /////////////////////////////////////////////////////////////////////////////
-  // VARIABLE DECLARATION AND INITIALISATION
-  /////////////////////////////////////////////////////////////////////////////
+  /****************************************************************************
+   VARIABLE DECLARATION AND INITIALISATION
+  ****************************************************************************/
 
+  // time
   double t=0;
-  double t_save=0;
+  // counter for saving time
+  double tSave=0;
+  // gillespie's SSA time-step
   double dtg;
+  // accesory time-step to store time until population ODE resolution
   double dt=dtp;
-  double x_rand;
-  unsigned int reaction,patch;
+  // counter
   unsigned int i;
+  // number of natural and degraded cells to stop the simulation in case the landscape is in an absorbant state
+  unsigned int natCells, degCells;
+  // minimum natural land in the simulation after the transient
+  unsigned int nMin=0;
+  // maximum natural land in the simulation after the transient
+  unsigned int nMax=0;
+  // idem for the population
+  double pMin=0;
+  double pMax=0;
+  // switch to identify if the estimated transient time is over
+  unsigned int firstTime=0;
+  // variable to store the resource deficit
+  double resourceDeficit;
+  // variable to store the total propensity associated with agricultural managament
+  double totalManagementPropensity;
 
   // this vector has only one member and it is the population
   vector<double> population;
   // vector containing the landscape state
-  vector<unsigned int> landscape;
+  vector<unsigned int> landscape(nSide*nSide);
   // vector containing neighbours
-  vector<vector<unsigned int>> neighbourMatrixES; // this is for the ES flow
-  vector<vector<unsigned int>> neighbourAgroMatrix; // this is for the neighbours from an agricultural management perspective
-  vector<vector<unsigned int>> neighbourNaturalMatrix; // this is for the neighbours from a natural perspective
-  // vector containing the production of each patch
-  vector<double> agriculturalProduction;
-  // vector containing the production of each patch
-  vector<double> ecosystemServices;
+  vector<vector<unsigned int>> neighbourMatrixES; // this is for the ES flow and natural connection threshold
+  vector<vector<unsigned int>> neighbourMatrix; // this is for closest neighbours
+  // vector containing the production of each cell initialized directly with the size
+  vector<double> agriculturalProduction(nSide*nSide);
+  // vector containing the production of each cell initialized directly with the size
+  vector<double> ecosystemServices(nSide*nSide);
   // vector containing the natural connected components information
   vector<vector<int>> naturalComponents;
-  // vector containing the event's propensities
+  // vector containing the transitions' propensities
   vector<double> propensityVector;
-  // vector to store the number of events of each kind
-  vector<unsigned int> count_events={0,0,0,0,0,0};
+  // vector to store the number of transitions of each kind
+  vector<unsigned int> countTransitions={0,0,0,0,0,0};
   // vector to store the farm information: which cells belong to which farm
   vector<vector<unsigned int>> farms;
+  // vector to store the sensitivity to demand of each farm manager
+  vector<double> farmSensitivity(nFarms);
+  // vector to store the strategy of each farm, column1 is intensification and column2 clustering
+  vector<vector<double>> farmStrategy;
+  // vector to store the propensities of the spontaneous LUC transitions size number of cells * number of transitions (recovery, degradation, fertility loss)
+  vector<double> spontaneousPropensity(nSide*nSide*3);
+  // cumulative propensities of spontaneous transitions
+  vector<double> spontaneousCumulativePropensity(nSide*nSide*3);
 
-  ////////////////////////////////////////////////////////////////////////////
-  // STATE INITIALISATION
-  ////////////////////////////////////////////////////////////////////////////
+  /****************************************************************************
+   STATE INITIALISATION
+  ****************************************************************************/
 
   // BY CONF FILE
   if (LOAD_CONF==1){
-    cout << "Starting from conf file \n";
+    cout << "Starting from conf file \nSide";
     ifstream conf_file("DATA_CONF");
     if(conf_file.is_open()) {
 
       // first extract the time and population
       double pop;
       if (!(conf_file >> t >> pop)){
-        cout << "Error: mainALUMSS.cpp: time and population could not be loaded from CONF file. \n";
+        cout << "Error: mainALUMSS.cpp: time and population could not be loaded from CONF file. \nSide";
       }
       population.push_back(pop);
       SimTime+=t;
@@ -325,79 +333,59 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    getNeighbourMatrix(neighbourAgroMatrix,n,managementDC);
-    getNeighbourMatrix(neighbourMatrixES,n,d);
-    getNeighbourMatrix(neighbourNaturalMatrix,n,naturalDC);
-    initializeSES(farms,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourAgroMatrix,neighbourMatrixES,n,a0,d0,a,ksi,y0,sar,w,naturalDC,nFarms,r);
+    getNeighbourMatrix(neighbourMatrixES,nSide,(double)dES*nSide);
+    getNeighbourMatrix(neighbourMatrix,nSide,1.0);
+    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,b,y1,y0,z,(double)dES*nSide,nFarms,r);
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, y1, y0);
+    resourceDeficit = getResourceDeficit(agriculturalProduction, population);
+    totalManagementPropensity = getTotalManagementPropensity(landscape, farmSensitivity, resourceDeficit);
+    getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
+    partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
   }
 
-  /////////////////////////////////////////////////////////////////////////////
-  // BEGIN OF SIMULATION
-  /////////////////////////////////////////////////////////////////////////////
-
-  unsigned int nat_cells;
-  unsigned int deg_cells;
-
-  // calculate the number of natural cells for the nopop experiment
-  nat_cells = 0;
-  deg_cells = 0;
-  for(i=0;i<landscape.size();i++){
-    if(landscape[i]==0){
-      nat_cells+=1;
-    }
-    else if(landscape[i]==1){
-      deg_cells+=1;
-    }
-  }
-
-  unsigned int nMin=0;
-  unsigned int nMax=0;
-  double pMin=0;
-  double pMax=0;
-  unsigned int first_time=0;
+  /****************************************************************************
+   BEGIN OF SIMULATION
+  ****************************************************************************/
 
   // entering the time loop
   while(t<SimTime){
 
-    // updating agricultural production
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ksi, y0);
-
-    // STOPPING EXECUTION AS SOON AS LANDSCAPE IS FULLY NATURAL OR DEGRADED
-    nat_cells = 0;
-    deg_cells = 0;
+    /****************************************************************************
+     STOPPING EXECUTION IF LANDSCAPE IS IN AN ABSORBANT STATE
+    ****************************************************************************/
+    natCells = 0;
+    degCells = 0;
     for(i=0;i<landscape.size();i++){
       if(landscape[i]==0){
-        nat_cells+=1;
+        natCells+=1;
       }
       else if(landscape[i]==1){
-        deg_cells+=1;
+        degCells+=1;
       }
     }
-    if(nat_cells==landscape.size() || deg_cells==landscape.size()){
+    if(natCells==landscape.size() || degCells==landscape.size()){
       break;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // CALCULATING THE MINIMUM AND MAXIMUM VARAIBLE VALUES TO GET CYCLES
-    // FOR THIS EXPERIMENT I SET UP THE INITIAL CONDITIONS AT THE TRANSITION POINT
-    //////////////////////////////////////////////////////////////////////////
-
+    /****************************************************************************
+     CALCULATING THE MINIMUM AND MAXIMUM VARAIBLE VALUES TO GET CYCLES' AMPLITUDE
+    ****************************************************************************/
     if(t>SimTime/6){ // let some time for a transient before the cycles
 
-      if (first_time==0){ // to initialize the value after the transient
-        nMax = nat_cells;
-        nMin = nat_cells;
+      if (firstTime==0){ // to initialize the value after the transient
+        nMax = natCells;
+        nMin = natCells;
         pMax = population[0];
         pMin = population[0];
-        first_time=1;
+        firstTime=1;
       }
 
       // i only save the natural area and population for instance
-      if (nat_cells>nMax){
-        nMax=nat_cells; // reset the maximum value
+      if (natCells>nMax){
+        nMax=natCells; // reset the maximum value
       }
-      if (nat_cells<nMin){
-        nMin=nat_cells; // reset the minimum value
+      if (natCells<nMin){
+        nMin=natCells; // reset the minimum value
       }
       if (population[0]>pMax){
         pMax=population[0]; // reset the maximum value
@@ -405,78 +393,59 @@ int main(int argc, const char * argv[]){
       if (population[0]<pMin){
         pMin=population[0]; // reset the minimum value
       }
-
     }
 
-
-    ///////////////////////////////////////////////////////////////////////////
-    // SAVING DATA
-    ///////////////////////////////////////////////////////////////////////////
-    if(t>=t_save)
-    {
-      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+    /****************************************************************************
+     SAVING DATA
+    ****************************************************************************/
+    if(t>=tSave){
+      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
       saveLandscape(tofile_land,t,landscape);
       saveComponents(tofile_clus,t,landscape,naturalComponents);
-
-      t_save+=dtsave;
+      tSave+=dtSave;
     }
 
+    // time until next transition
+    dtg=-1/(totalManagementPropensity+spontaneousCumulativePropensity.back())*log(gsl_rng_uniform(r));
 
-    ///////////////////////////////////////////////////////////////////////////
-    // CALCULATING PROPENSITY VECTOR
-    ///////////////////////////////////////////////////////////////////////////
-    getPropensityVector(propensityVector,neighbourAgroMatrix,landscape,ecosystemServices,agriculturalProduction,population,Tr,Td,w,a,Tag,Tab);
-    //cout << "size of pvector is " << propensityVector.size() << "\n";
+    /****************************************************************************
+     LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION OR THE REALIZATION OF A
+     LAND-USE/COVER TRANSITION
+    ****************************************************************************/
 
-    ///////////////////////////////////////////////////////////////////////////
-    // TIME UNTIL NEXT EVENT
-    ///////////////////////////////////////////////////////////////////////////
-    dtg=-1/propensityVector.back()*log(gsl_rng_uniform(r));
-    ///////////////////////////////////////////////////////////////////////////
-    // LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION AND CONSUMPTION OR
-    // THE REALIZATION OF A STOCHASTIC EVENT
-    ///////////////////////////////////////////////////////////////////////////
-
-    if (dtg>dt){ // if the time until next event is larger than the ODE timestep
-      // update population and consumption
+    // if the time until next event is larger than the time until next ODE resolution
+    if (dtg>dt){
+      // then it is time to update population density
       if (population[0]>0){
+        // solve population ODE with a Runge-Kutta 4 scheme
         rungeKutta4(population,agriculturalProduction,dt);
       }
       else{
         population[0]=0;
-        // break;
       }
 
-      // update the time as well as the timestep for ODE solving
+      // increment the time and re-initialize the timestep for ODE solving
       t+=dt;
       dt=dtp;
+
+      // re-calculating the spontaneous propensity is not needed
+      resourceDeficit = getResourceDeficit(agriculturalProduction,population);
+      totalManagementPropensity = getTotalManagementPropensity(landscape, farmSensitivity, resourceDeficit);
     }
-    else{ // if the time until next event is shorter than the ODE timestep
-      // compute random number to select next reaction
-      x_rand = gsl_rng_uniform(r)*propensityVector.back();
-      // traverse the propensity vector and stop once reaching the selceted cell
-      i=0;
-      while(x_rand>propensityVector[i]){
-        i++;
-      }
-      // calculate the corresponding reaction and patch from the selected index i
-      reaction=(int)i/(n*n); //result from euclidian division
-      patch=i%(n*n); // remainder from euclidian division
+    else{ // if the time until next transition is shorter than the time until ODE resolution
 
-      // transform the landscape according to reaction and patch
-      if (reaction==0){landscape[patch]=0;count_events[0]+=1; updateNCCadding(naturalComponents,neighbourNaturalMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //recovery
-      else if(reaction==1) {landscape[patch]=1;count_events[1]+=1; updateNCCremoving(naturalComponents,landscape,patch,naturalDC); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //degradation
-      else if(reaction==2) {landscape[patch]=2;count_events[2]+=1;updateNCCremoving(naturalComponents,landscape,patch,naturalDC);getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar);} //expansion
-      else if(reaction==3) {landscape[patch]=3;count_events[3]+=1;} //intensification
-      else if(reaction==4) {landscape[patch]=0;count_events[4]+=1; updateNCCadding(naturalComponents,neighbourNaturalMatrix,landscape,patch); getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,sar); } //abandonment to natural
-      else if(reaction==5) {landscape[patch]=1;count_events[5]+=1;} //abandonment to degraded
-      else {cout << "Error: mainALUMSS.cpp reaction " << reaction << " does not exist.\n";}
+      // making the LUC transition happen, spontaneous propensities are updated inside
+      executeLUCTransition(landscape,naturalComponents,ecosystemServices, agriculturalProduction, farms,neighbourMatrix,neighbourMatrixES,population,farmSensitivity,farmStrategy,spontaneousPropensity,spontaneousCumulativePropensity,totalManagementPropensity,resourceDeficit,nFarms,nSide,y1,y0,sR,sD,sFL,z,dES,r,countTransitions);
 
+      // update total management propensity
+      resourceDeficit = getResourceDeficit(agriculturalProduction,population);
+      totalManagementPropensity = getTotalManagementPropensity(landscape, farmSensitivity, resourceDeficit);
 
-      // update the time and timestep for ODE solving
+      // increment the time and update timestep for ODE solving
       t+=dtg;
       dt-=dtg;
     }
+
   }
 
   // saving CONF file to re start other simulations from this point
@@ -484,25 +453,25 @@ int main(int argc, const char * argv[]){
   // for(i=0 ; i<landscape.size() ; i++){
   //   tofile_conf << " " << landscape[i];
   // }
-  // tofile_conf << "\n";
+  // tofile_conf << "\nSide";
 
   // saving files so ifdtsave was largest than execution time one gets the final
   // values for every output we look at
   // ofstream tofile_sens("DATA_SENSITIVITY");
   // tofile_sens.precision(5);
   // tofile_sens.setf(ios::scientific,ios::floatfield);
-  // saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+  // saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
 
 
   // careful I commented the standard output!!
-  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,n,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
-  // saveLandscapeMetrics(tofile_out,n,landscape,ecosystemServices);
+  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+  // saveLandscapeMetrics(tofile_out,nSide,landscape,ecosystemServices);
 
   // saveLandscape(tofile_land,t,landscape);
   // saveComponents(tofile_clus,t,landscape,naturalComponents);
 
   // saving output for sensitivity analysis
-  // saveSensitivityOutput(tofile_sens,n,1,population,naturalComponents,landscape,ecosystemServices);
+  // saveSensitivityOutput(tofile_sens,nSide,1,population,naturalComponents,landscape,ecosystemServices);
   // saving output for pattern exploration space and origin exploration space
   // saveAggregated(tofile_spex,t,population,landscape,agriculturalProduction);
 

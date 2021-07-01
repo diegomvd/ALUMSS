@@ -23,10 +23,11 @@ using namespace std;
 //       - getNeighboursState
 ///////////////////////////////////////////////////////////////////////////////
 
-void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double d);
+void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned int nSide, double d);
 void getNeighbours(vector<unsigned int> &neighboursList, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int i);
 void getNeighboursState(vector<unsigned int> &neighboursState, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, unsigned int i, unsigned int state);
 void getNeighboursStateInf(vector<unsigned int> &neighboursState, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, unsigned int i, unsigned int maxState);
+void getNeighboursStateSup(vector<unsigned int> &neighboursState, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, unsigned int i, unsigned int minState);
 
 ////////////////////////////////////////////////////////////////////////////////
 // 2- Calculation of Ecosystem Service provision:
@@ -52,13 +53,11 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
 //       - getPropensityVector
 ////////////////////////////////////////////////////////////////////////////////
 
-double saturationFunction(double var, double halfVal);
-void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double ksi, double y0);
-double getConsumptionDeficit(const vector<double> &agriculturalProduction, const vector<double> &population);
-void getSpontaneousPropensity(vector<double> &recoveryPropensity, vector<double> &degradationPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tr, double Td);
-void getAgroPropensity(vector<double> &expansionPropensity, vector<double> &intensePropensity, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<double> &population, double w, double a, double Tag);
-void getAbandonmentPropensity(vector<double> &naturalAbandonPropensity, vector<double> &degradedAbandonPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double Tab);
-void getPropensityVector(vector<double> &propensityVector, const vector<vector<unsigned int>> &neighbourMatrix, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, const vector<double> &agriculturalProduction, const vector<double> &population, double Tr, double Td, double w, double a, double Tag, double Tab);
+void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double y1, double y0);
+double getResourceDeficit(const vector<double> &agriculturalProduction, const vector<double> &population);
+double getTotalManagementPropensity(const vector<unsigned int> &landscape, const vector<double> &farmSensitivity, double resourceDeficit);
+void getSpontaneousPropensity(vector<double> &spontaneousPropensity, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, unsigned int nSide, double sR, double sD, double sFL);
+void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices, vector<double> &agriculturalProduction, const vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, const vector<vector<unsigned int>> &neighbourMatrixES, const vector<double> &population, const vector <double> &farmSensitivity, const vector<vector<double>> &farmStrategy, vector<double> &spontaneousPropensity, vector<double> &spontaneousCumulativePropensity, double totalManagementPropensity, double resourceDeficit, unsigned int nFarms, unsigned int nSide, double y1, double y0, double sR, double sD, double sFL, double z, double dES, gsl_rng  *r, vector<unsigned int> &countTransitions);
 
 ////////////////////////////////////////////////////////////////////////////////
 // 4- Initialization functions:
@@ -68,9 +67,11 @@ void getPropensityVector(vector<double> &propensityVector, const vector<vector<u
 ////////////////////////////////////////////////////////////////////////////////
 
 void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int nSide, unsigned int nFarms, gsl_rng  *r);
-void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int n, double a0, double d0, double a, double w, gsl_rng  *r);
+void initializeFarmStrategy( vector<vector<unsigned int>> farmStrategy, unsigned int nFarms, double a, gsl_rng *r);
+void initializeFarmSensitivity( vector<double> farmSensitivity, unsigned int nFarms, double b, gsl_rng *r);
+void initializeLandscape(vector<unsigned int> &landscape, const vector<vector<unsigned int>> &farms, const vector<double> &farmSensitivity, const vector<vector<double>> &farmStrategy, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int nSide, unsigned int nFarms, double a0, double d0, gsl_rng  *r);
 void initializePopulation( vector<double> &population, const vector<double> &agriculturalProduction);
-void initializeSES( vector<vector<unsigned int>> &farms, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int n, double a0, double d0, double a, double ksi, double y0, double sar, double w, double distanceConnection, unsigned int nFarms, gsl_rng  *r);
+void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double b, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r);
 ////////////////////////////////////////////////////////////////////////////////
 // 5- ODEs and solver:
 //       - populationEquation
