@@ -262,8 +262,8 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
       }
       /*now erase the components: traverse erase vector backwards to be sure of
       addressing the correct bits of memory erasing first the furthest pointers*/
-      for(ix=toErase.size()-1;ix>=0;ix--){
-        naturalComponents.erase(toErase[ix]);
+      for(ix=toErase.size();ix>=1;ix--){
+        naturalComponents.erase(toErase[ix-1]);
       }
       /*now add the new natural component*/
       naturalComponents.push_back(newNaturalComponent);
