@@ -103,10 +103,10 @@ int main(int argc, const char * argv[]){
 
   unsigned int nFarms; // number of farms in the landscape
   double a; // fraction of managers doing land-sparing
-  double b; // fraction of managers highly sensitive to demand
+  double sAT; // total sensitivity to resource demand
 
   double z; // saturation exponent of the ES-Area relationship
-  double dES; // distance relative to the landscape side length nSide at which ES flow and 2 natural cells are considered connected from a EF point of view
+  double dES; // distance at which ES flow and 2 natural cells are considered connected from a EF point of view
 
   double y1; // productivity of intense agriculture per es productivity
   double y0; // baseline productivity of low intense agri per es productivity
@@ -139,7 +139,7 @@ int main(int argc, const char * argv[]){
         // management parameters
         nFarms = (unsigned int) strtod(argv[6], &pEnd);
         a = strtod(argv[7], &pEnd);
-        b = strtod(argv[8], &pEnd);
+        sAT = strtod(argv[8], &pEnd);
 
         //ES-provision parameters
         z = strtod(argv[9], &pEnd);
@@ -189,7 +189,7 @@ int main(int argc, const char * argv[]){
     filename += "_d0_"+allArgs[5];
     filename += "_nF_"+allArgs[6];
     filename += "_a_"+allArgs[7];
-    filename += "_b_"+allArgs[8];
+    filename += "_sAT_"+allArgs[8];
     filename += "_z_"+allArgs[9];
     filename += "_dES_"+allArgs[10];
     filename += "_y0_"+allArgs[11];
@@ -333,10 +333,9 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
-    getNeighbourMatrix(neighbourMatrixES,nSide,(double)dES*nSide);
+    getNeighbourMatrix(neighbourMatrixES,nSide,dES);
     getNeighbourMatrix(neighbourMatrix,nSide,1.0);
-    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,b,y1,y0,z,(double)dES*nSide,nFarms,r);
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, y1, y0);
+    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,sAT,y1,y0,z,dES,nFarms,r);
     resourceDeficit = getResourceDeficit(agriculturalProduction, population);
     totalManagementPropensity = getTotalManagementPropensity(landscape, farmSensitivity, resourceDeficit);
     getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
@@ -446,6 +445,16 @@ int main(int argc, const char * argv[]){
       dt-=dtg;
     }
 
+  }
+
+  // print the landscape and the farms to check if it is ok
+  unsigned int ix,jx,lx;
+  for(ix=0;ix<nSide;++ix){
+    for(jx=0;jx<nSide;++jx){
+      lx = nSide*ix+jx;
+      cout << landscape[lx] << " ";
+    }
+    cout << "\n";
   }
 
   // saving CONF file to re start other simulations from this point

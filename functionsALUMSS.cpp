@@ -111,7 +111,7 @@ void getNeighboursStateInf(vector<unsigned int> &neighboursState, const vector<v
 {
   /*
   fills the vector neighboursState so that it contains the indexes of all the
-  closest neighbours of i in a state larger than minState.
+  closest neighbours of i in a state smaller than maxState.
   the landscape is passed as a constant reference so that the vector cannot be
   modified by the function in main
   */
@@ -768,6 +768,7 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
   voronoiSeedCumulativeProbability.resize(nSide*nSide);
   vector<unsigned int> voronoiSeeds(nFarms);
   vector<unsigned int>::iterator it;
+  double xRand;
 
   // initialize shape of farms vector
   farms.clear();
@@ -795,27 +796,30 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
   // from the seeds
 
   // create the political landscape initializing the seeds
-  // the value 0 indicate the cell hasn't been colonized
+  // the value nFarms indicate the cell hasn't been colonized
   vector<unsigned int> politicalLandscape(nSide*nSide,nFarms);
-  // initializing farm count at 1 to let 0 be the non colonized
-  ix=1;
+  // initializing farm count at 0 so that we reach nFarms-1 for the colonized
+  ix=0;
   for(it = voronoiSeeds.begin(); it != voronoiSeeds.end(); ++it){
     politicalLandscape[*it] = ix;
     ix++;
   }
 
-  vector<double> propensitiesRadialGrowth;
-  vector<double> cumulativePropensitiesRadialGrowth;
+  vector<double> propensitiesRadialGrowth(nSide*nSide);
+  vector<double> cumulativePropensitiesRadialGrowth(nSide*nSide);
   vector<unsigned int> neighbours;
-  cumulativePropensitiesRadialGrowth.resize(nSide*nSide);
+
+  vector<double> farmNeighboursPropensity(nFarms);
+  vector<double> farmNeighboursCumulativePropensity(nFarms);
 
   unsigned int nColonized = nFarms;
+  unsigned int farmId;
   // iterate until the whole landscape is colonized
+
+
   while (nColonized<politicalLandscape.size()){
 
-    // clear propensity vector, resize it and initialize to 0 everyone
-    propensitiesRadialGrowth.clear();
-    propensitiesRadialGrowth.resize(nSide*nSide);
+    // initialize to 0 the propensity vector for the radial growth
     fill(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),0.0);
 
     // calculate propensities
@@ -826,32 +830,37 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
         getNeighboursStateInf(neighbours, neighbourMatrix, politicalLandscape, ix, nFarms);
         // update the propensity = number of colonized neighbours
         propensitiesRadialGrowth[ix]=neighbours.size();
+        neighbours.clear();
       }
     }
 
     // get the cumulative propensity
     partial_sum(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),cumulativePropensitiesRadialGrowth.begin(), plus<double>());
+
     ix=0;
     // choose the cell at which the colonization happens
-    while(gsl_rng_uniform(r)*cumulativePropensitiesRadialGrowth.back() > cumulativePropensitiesRadialGrowth[ix]){
+    xRand = gsl_rng_uniform(r)*cumulativePropensitiesRadialGrowth.back();
+    while(xRand > cumulativePropensitiesRadialGrowth[ix]){
         ix++;
     }
 
-    vector<double> farmNeighboursPropensity(nFarms,0.0);
-    vector<double> farmNeighboursCumulativePropensity;
-    farmNeighboursCumulativePropensity.resize(nFarms);
-
     // get neighbours of cell ix and choose which farmer colonized the cell
+    neighbours.clear();
     getNeighboursStateInf(neighbours, neighbourMatrix, politicalLandscape, ix, nFarms);
+    fill(farmNeighboursPropensity.begin(),farmNeighboursPropensity.end(),0.0);
     // iterate neighbours and identify potential farmer colonizers
     for(it = neighbours.begin(); it != neighbours.end(); ++it){
+      // check to which farm belongs the neighbour
+      farmId = politicalLandscape[*it];
       // increment the amount of neighbours from a given farm
-      farmNeighboursPropensity[*it]+=1;
+      farmNeighboursPropensity[farmId]+=1;
     }
+
     // select the colonizing farm
     partial_sum(farmNeighboursPropensity.begin(),farmNeighboursPropensity.end(),farmNeighboursCumulativePropensity.begin(), plus<double>());
     jx=0;
-    while(gsl_rng_uniform(r)*farmNeighboursCumulativePropensity.back() > farmNeighboursCumulativePropensity[ix]){
+    xRand = gsl_rng_uniform(r)*farmNeighboursCumulativePropensity.back();
+    while(xRand > farmNeighboursCumulativePropensity[jx]){
       jx++;
     }
 
@@ -868,7 +877,7 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
   return;
 }
 
-void initializeFarmStrategy( vector<vector<double>> farmStrategy, unsigned int nFarms, double a, gsl_rng *r)
+void initializeFarmStrategy( vector<vector<double>> &farmStrategy, unsigned int nFarms, double a, gsl_rng *r)
 {
   /*
   for instance we only consider the fraction of farms on each strategy and
@@ -885,58 +894,62 @@ void initializeFarmStrategy( vector<vector<double>> farmStrategy, unsigned int n
   farmStrategy.clear();
   farmStrategy.resize(nFarms);
   nSparing = (unsigned int) a*nFarms;
+  double xRand;
+
 
   // initialize all the farms as sharing and then change nSparing to sparing
   for(ix=0;ix<farmStrategy.size();++ix){
-    farmStrategy[ix][0] = 0; // intensification
-    farmStrategy[ix][1] = 0; // clustering
+    farmStrategy[ix].push_back(0); // intensification
+    farmStrategy[ix].push_back(0); // clustering
   }
 
   for(ix=0;ix<nSparing;++ix){
     // choose in which Farm to spare
     partial_sum(probSparing.begin(),probSparing.end(),cumProbSparing.begin());
     jx=0;
-    while(gsl_rng_uniform(r)*cumProbSparing.back() > cumProbSparing[jx]){
+    xRand= gsl_rng_uniform(r)*cumProbSparing.back();
+    while( xRand > cumProbSparing[jx]){
       jx++;
     }
     // update probSparing
     probSparing[jx]=0;
     // update farmStrategy
-    farmStrategy[ix][0] = 1; // intensification
-    farmStrategy[ix][1] = 5; // clustering
+    farmStrategy[ix].push_back(1); // intensification
+    farmStrategy[ix].push_back(5); // clustering
   }
 
   return;
 }
 
-void initializeFarmSensitivity( vector<double> farmSensitivity, unsigned int nFarms, double b, gsl_rng *r)
+void initializeFarmSensitivity( vector<double> &farmSensitivity, unsigned int nFarms, double sAT, gsl_rng *r)
 {
   /*
-  For instance we assume there are two possible magnitudes of sensitivity: low
-  and high and assign them with uniform probablity over the farms and independently
-  of the farm's strategy according to an initial fraction of high sensitivity ones b
+  For instance we initialize all the farms with the same sesitivity in order to
+  preserve total sensitivity sAT
   */
-  unsigned int ix, jx, nHighSens;
-  vector<double> probHighSens(nFarms,1);
-  vector<double> cumProbHighSens(nFarms);
+  // unsigned int ix, jx, nHighSens;
+  // vector<double> probHighSens(nFarms,1);
+  // vector<double> cumProbHighSens(nFarms);
+  // double xRand;
 
   // all the farms are initially at low sensitivity
-  fill(farmSensitivity.begin(),farmSensitivity.end(),1.0);
+  fill(farmSensitivity.begin(),farmSensitivity.end(),(double) sAT/nFarms);
 
-  // number of high sensitivtiy farms
-  nHighSens = (unsigned int) b*nFarms;
-  for(ix=0;ix<nHighSens;++ix){
-    // choose which farm is high sensitivity
-    partial_sum(probHighSens.begin(),probHighSens.end(),cumProbHighSens.begin());
-    jx=0;
-    while(gsl_rng_uniform(r)*cumProbHighSens.back() > cumProbHighSens[jx]){
-      jx++;
-    }
-    // update probHighSens
-    probHighSens[jx]=0;
-    // update farmSensitivity
-    farmSensitivity[jx]=10;
-  }
+  // // number of high sensitivtiy farms
+  // nHighSens = (unsigned int) b*nFarms;
+  // for(ix=0;ix<nHighSens;++ix){
+  //   // choose which farm is high sensitivity
+  //   partial_sum(probHighSens.begin(),probHighSens.end(),cumProbHighSens.begin());
+  //   jx=0;
+  //   xRand=gsl_rng_uniform(r)*cumProbHighSens.back()
+  //   while( xRand > cumProbHighSens[jx]){
+  //     jx++;
+  //   }
+  //   // update probHighSens
+  //   probHighSens[jx]=0;
+  //   // update farmSensitivity
+  //   farmSensitivity[jx]=10;
+  // }
   return;
 }
 
@@ -946,7 +959,6 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   initializes the landscape given a fraction of initial agricultural patches a0
   and degraded patches d0 considering the farm distribution and farmers strategies
   */
-
   //unsigned int number_cropped_patches = 1;
   unsigned long ix,jx,lx;
   vector<unsigned int>::const_iterator it1;
@@ -972,13 +984,15 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   vector<unsigned int> agriculturalNeighbours;
   // cumulative farm sensitivity
   vector<double> cumFarmSensitivity(nFarms);
+  double xRand;
 
   // start the degradation process until all the required cells are degraded
   for (ix=0; ix<nd0; ++ix){
     jx=0;
     // select to be degraded cell with uniform spatial distribution
     partial_sum(probDegradation.begin(),probDegradation.end(),cumProbDegradation.begin());
-    while (gsl_rng_uniform(r)*cumProbDegradation.back() > cumProbDegradation[jx]){
+    xRand = gsl_rng_uniform(r)*cumProbDegradation.back();
+    while ( xRand > cumProbDegradation[jx]){
       jx++;
     }
     // update the state of the landscape
@@ -995,7 +1009,8 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     // select the farm
     jx=0;
     partial_sum(farmSensitivity.begin(),farmSensitivity.end(),cumFarmSensitivity.begin());
-    while (gsl_rng_uniform(r)*cumFarmSensitivity.back() > cumFarmSensitivity[jx]){
+    xRand = gsl_rng_uniform(r)*cumFarmSensitivity.back();
+    while ( xRand > cumFarmSensitivity[jx]){
       jx++;
     }
     // now that the farm has been selected check which cells are available
@@ -1008,6 +1023,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
         availableCells.push_back(*it1);
       }
     }
+
     // clear and resize the probability of conversion vector
     probConversion.clear();
     probConversion.resize(availableCells.size());
@@ -1032,7 +1048,8 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     lx=0;
     it2=availableCells.begin();
     partial_sum(probConversion.begin(),probConversion.end(),cumProbConversion.begin());
-    while (gsl_rng_uniform(r)*cumProbConversion.back() > cumProbConversion[lx]){
+    xRand = gsl_rng_uniform(r)*cumProbConversion.back();
+    while ( xRand > cumProbConversion[lx]){
       lx++;
       it2++;
     }
@@ -1066,12 +1083,13 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
   return;
 }
 
-void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double b, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
+void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double sAT, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
 {
-
+  cout << "here11\n";
   initializeVoronoiFarms(farms,neighbourMatrix,nSide,nFarms,r);
+  cout << "here12\n";
   initializeFarmStrategy(farmStrategy,nFarms,a,r);
-  initializeFarmSensitivity(farmSensitivity,nFarms,b,r);
+  initializeFarmSensitivity(farmSensitivity,nFarms,sAT,r);
   initializeLandscape(landscape,farms,farmSensitivity,farmStrategy,neighbourMatrix,nSide,nFarms,a0,d0,r);
   getNaturalConnectedComponents(naturalComponents,landscape,dES);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z);

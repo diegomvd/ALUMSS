@@ -67,11 +67,12 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
 ////////////////////////////////////////////////////////////////////////////////
 
 void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int nSide, unsigned int nFarms, gsl_rng  *r);
-void initializeFarmStrategy( vector<vector<unsigned int>> farmStrategy, unsigned int nFarms, double a, gsl_rng *r);
-void initializeFarmSensitivity( vector<double> farmSensitivity, unsigned int nFarms, double b, gsl_rng *r);
+void initializeFarmStrategy( vector<vector<unsigned int>> &farmStrategy, unsigned int nFarms, double a, gsl_rng *r);
+void initializeFarmSensitivity( vector<double> &farmSensitivity, unsigned int nFarms, double sAT, gsl_rng *r);
 void initializeLandscape(vector<unsigned int> &landscape, const vector<vector<unsigned int>> &farms, const vector<double> &farmSensitivity, const vector<vector<double>> &farmStrategy, const vector<vector<unsigned int>> &neighbourMatrix, unsigned int nSide, unsigned int nFarms, double a0, double d0, gsl_rng  *r);
 void initializePopulation( vector<double> &population, const vector<double> &agriculturalProduction);
 void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double b, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r);
+
 ////////////////////////////////////////////////////////////////////////////////
 // 5- ODEs and solver:
 //       - populationEquation
