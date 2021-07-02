@@ -334,7 +334,7 @@ int main(int argc, const char * argv[]){
   }
   else{ // WITH ARGV PARAMETERS
     getNeighbourMatrix(neighbourMatrixES,nSide,dES);
-    getNeighbourMatrix(neighbourMatrix,nSide,1.0);
+    getNeighbourMatrix(neighbourMatrix,nSide,1.1);
     initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,sAT,y1,y0,z,dES,nFarms,r);
     resourceDeficit = getResourceDeficit(agriculturalProduction, population);
     totalManagementPropensity = getTotalManagementPropensity(landscape, farmSensitivity, resourceDeficit);
@@ -406,6 +406,9 @@ int main(int argc, const char * argv[]){
 
     // time until next transition
     dtg=-1/(totalManagementPropensity+spontaneousCumulativePropensity.back())*log(gsl_rng_uniform(r));
+    cout << "managment propensity " << totalManagementPropensity <<"\n";
+    cout << "spontaneous propensity " << spontaneousCumulativePropensity.back() <<"\n";
+    cout << dtg <<"\n";
 
     /****************************************************************************
      LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION OR THE REALIZATION OF A
@@ -434,7 +437,11 @@ int main(int argc, const char * argv[]){
     else{ // if the time until next transition is shorter than the time until ODE resolution
 
       // making the LUC transition happen, spontaneous propensities are updated inside
+      cout << "before LUC\n";
+      cout << farmStrategy.size() << "\n";
+      cout << naturalComponents.size() << "\n";
       executeLUCTransition(landscape,naturalComponents,ecosystemServices, agriculturalProduction, farms,neighbourMatrix,neighbourMatrixES,population,farmSensitivity,farmStrategy,spontaneousPropensity,spontaneousCumulativePropensity,totalManagementPropensity,resourceDeficit,nFarms,nSide,y1,y0,sR,sD,sFL,z,dES,r,countTransitions);
+      cout << "after LUC\n";
 
       // update total management propensity
       resourceDeficit = getResourceDeficit(agriculturalProduction,population);
@@ -444,15 +451,32 @@ int main(int argc, const char * argv[]){
       t+=dtg;
       dt-=dtg;
     }
+    cout << t << " out of " << SimTime <<" \n";
 
   }
 
   // print the landscape and the farms to check if it is ok
   unsigned int ix,jx,lx;
+  cout << "Natural Landscape:\n";
   for(ix=0;ix<nSide;++ix){
     for(jx=0;jx<nSide;++jx){
       lx = nSide*ix+jx;
       cout << landscape[lx] << " ";
+    }
+    cout << "\n";
+  }
+  vector<unsigned int> politicalLandscape(nSide*nSide);
+  vector<unsigned int>::iterator it;
+  for(ix=0;ix<farms.size();++ix){
+    for(it=farms[ix].begin();it!=farms[ix].end();++it){
+      politicalLandscape[*it]=ix;
+    }
+  }
+  cout << "Political Landscape:\n";
+  for(ix=0;ix<nSide;++ix){
+    for(jx=0;jx<nSide;++jx){
+      lx = nSide*ix+jx;
+      cout << politicalLandscape[lx] << " ";
     }
     cout << "\n";
   }
