@@ -719,6 +719,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   unsigned int nao0=(unsigned int) (a0*n*n*(1-a));
   unsigned int nai0=(unsigned int) (a0*n*n*a);
   unsigned int na0=nao0+nai0;
+  double xRand;
 
   // first build a completely natural landscape with n*n patches
   landscape.push_back(0);
@@ -768,7 +769,8 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   vector<unsigned int> intenseNeighbours;
   for(ix=0;ix<nai0;++ix){
     jx=0;
-    while (gsl_rng_uniform(r)*probIntense.back()>probIntense[jx]){
+    xRand = gsl_rng_uniform(r)*probIntense.back();
+    while (xRand > probIntense[jx]){
       jx++;
     }
     landscape[jx]=3;
