@@ -272,6 +272,8 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
   vector<int> newNaturalComponent, newNaturalComponent2;
   newNaturalComponent.push_back(i);
 
+
+
   if(neighboursNatural.size()==0){ //no natural neighbour: simplest case, just create a new component
       naturalComponents.push_back(newNaturalComponent); // add it to the list
   }
@@ -287,6 +289,7 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
     pointers to components are located in a sorted way. this is key to ensure
     that the erasing process doesn't mess up with the memory.
     */
+
     unsigned int neighboursFound = 0;
     for(it2=naturalComponents.begin();it2!=naturalComponents.end();it2++){ // traverse all the components
       for(it1=neighboursNatural.begin();it1!=neighboursNatural.end();it1++){ // traverse all the natural neigbhours of new natural cell
@@ -303,31 +306,37 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
     }
 
 
+
     // if there is a single component in toErase just add i to that component, no need of merging
     if (toErase.size()>0 && toErase.size()<2){
       toErase[0]->push_back(i);
     }
     else if(toErase.size()>1){ // if there are more, erase them and push back the merged ones
       // erasing components that are going to be merged
+
       unsigned int ix;
       for(ix=0;ix<toErase.size();ix++){
         for(it3=toErase[ix]->begin();it3!=toErase[ix]->end();it3++){
           newNaturalComponent.push_back(*it3);
         }
       }
+
       /*now erase the components: traverse erase vector backwards to be sure of
       addressing the correct bits of memory erasing first the furthest pointers*/
-      for(ix=toErase.size()-1;ix>=0;ix--){
-        naturalComponents.erase(toErase[ix]);
+      for(ix=toErase.size();ix>=1;--ix){
+        naturalComponents.erase(toErase[ix-1]);
       }
       /*now add the new natural component*/
       naturalComponents.push_back(newNaturalComponent);
+
     }
     else{ // toErase is empty, in which case there is an error in the code
       cout << "Error: toErase size is " << toErase.size() << " but toErase cannot be empty\n";
     }
 
   }
+
+
 
   return;
 }
@@ -339,7 +348,6 @@ void updateNCCremoving(vector<vector<int>> &naturalComponents, const vector<unsi
   having a parameter for the connection distance
   */
 
-  //cout <<"\n";
   unsigned int n = (unsigned int) sqrt(landscape.size());
 
   // find cluster of cell l
@@ -550,14 +558,16 @@ double getResourceDeficit(const vector<double> &agriculturalProduction, const ve
 double getTotalManagementPropensity(const vector<unsigned int> &landscape, const vector<double> &farmSensitivity, double resourceDeficit)
 {
   unsigned int oneNatural = 0;
-  double totalManagementPropensity;
+  double totalManagementPropensity=0;
 
   // if there is no natural land left, then there is no possible land conversion
   if( find( landscape.begin(), landscape.end(), 0) != landscape.end() ){
     oneNatural = 1;
   }
 
-  totalManagementPropensity = oneNatural * resourceDeficit * accumulate(farmSensitivity.begin(),farmSensitivity.end(),0.0,plus<double>());
+  if (resourceDeficit>0){
+    totalManagementPropensity = oneNatural * resourceDeficit * accumulate(farmSensitivity.begin(),farmSensitivity.end(),0.0,plus<double>());
+  }
 
   return totalManagementPropensity;
 }
@@ -594,7 +604,7 @@ void getSpontaneousPropensity(vector<double> &spontaneousPropensity, const vecto
     return;
 }
 
-void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices, vector<double> &agriculturalProduction, const vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, const vector<vector<unsigned int>> &neighbourMatrixES, const vector<double> &population, const vector <double> &farmSensitivity, const vector<vector<double>> &farmStrategy, vector<double> &spontaneousPropensity, vector<double> &spontaneousCumulativePropensity, double totalManagementPropensity, double resourceDeficit, unsigned int nFarms, unsigned int nSide, double y1, double y0, double sR, double sD, double sFL, double z, double dES, gsl_rng  *r, vector<unsigned int> &countTransitions)
+void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices, vector<double> &agriculturalProduction, const vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, const vector<vector<unsigned int>> &neighbourMatrixES, const vector<double> &population, const vector<double> &farmSensitivity, const vector<vector<double>> &farmStrategy, vector<double> &spontaneousPropensity, vector<double> &spontaneousCumulativePropensity, double totalManagementPropensity, double resourceDeficit, unsigned int nFarms, unsigned int nSide, double y1, double y0, double sR, double sD, double sFL, double z, double dES, gsl_rng  *r, vector<unsigned int> &countTransitions)
 {
 
   vector<double> farmPropensity(nFarms);
@@ -614,6 +624,8 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
 
   // check if it is a management-related transition or a spontaneous one
   if(xRand < totalManagementPropensity){// if it is a management transition
+
+    cout << "management1\n";
     // select the farm
     ix=0;
     for(ix=0;ix<farmSensitivity.size();++ix){
@@ -625,6 +637,8 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
       farmPropensity[ix] = oneNatural*farmSensitivity[ix]*resourceDeficit;
     }
     partial_sum(farmPropensity.begin(),farmPropensity.end(),farmCumulativePropensity.begin());
+
+    ix=0;
     while (xRand > farmCumulativePropensity[ix]){
       ix++;
     }
@@ -637,6 +651,7 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
         availableCells.push_back(*it1);
       }
     }
+
     // clear and resize the probability of conversion vector
     conversionPropensity.resize(availableCells.size());
     conversionCumulativePropensity.resize(availableCells.size());
@@ -661,6 +676,7 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
         conversionPropensity[jx] = conversionPropensity[jx] * farmCumulativePropensity[ix] / conversionCumSum;
       }
     }
+
     jx=0;
     it2=availableCells.begin();
     partial_sum(conversionPropensity.begin(),conversionPropensity.end(),conversionCumulativePropensity.begin());
@@ -668,15 +684,17 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
       jx++;
       it2++;
     }
+
     // update the landscape according to the strategy: either natural to low-intense, or intense
-    if(farmStrategy[jx][0]==0){
+    if(farmStrategy[ix][0]==0){
       landscape[*it2]=2;
       countTransitions[4]+=1;
     }
-    else if(farmStrategy[jx][0]==1){
+    else if(farmStrategy[ix][0]==1){
       landscape[*it2]=3;
       countTransitions[5]+=1;
     }
+
     // update natural components
     updateNCCremoving(naturalComponents,landscape,*it2,dES);
     // update ecosystem service provision
@@ -684,16 +702,21 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
     // update the propensity of spontaneous transitions
     getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
     partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
+    cout << "management2\n";
   }
   else{ // if it is a spontaneous transition
+    cout << "spontaneous1\n";
     ix=0;
     while(xRand > spontaneousCumulativePropensity[ix]){
       ix++;
     }
+
+
     transition=(unsigned int) ix/(nSide*nSide);
     cell=(unsigned int) ix%(nSide*nSide);
 
     if (transition==0){ // land recovery
+
       landscape[cell]=0; // update the landscape
       countTransitions[0]+=1; // update the transitions' count
       updateNCCadding(naturalComponents,neighbourMatrixES,landscape,cell); // update the NCC
@@ -701,8 +724,10 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
       // update the propensity of spontaneous transitions
       getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
       partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
+
     }
     else if(transition==1){ // land degradation
+
       landscape[cell]=1;
       countTransitions[1]+=1;
       updateNCCremoving(naturalComponents,landscape,cell,dES);
@@ -710,31 +735,42 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
       // update the propensity of spontaneous transitions
       getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
       partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
+
     }
     else if(transition==2){ // fertility loss
+
       if(landscape[cell]==2){ // if it was low-intense agriculture
+
         landscape[cell] = 0;
         countTransitions[2]+=1;
+
+        cout << "here1\n";
         updateNCCadding(naturalComponents,neighbourMatrixES,landscape,cell);
+        cout << "here2\n";
         getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z);
         // update the propensity of spontaneous transitions
         getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
         partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
+
       }
       else if(landscape[cell]==3){ // if it was high-intense agriculture
+
         landscape[cell] = 1;
         countTransitions[3]+=1;
         // update the propensity of spontaneous transitions
         spontaneousPropensity[ix]=0; // transition that just occurred has now null propensity
         spontaneousPropensity[cell] = sR*ecosystemServices[cell]; // applying the recovery transition formula
+
       }
       else{
         cout << "Error: functionsALUMSS.cpp : solveSSA: fertility loss of non-agricultural cell.\n";
       }
+
     }
     else{
       cout << "Error: functionsALUMSS.cpp : solveSSA: spontaneous transition "<< transition << " does not exist.\n";
     }
+    cout << "spontaneous2\n";
   }
   // updating agricultural production after the LUC transition
   getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, y1, y0);
@@ -782,7 +818,8 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
     jx=0;
     // draw a random number between [0,nSide*nSide[ to uniformly choose one of
     // the cells as a seed
-    while ( gsl_rng_uniform(r)*voronoiSeedCumulativeProbability.back() > voronoiSeedCumulativeProbability[jx] ){
+    xRand = gsl_rng_uniform(r)*voronoiSeedCumulativeProbability.back();
+    while ( xRand > voronoiSeedCumulativeProbability[jx] ){
       // as long as the condition isn't fulfill pass to the next cell by incrementing jx
       jx++ ;
     }
@@ -802,6 +839,7 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
   ix=0;
   for(it = voronoiSeeds.begin(); it != voronoiSeeds.end(); ++it){
     politicalLandscape[*it] = ix;
+    farms[ix].push_back(*it);
     ix++;
   }
 
@@ -818,7 +856,6 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
 
 
   while (nColonized<politicalLandscape.size()){
-
     // initialize to 0 the propensity vector for the radial growth
     fill(propensitiesRadialGrowth.begin(),propensitiesRadialGrowth.end(),0.0);
 
@@ -873,7 +910,6 @@ void initializeVoronoiFarms( vector<vector<unsigned int>> &farms, const vector<v
     // store the newly colonized cell in the farms vector
     farms[jx].push_back(ix);
   }
-
   return;
 }
 
@@ -960,6 +996,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   and degraded patches d0 considering the farm distribution and farmers strategies
   */
   //unsigned int number_cropped_patches = 1;
+
   unsigned long ix,jx,lx;
   vector<unsigned int>::const_iterator it1;
   vector<unsigned int>::iterator it2;
@@ -989,12 +1026,14 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   // start the degradation process until all the required cells are degraded
   for (ix=0; ix<nd0; ++ix){
     jx=0;
+
     // select to be degraded cell with uniform spatial distribution
     partial_sum(probDegradation.begin(),probDegradation.end(),cumProbDegradation.begin());
     xRand = gsl_rng_uniform(r)*cumProbDegradation.back();
     while ( xRand > cumProbDegradation[jx]){
       jx++;
     }
+
     // update the state of the landscape
     landscape[jx]=1;
     // update the degradation probability
@@ -1007,15 +1046,18 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   // based on the farm's strategy
   for (ix=0; ix<na0; ++ix){
     // select the farm
+
     jx=0;
     partial_sum(farmSensitivity.begin(),farmSensitivity.end(),cumFarmSensitivity.begin());
     xRand = gsl_rng_uniform(r)*cumFarmSensitivity.back();
     while ( xRand > cumFarmSensitivity[jx]){
       jx++;
     }
+
     // now that the farm has been selected check which cells are available
     // for conversion
     // iterate over the cells belonging to the selected farm
+
     for(it1=farms[jx].begin();it1!=farms[jx].end();++it1){
       // check if the cell is natural
       if(landscape[*it1]==0){
@@ -1023,6 +1065,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
         availableCells.push_back(*it1);
       }
     }
+
 
     // clear and resize the probability of conversion vector
     probConversion.clear();
@@ -1045,7 +1088,9 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
         probConversion[lx]=pow( max(0.1 , (double)agriculturalNeighbours.size() ) , farmStrategy[jx][1] ) ;
       }
     }
+
     lx=0;
+
     it2=availableCells.begin();
     partial_sum(probConversion.begin(),probConversion.end(),cumProbConversion.begin());
     xRand = gsl_rng_uniform(r)*cumProbConversion.back();
@@ -1063,6 +1108,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     else{
       cout << "Error: initializeLandscape: farmStrategy[jx][0] has an unauthorized value.";
     }
+
   }
 
   return;
@@ -1085,9 +1131,7 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
 
 void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double sAT, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
 {
-  cout << "here11\n";
   initializeVoronoiFarms(farms,neighbourMatrix,nSide,nFarms,r);
-  cout << "here12\n";
   initializeFarmStrategy(farmStrategy,nFarms,a,r);
   initializeFarmSensitivity(farmSensitivity,nFarms,sAT,r);
   initializeLandscape(landscape,farms,farmSensitivity,farmStrategy,neighbourMatrix,nSide,nFarms,a0,d0,r);
