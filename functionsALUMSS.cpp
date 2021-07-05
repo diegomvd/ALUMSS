@@ -258,6 +258,7 @@ void updateNCCadding(vector<vector<int>> &naturalComponents, const vector<vector
       for(ix=toErase.size();ix>=1;ix--){
         naturalComponents.erase(toErase[ix-1]);
       }
+
       /*now add the new natural component*/
       naturalComponents.push_back(newNaturalComponent);
     }
