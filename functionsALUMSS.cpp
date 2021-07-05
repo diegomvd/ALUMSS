@@ -543,16 +543,16 @@ double getResourceDeficit(const vector<double> &agriculturalProduction, const ve
   expansion or intensification
   */
   double totalAgriculturalProduction;
-  double consumptionDeficit;
+  double resourceDeficit;
 
   totalAgriculturalProduction=accumulate(agriculturalProduction.begin(),agriculturalProduction.end(),0.0,plus<double>());
   if(population[0]>0){
-    consumptionDeficit = population[0] - totalAgriculturalProduction;
+    resourceDeficit = population[0] - totalAgriculturalProduction;
   }
   else{
-    consumptionDeficit=0;
+    resourceDeficit=0;
   }
-  return consumptionDeficit;
+  return resourceDeficit;
 }
 
 double getTotalManagementPropensity(const vector<unsigned int> &landscape, const vector<double> &farmSensitivity, double resourceDeficit)
@@ -625,7 +625,6 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
   // check if it is a management-related transition or a spontaneous one
   if(xRand < totalManagementPropensity){// if it is a management transition
 
-    cout << "management1\n";
     // select the farm
     ix=0;
     for(ix=0;ix<farmSensitivity.size();++ix){
@@ -702,16 +701,16 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
     // update the propensity of spontaneous transitions
     getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
     partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
-    cout << "management2\n";
   }
   else{ // if it is a spontaneous transition
-    cout << "spontaneous1\n";
     ix=0;
+    cout << "xRand = " << xRand << ", totalcumulativepropensity = " << spontaneousCumulativePropensity.back() << "\n";
     while(xRand > spontaneousCumulativePropensity[ix]){
       ix++;
     }
 
 
+    cout << "propensity index " << ix <<"\n";
     transition=(unsigned int) ix/(nSide*nSide);
     cell=(unsigned int) ix%(nSide*nSide);
 
@@ -744,9 +743,7 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
         landscape[cell] = 0;
         countTransitions[2]+=1;
 
-        cout << "here1\n";
         updateNCCadding(naturalComponents,neighbourMatrixES,landscape,cell);
-        cout << "here2\n";
         getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z);
         // update the propensity of spontaneous transitions
         getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
@@ -770,7 +767,6 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
     else{
       cout << "Error: functionsALUMSS.cpp : solveSSA: spontaneous transition "<< transition << " does not exist.\n";
     }
-    cout << "spontaneous2\n";
   }
   // updating agricultural production after the LUC transition
   getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, y1, y0);

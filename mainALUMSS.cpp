@@ -406,9 +406,6 @@ int main(int argc, const char * argv[]){
 
     // time until next transition
     dtg=-1/(totalManagementPropensity+spontaneousCumulativePropensity.back())*log(gsl_rng_uniform(r));
-    cout << "managment propensity " << totalManagementPropensity <<"\n";
-    cout << "spontaneous propensity " << spontaneousCumulativePropensity.back() <<"\n";
-    cout << dtg <<"\n";
 
     /****************************************************************************
      LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION OR THE REALIZATION OF A
@@ -437,11 +434,8 @@ int main(int argc, const char * argv[]){
     else{ // if the time until next transition is shorter than the time until ODE resolution
 
       // making the LUC transition happen, spontaneous propensities are updated inside
-      cout << "before LUC\n";
-      cout << farmStrategy.size() << "\n";
-      cout << naturalComponents.size() << "\n";
       executeLUCTransition(landscape,naturalComponents,ecosystemServices, agriculturalProduction, farms,neighbourMatrix,neighbourMatrixES,population,farmSensitivity,farmStrategy,spontaneousPropensity,spontaneousCumulativePropensity,totalManagementPropensity,resourceDeficit,nFarms,nSide,y1,y0,sR,sD,sFL,z,dES,r,countTransitions);
-      cout << "after LUC\n";
+
 
       // update total management propensity
       resourceDeficit = getResourceDeficit(agriculturalProduction,population);
@@ -451,7 +445,6 @@ int main(int argc, const char * argv[]){
       t+=dtg;
       dt-=dtg;
     }
-    cout << t << " out of " << SimTime <<" \n";
 
   }
 
