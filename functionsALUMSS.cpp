@@ -555,7 +555,7 @@ double getResourceDeficit(const vector<double> &agriculturalProduction, const ve
   return resourceDeficit;
 }
 
-double getTotalManagementPropensity(const vector<unsigned int> &landscape, const vector<double> &farmSensitivity, double resourceDeficit)
+double getTotalManagementPropensity(const vector<unsigned int> &landscape, double sAT, double resourceDeficit)
 {
   unsigned int oneNatural = 0;
   double totalManagementPropensity=0;
@@ -566,7 +566,7 @@ double getTotalManagementPropensity(const vector<unsigned int> &landscape, const
   }
 
   if (resourceDeficit>0){
-    totalManagementPropensity = oneNatural * resourceDeficit * accumulate(farmSensitivity.begin(),farmSensitivity.end(),0.0,plus<double>());
+    totalManagementPropensity = oneNatural * resourceDeficit * sAT;
   }
 
   return totalManagementPropensity;
@@ -607,7 +607,7 @@ void getSpontaneousPropensity(vector<double> &spontaneousPropensity, const vecto
 void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices, vector<double> &agriculturalProduction, const vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, const vector<vector<unsigned int>> &neighbourMatrixES, const vector<double> &population, const vector<double> &farmSensitivity, const vector<vector<double>> &farmStrategy, vector<double> &spontaneousPropensity, vector<double> &spontaneousCumulativePropensity, double totalManagementPropensity, double resourceDeficit, unsigned int nFarms, unsigned int nSide, double y1, double y0, double sR, double sD, double sFL, double z, double dES, gsl_rng  *r, vector<unsigned int> &countTransitions)
 {
 
-  vector<double> farmPropensity(nFarms);
+  vector<double> farmPropensity(nFarms,0);
   vector<double> farmCumulativePropensity(nFarms);
   vector<unsigned int> availableCells;
   vector<unsigned int> agriculturalNeighbours;
@@ -615,9 +615,11 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
   unsigned int ix,jx;
   unsigned int transition,cell;
   double conversionCumSum = 0;
-  int oneNatural = 0;
+  double normFactor = 0;
+  vector<double>::iterator it0;
   vector<unsigned int>::const_iterator it1;
   vector<unsigned int>::iterator it2;
+
 
   // random number to pick the transition and the cell
   double xRand = gsl_rng_uniform(r)*(totalManagementPropensity + spontaneousCumulativePropensity.back());
@@ -627,13 +629,18 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
 
     // select the farm
     ix=0;
-    for(ix=0;ix<farmSensitivity.size();++ix){
+    for(ix=0;ix<farms.size();++ix){
       // if there is no natural land in a farm then there is no conversion
-      oneNatural=0;
-      if( find( farms[ix].begin(), farms[ix].end(), 0) != farms[ix].end() ){
-        oneNatural = 1;
+      for(it1 = farms[ix].begin(); it1!=farms[ix].end(); ++it1){
+        if(landscape[*it1]==0){
+          farmPropensity[ix]=farmSensitivity[ix];
+          normFactor += farmSensitivity[ix];
+          break;
+        }
       }
-      farmPropensity[ix] = oneNatural*farmSensitivity[ix]*resourceDeficit;
+    }
+    for(it0=farmPropensity.begin();it0!=farmPropensity.end();++it0){
+      *it0 = *it0/normFactor*totalManagementPropensity;
     }
     partial_sum(farmPropensity.begin(),farmPropensity.end(),farmCumulativePropensity.begin());
 
@@ -701,16 +708,15 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
     // update the propensity of spontaneous transitions
     getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
     partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
+
   }
   else{ // if it is a spontaneous transition
     ix=0;
-    cout << "xRand = " << xRand << ", totalcumulativepropensity = " << spontaneousCumulativePropensity.back() << "\n";
-    while(xRand > spontaneousCumulativePropensity[ix]){
+
+    while(xRand > totalManagementPropensity + spontaneousCumulativePropensity[ix]){
       ix++;
     }
 
-
-    cout << "propensity index " << ix <<"\n";
     transition=(unsigned int) ix/(nSide*nSide);
     cell=(unsigned int) ix%(nSide*nSide);
 
@@ -953,35 +959,19 @@ void initializeFarmStrategy( vector<vector<double>> &farmStrategy, unsigned int 
   return;
 }
 
-void initializeFarmSensitivity( vector<double> &farmSensitivity, unsigned int nFarms, double sAT, gsl_rng *r)
+void initializeFarmSensitivity( vector<double> &farmSensitivity, double wS, gsl_rng *r)
 {
   /*
-  For instance we initialize all the farms with the same sesitivity in order to
-  preserve total sensitivity sAT
+  the weigths for each farm sensitivity are drawn uniformly with widht relative to the mean = wS
   */
-  // unsigned int ix, jx, nHighSens;
-  // vector<double> probHighSens(nFarms,1);
-  // vector<double> cumProbHighSens(nFarms);
-  // double xRand;
 
-  // all the farms are initially at low sensitivity
-  fill(farmSensitivity.begin(),farmSensitivity.end(),(double) sAT/nFarms);
+  vector<double>::iterator it;
 
-  // // number of high sensitivtiy farms
-  // nHighSens = (unsigned int) b*nFarms;
-  // for(ix=0;ix<nHighSens;++ix){
-  //   // choose which farm is high sensitivity
-  //   partial_sum(probHighSens.begin(),probHighSens.end(),cumProbHighSens.begin());
-  //   jx=0;
-  //   xRand=gsl_rng_uniform(r)*cumProbHighSens.back()
-  //   while( xRand > cumProbHighSens[jx]){
-  //     jx++;
-  //   }
-  //   // update probHighSens
-  //   probHighSens[jx]=0;
-  //   // update farmSensitivity
-  //   farmSensitivity[jx]=10;
-  // }
+  // fill the vector with weights drawn from a uniform distribution with mean 1 and width wS
+  for(it=farmSensitivity.begin();it!=farmSensitivity.end();++it){
+    *it = gsl_ran_flat(r,1-wS,1+wS);
+  }
+
   return;
 }
 
@@ -1125,11 +1115,11 @@ void initializePopulation( vector<double> &population, const vector<double> &agr
   return;
 }
 
-void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double sAT, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
+void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<double> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double wS, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
 {
   initializeVoronoiFarms(farms,neighbourMatrix,nSide,nFarms,r);
   initializeFarmStrategy(farmStrategy,nFarms,a,r);
-  initializeFarmSensitivity(farmSensitivity,nFarms,sAT,r);
+  initializeFarmSensitivity(farmSensitivity,wS,r);
   initializeLandscape(landscape,farms,farmSensitivity,farmStrategy,neighbourMatrix,nSide,nFarms,a0,d0,r);
   getNaturalConnectedComponents(naturalComponents,landscape,dES);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z);

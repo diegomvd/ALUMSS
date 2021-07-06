@@ -104,6 +104,7 @@ int main(int argc, const char * argv[]){
   unsigned int nFarms; // number of farms in the landscape
   double a; // fraction of managers doing land-sparing
   double sAT; // total sensitivity to resource demand
+  double wS; // relative width of the farms' sensitivity weight distribution
 
   double z; // saturation exponent of the ES-Area relationship
   double dES; // distance at which ES flow and 2 natural cells are considered connected from a EF point of view
@@ -140,22 +141,23 @@ int main(int argc, const char * argv[]){
         nFarms = (unsigned int) strtod(argv[6], &pEnd);
         a = strtod(argv[7], &pEnd);
         sAT = strtod(argv[8], &pEnd);
+        wS = strtod(argv[9], &pEnd);
 
         //ES-provision parameters
-        z = strtod(argv[9], &pEnd);
-        dES = strtod(argv[10], &pEnd);
+        z = strtod(argv[10], &pEnd);
+        dES = strtod(argv[11], &pEnd);
 
         // agricultural production parameters
-        y0 = strtod(argv[11], &pEnd);
-        y1 = strtod(argv[12], &pEnd);
+        y0 = strtod(argv[12], &pEnd);
+        y1 = strtod(argv[13], &pEnd);
 
         // spontaneous land-cover transitions
-        sFL = strtod(argv[13], &pEnd);
-        sR = strtod(argv[14], &pEnd);
-        sD = strtod(argv[15], &pEnd);
+        sFL = strtod(argv[14], &pEnd);
+        sR = strtod(argv[15], &pEnd);
+        sD = strtod(argv[16], &pEnd);
 
         // save timespace just in case
-        dtSave = strtod(argv[16], &pEnd);
+        dtSave = strtod(argv[17], &pEnd);
 
         // save seed
         seed = (unsigned long int)abs(atoi(argv[17]));
@@ -335,9 +337,9 @@ int main(int argc, const char * argv[]){
   else{ // WITH ARGV PARAMETERS
     getNeighbourMatrix(neighbourMatrixES,nSide,dES);
     getNeighbourMatrix(neighbourMatrix,nSide,1.1);
-    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,sAT,y1,y0,z,dES,nFarms,r);
+    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,wS,y1,y0,z,dES,nFarms,r);
     resourceDeficit = getResourceDeficit(agriculturalProduction, population);
-    totalManagementPropensity = getTotalManagementPropensity(landscape, farmSensitivity, resourceDeficit);
+    totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
     getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
     partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
   }
@@ -429,17 +431,16 @@ int main(int argc, const char * argv[]){
 
       // re-calculating the spontaneous propensity is not needed
       resourceDeficit = getResourceDeficit(agriculturalProduction,population);
-      totalManagementPropensity = getTotalManagementPropensity(landscape, farmSensitivity, resourceDeficit);
+      totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
     }
     else{ // if the time until next transition is shorter than the time until ODE resolution
 
       // making the LUC transition happen, spontaneous propensities are updated inside
       executeLUCTransition(landscape,naturalComponents,ecosystemServices, agriculturalProduction, farms,neighbourMatrix,neighbourMatrixES,population,farmSensitivity,farmStrategy,spontaneousPropensity,spontaneousCumulativePropensity,totalManagementPropensity,resourceDeficit,nFarms,nSide,y1,y0,sR,sD,sFL,z,dES,r,countTransitions);
 
-
       // update total management propensity
       resourceDeficit = getResourceDeficit(agriculturalProduction,population);
-      totalManagementPropensity = getTotalManagementPropensity(landscape, farmSensitivity, resourceDeficit);
+      totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
 
       // increment the time and update timestep for ODE solving
       t+=dtg;
