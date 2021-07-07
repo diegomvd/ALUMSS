@@ -407,7 +407,7 @@ int main(int argc, const char * argv[]){
       saveLandscape(tofile_land,t,landscape);
       saveComponents(tofile_clus,t,landscape,naturalComponents);
       tSave+=dtSave;
-      cout << "P : " << population[0] << ", N : " << natCells << ", D : " << degCells << "\n";
+      // cout << "P : " << population[0] << ", N : " << natCells << ", D : " << degCells << "\n";
     }
 
     // time until next transition
@@ -430,30 +430,30 @@ int main(int argc, const char * argv[]){
   }
 
   // print the landscape and the farms to check if it is ok
-  unsigned int ix,jx,lx;
-  cout << "Natural Landscape:\n";
-  for(ix=0;ix<nSide;++ix){
-    for(jx=0;jx<nSide;++jx){
-      lx = nSide*ix+jx;
-      cout << landscape[lx] << " ";
-    }
-    cout << "\n";
-  }
-  vector<unsigned int> politicalLandscape(nSide*nSide);
-  vector<unsigned int>::iterator it;
-  for(ix=0;ix<farms.size();++ix){
-    for(it=farms[ix].begin();it!=farms[ix].end();++it){
-      politicalLandscape[*it]=ix;
-    }
-  }
-  cout << "Political Landscape:\n";
-  for(ix=0;ix<nSide;++ix){
-    for(jx=0;jx<nSide;++jx){
-      lx = nSide*ix+jx;
-      cout << politicalLandscape[lx] << " ";
-    }
-    cout << "\n";
-  }
+  // unsigned int ix,jx,lx;
+  // cout << "Natural Landscape:\n";
+  // for(ix=0;ix<nSide;++ix){
+  //   for(jx=0;jx<nSide;++jx){
+  //     lx = nSide*ix+jx;
+  //     cout << landscape[lx] << " ";
+  //   }
+  //   cout << "\n";
+  // }
+  // vector<unsigned int> politicalLandscape(nSide*nSide);
+  // vector<unsigned int>::iterator it;
+  // for(ix=0;ix<farms.size();++ix){
+  //   for(it=farms[ix].begin();it!=farms[ix].end();++it){
+  //     politicalLandscape[*it]=ix;
+  //   }
+  // }
+  // cout << "Political Landscape:\n";
+  // for(ix=0;ix<nSide;++ix){
+  //   for(jx=0;jx<nSide;++jx){
+  //     lx = nSide*ix+jx;
+  //     cout << politicalLandscape[lx] << " ";
+  //   }
+  //   cout << "\n";
+  // }
 
   // saving CONF file to re start other simulations from this point
   // tofile_conf << t << " " << population[0];
