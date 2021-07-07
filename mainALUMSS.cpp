@@ -96,7 +96,6 @@ int main(int argc, const char * argv[]){
 
   unsigned int nSide;  // lenght of the sides of the square landscape: number of cells=nSide*nSide
   double SimTime; // total simulation time
-  double dtp; // timestep for population dynamics
 
   double a0; //number of agricultural patches at beggining
   double d0; // number of degraded patches at beggining
@@ -130,34 +129,33 @@ int main(int argc, const char * argv[]){
 
         // time and space specifications for the simulation
         SimTime = strtod(argv[1], &pEnd);
-        dtp = strtod(argv[2], &pEnd);
-        nSide = (unsigned int) strtod(argv[3], &pEnd);
+        nSide = (unsigned int) strtod(argv[2], &pEnd);
 
         // initial values of agricultural land use and consumption
-        a0 = strtod(argv[4],&pEnd);
-        d0 = strtod(argv[5],&pEnd);
+        a0 = strtod(argv[3],&pEnd);
+        d0 = strtod(argv[4],&pEnd);
 
         // management parameters
-        nFarms = (unsigned int) strtod(argv[6], &pEnd);
-        a = strtod(argv[7], &pEnd);
-        sAT = strtod(argv[8], &pEnd);
-        wS = strtod(argv[9], &pEnd);
+        nFarms = (unsigned int) strtod(argv[5], &pEnd);
+        a = strtod(argv[6], &pEnd);
+        sAT = strtod(argv[7], &pEnd);
+        wS = strtod(argv[8], &pEnd);
 
         //ES-provision parameters
-        z = strtod(argv[10], &pEnd);
-        dES = strtod(argv[11], &pEnd);
+        z = strtod(argv[9], &pEnd);
+        dES = strtod(argv[10], &pEnd);
 
         // agricultural production parameters
-        y0 = strtod(argv[12], &pEnd);
-        y1 = strtod(argv[13], &pEnd);
+        y0 = strtod(argv[11], &pEnd);
+        y1 = strtod(argv[12], &pEnd);
 
         // spontaneous land-cover transitions
-        sFL = strtod(argv[14], &pEnd);
-        sR = strtod(argv[15], &pEnd);
-        sD = strtod(argv[16], &pEnd);
+        sFL = strtod(argv[13], &pEnd);
+        sR = strtod(argv[14], &pEnd);
+        sD = strtod(argv[15], &pEnd);
 
         // save timespace just in case
-        dtSave = strtod(argv[17], &pEnd);
+        dtSave = strtod(argv[16], &pEnd);
 
         // save seed
         seed = (unsigned long int)abs(atoi(argv[17]));
@@ -185,13 +183,13 @@ int main(int argc, const char * argv[]){
   string filename;
   if(argc>1){
     filename = "_T_"+allArgs[1];
-    filename += "_dtp_"+allArgs[2];
-    filename += "_n_"+allArgs[3];
-    filename += "_a0_"+allArgs[4];
-    filename += "_d0_"+allArgs[5];
-    filename += "_nF_"+allArgs[6];
-    filename += "_a_"+allArgs[7];
-    filename += "_sAT_"+allArgs[8];
+    filename += "_n_"+allArgs[2];
+    filename += "_a0_"+allArgs[3];
+    filename += "_d0_"+allArgs[4];
+    filename += "_nF_"+allArgs[5];
+    filename += "_a_"+allArgs[6];
+    filename += "_sAT_"+allArgs[7];
+    filename += "_wS_"+allArgs[8];
     filename += "_z_"+allArgs[9];
     filename += "_dES_"+allArgs[10];
     filename += "_y0_"+allArgs[11];
@@ -259,8 +257,6 @@ int main(int argc, const char * argv[]){
   double tSave=0;
   // gillespie's SSA time-step
   double dtg;
-  // accesory time-step to store time until population ODE resolution
-  double dt=dtp;
   // counter
   unsigned int i;
   // number of natural and degraded cells to stop the simulation in case the landscape is in an absorbant state
@@ -270,8 +266,8 @@ int main(int argc, const char * argv[]){
   // maximum natural land in the simulation after the transient
   unsigned int nMax=0;
   // idem for the population
-  double pMin=0;
-  double pMax=0;
+  unsigned int pMin=0;
+  unsigned int pMax=0;
   // switch to identify if the estimated transient time is over
   unsigned int firstTime=0;
   // variable to store the resource deficit
@@ -280,7 +276,7 @@ int main(int argc, const char * argv[]){
   double totalManagementPropensity;
 
   // this vector has only one member and it is the population
-  vector<double> population;
+  vector<unsigned int> population;
   // vector containing the landscape state
   vector<unsigned int> landscape(nSide*nSide);
   // vector containing neighbours
@@ -303,9 +299,13 @@ int main(int argc, const char * argv[]){
   // vector to store the strategy of each farm, column1 is intensification and column2 clustering
   vector<vector<double>> farmStrategy;
   // vector to store the propensities of the spontaneous LUC transitions size number of cells * number of transitions (recovery, degradation, fertility loss)
-  vector<double> spontaneousPropensity(nSide*nSide*3);
+  vector<double> spontaneousPropensities(nSide*nSide*3);
   // cumulative propensities of spontaneous transitions
-  vector<double> spontaneousCumulativePropensity(nSide*nSide*3);
+  vector<double> spontaneousCumulativePropensities(nSide*nSide*3);
+  // demographic propensities: birth and death processes from logistic dynamics
+  vector<double> demographicPropensities(2);
+  // cumulative
+  vector<double> demographicCumulativePropensities(2);
 
   /****************************************************************************
    STATE INITIALISATION
@@ -340,8 +340,10 @@ int main(int argc, const char * argv[]){
     initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,wS,y1,y0,z,dES,nFarms,r);
     resourceDeficit = getResourceDeficit(agriculturalProduction, population);
     totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
-    getSpontaneousPropensity(spontaneousPropensity,landscape,ecosystemServices,nSide,sR,sD,sFL);
-    partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
+    getDemographicPropensities(demographicPropensities,agriculturalProduction,population);
+    partial_sum(demographicPropensities.begin(),demographicPropensities.end(),demographicCumulativePropensities.begin());
+    getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
+    partial_sum(spontaneousPropensities.begin(),spontaneousPropensities.end(),spontaneousCumulativePropensities.begin());
   }
 
   /****************************************************************************
@@ -350,6 +352,7 @@ int main(int argc, const char * argv[]){
 
   // entering the time loop
   while(t<SimTime){
+
 
     /****************************************************************************
      STOPPING EXECUTION IF LANDSCAPE IS IN AN ABSORBANT STATE
@@ -404,48 +407,25 @@ int main(int argc, const char * argv[]){
       saveLandscape(tofile_land,t,landscape);
       saveComponents(tofile_clus,t,landscape,naturalComponents);
       tSave+=dtSave;
+      cout << "P : " << population[0] << ", N : " << natCells << ", D : " << degCells << "\n";
     }
 
     // time until next transition
-    dtg=-1/(totalManagementPropensity+spontaneousCumulativePropensity.back())*log(gsl_rng_uniform(r));
+    dtg=-1/(totalManagementPropensity+spontaneousCumulativePropensities.back()+demographicCumulativePropensities.back())*log(gsl_rng_uniform(r));
 
     /****************************************************************************
-     LOOKING IF NEXT THING TO DO IS TO UPDATE POPULATION OR THE REALIZATION OF A
-     LAND-USE/COVER TRANSITION
+     CHOOSING NEXT EVENT, EITHER LUC TRANSITION OR DEMOGRAPHIC
     ****************************************************************************/
 
-    // if the time until next event is larger than the time until next ODE resolution
-    if (dtg>dt){
-      // then it is time to update population density
-      if (population[0]>0){
-        // solve population ODE with a Runge-Kutta 4 scheme
-        rungeKutta4(population,agriculturalProduction,dt);
-      }
-      else{
-        population[0]=0;
-      }
+    // making the LUC transition happen, spontaneous propensities are updated inside
+    solveSSA(landscape,naturalComponents,ecosystemServices, agriculturalProduction, farms,neighbourMatrix,neighbourMatrixES,population,farmSensitivity,farmStrategy,spontaneousPropensities,spontaneousCumulativePropensities,demographicPropensities,demographicCumulativePropensities,totalManagementPropensity,resourceDeficit,nFarms,nSide,y1,y0,sR,sD,sFL,z,dES,r,countTransitions);
 
-      // increment the time and re-initialize the timestep for ODE solving
-      t+=dt;
-      dt=dtp;
+    // update total management propensity
+    resourceDeficit = getResourceDeficit(agriculturalProduction,population);
+    totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
 
-      // re-calculating the spontaneous propensity is not needed
-      resourceDeficit = getResourceDeficit(agriculturalProduction,population);
-      totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
-    }
-    else{ // if the time until next transition is shorter than the time until ODE resolution
-
-      // making the LUC transition happen, spontaneous propensities are updated inside
-      executeLUCTransition(landscape,naturalComponents,ecosystemServices, agriculturalProduction, farms,neighbourMatrix,neighbourMatrixES,population,farmSensitivity,farmStrategy,spontaneousPropensity,spontaneousCumulativePropensity,totalManagementPropensity,resourceDeficit,nFarms,nSide,y1,y0,sR,sD,sFL,z,dES,r,countTransitions);
-
-      // update total management propensity
-      resourceDeficit = getResourceDeficit(agriculturalProduction,population);
-      totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
-
-      // increment the time and update timestep for ODE solving
-      t+=dtg;
-      dt-=dtg;
-    }
+    // increment the time and update timestep for ODE solving
+    t+=dtg;
 
   }
 
