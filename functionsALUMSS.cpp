@@ -47,8 +47,8 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
   neighbourMatrix.resize(nSide*nSide);
 
   for (ix=0; ix<neighbourMatrix.size(); ++ix){
-    xi = (unsigned int)ix%nSide;
-    yi = (unsigned int)ix/nSide;
+    xi = (unsigned int)(ix%nSide);
+    yi = (unsigned int)(ix/nSide);
     for (xj=0; xj<nSide; xj++){
       dx=(unsigned int)abs((int)(xi-xj));
       // calculating cyclic distances to account for periodic borders
@@ -726,8 +726,8 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
       ix++;
     }
 
-    transition=(unsigned int) ix/(nSide*nSide);
-    cell=(unsigned int) ix%(nSide*nSide);
+    transition=(unsigned int) (ix/(nSide*nSide));
+    cell=(unsigned int) (ix%(nSide*nSide));
 
     if (transition==0){ // land recovery
 
