@@ -47,8 +47,8 @@ void getNeighbourMatrix(vector<vector<unsigned int>> &neighbourMatrix, unsigned 
   neighbourMatrix.resize(nSide*nSide);
 
   for (ix=0; ix<neighbourMatrix.size(); ++ix){
-    xi = (unsigned int)ix%nSide;
-    yi = (unsigned int)ix/nSide;
+    xi = (unsigned int)(ix%nSide);
+    yi = (unsigned int)(ix/nSide);
     for (xj=0; xj<nSide; xj++){
       dx=(unsigned int)abs((int)(xi-xj));
       // calculating cyclic distances to account for periodic borders
@@ -676,6 +676,7 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
         getNeighboursStateSup(agriculturalNeighbours,neighbourMatrix,landscape,*it2,1);
         conversionPropensity[jx]=pow( max(0.1 , (double)agriculturalNeighbours.size() ) , farmStrategy[ix][1] );
         conversionCumSum += conversionPropensity[jx];
+        jx+=1;
       }
       for(jx=0;jx<conversionPropensity.size();++jx){
         // creating the 0-1 weights accordign to clustering and multiplying by total farm cumulative sensitivity to get converion propensity
@@ -717,8 +718,8 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
       ix++;
     }
 
-    transition=(unsigned int) ix/(nSide*nSide);
-    cell=(unsigned int) ix%(nSide*nSide);
+    transition=(unsigned int) (ix/(nSide*nSide));
+    cell=(unsigned int) (ix%(nSide*nSide));
 
     if (transition==0){ // land recovery
 
@@ -763,6 +764,7 @@ void executeLUCTransition(vector<unsigned int> &landscape, vector<vector<int>> &
         // update the propensity of spontaneous transitions
         spontaneousPropensity[ix]=0; // transition that just occurred has now null propensity
         spontaneousPropensity[cell] = sR*ecosystemServices[cell]; // applying the recovery transition formula
+        partial_sum(spontaneousPropensity.begin(),spontaneousPropensity.end(),spontaneousCumulativePropensity.begin());
 
       }
       else{
@@ -931,7 +933,7 @@ void initializeFarmStrategy( vector<vector<double>> &farmStrategy, unsigned int 
 
   farmStrategy.clear();
   farmStrategy.resize(nFarms);
-  nSparing = (unsigned int) a*nFarms;
+  nSparing = a*nFarms;
   double xRand;
 
 
