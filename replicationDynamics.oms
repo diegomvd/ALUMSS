@@ -61,4 +61,4 @@ val explorationNF = ExplorationTask(
 )
 
 // Workflow
-explorationSAT -< setParameters -- (createFile hook copyHook) -- replicationDynamics
+explorationNF -< setParameters -- (createFile hook copyHook) -- replicationDynamics
