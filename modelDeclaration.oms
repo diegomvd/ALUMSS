@@ -64,7 +64,7 @@ val modelPluginEuka =
     (inputs, outputs) += (T,L,a0,d0,nF,a,sAT,wS,z,dES,y0,y1,sFL,sR,sD,dtSave,mySeed),
 
     outputFiles += ("DATA_AGRE",output),
-    resources+= "/home/AD.LSM.CNRS.FR/diego.bengochea-paz/ALUMSS/ALUMSS/alumss-exec",
+    resources+= "/home/AD.LSM.CNRS.FR/diego.bengochea-paz/multi-farming/ALUMSS/alumss-exec",
 
     // default parameter and initialization values
     T:=3000.0,

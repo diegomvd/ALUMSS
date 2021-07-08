@@ -32,7 +32,7 @@ val setParameters = ScalaTask("""
   val a0 = 0.2
   val d0 = 0.0
   val nF = 1.0
-  val a = 0.0
+  val a = 0.5
   // val sAT = 1.0
   val wS = 0.0
   val z = 0.25
@@ -50,7 +50,7 @@ val setParameters = ScalaTask("""
 
 // Definition of the replication experiment with number of samples
 val replicationDynamics = Replication(
-  evaluation = modelPluginLocal hook hookAppend on myPCEnvironment,
+  evaluation = modelPluginEuka hook hookAppend on eukaryoteEnvironment,
   seed = mySeed,
   sample = 5
 )
