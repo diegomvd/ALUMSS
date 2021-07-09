@@ -204,32 +204,38 @@ int main(int argc, const char * argv[]){
 
   // this file is to output the land-metrics meanES, giniES, average distance
   // between natural patches to analyze the role of dES
-  string filename_OUT="DATA_OUT";
-  ofstream tofile_out(filename_OUT);
-  tofile_out.precision(5);
-  tofile_out.setf(ios::scientific,ios::floatfield);
+  // string filename_OUT="DATA_OUT";
+  // ofstream tofile_out(filename_OUT);
+  // tofile_out.precision(5);
+  // tofile_out.setf(ios::scientific,ios::floatfield);
+  //
+  // // string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
+  // // string filename_AGRE="DATA_AGRE"+filename;
+  // string filename_AGRE="DATA_AGRE";
+  // ofstream tofile_agre(filename_AGRE);
+  // tofile_agre.precision(5);
+  // tofile_agre.setf(ios::scientific,ios::floatfield);
+  //
+  // string filename_LAND=dirname+"/"+"DATA_LAND"+filename;
+  // ofstream tofile_land(filename_LAND);
+  // tofile_land.precision(5);
+  // tofile_land.setf(ios::scientific,ios::floatfield);
+  //
+  // string filename_CLUS=dirname+"/"+"DATA_CLUS"+filename;
+  // ofstream tofile_clus(filename_CLUS);
+  // tofile_clus.precision(5);
+  // tofile_clus.setf(ios::scientific,ios::floatfield);
+  //
+  // string filename_CONF=dirname+"/"+"DATA_CONF"+filename;
+  // ofstream tofile_conf(filename_CONF);
+  // tofile_conf.precision(5);
+  // tofile_conf.setf(ios::scientific,ios::floatfield);
 
-  // string filename_AGRE=dirname+"/"+"DATA_AGRE"+filename;
-  // string filename_AGRE="DATA_AGRE"+filename;
-  string filename_AGRE="DATA_AGRE";
-  ofstream tofile_agre(filename_AGRE);
-  tofile_agre.precision(5);
-  tofile_agre.setf(ios::scientific,ios::floatfield);
-
-  string filename_LAND=dirname+"/"+"DATA_LAND"+filename;
-  ofstream tofile_land(filename_LAND);
-  tofile_land.precision(5);
-  tofile_land.setf(ios::scientific,ios::floatfield);
-
-  string filename_CLUS=dirname+"/"+"DATA_CLUS"+filename;
-  ofstream tofile_clus(filename_CLUS);
-  tofile_clus.precision(5);
-  tofile_clus.setf(ios::scientific,ios::floatfield);
-
-  string filename_CONF=dirname+"/"+"DATA_CONF"+filename;
-  ofstream tofile_conf(filename_CONF);
-  tofile_conf.precision(5);
-  tofile_conf.setf(ios::scientific,ios::floatfield);
+  // this file is to output the fragmentation metrics for PSE with sparing
+  string filename ="output.dat";
+  ofstream tofile_output(filename);
+  tofile_output.precision(5);
+  tofile_output.setf(ios::scientific,ios::floatfield);
 
   // string filename_SENS="sensitivityOut.dat";
   // ofstream tofile_sens(filename_SENS);
@@ -403,9 +409,10 @@ int main(int argc, const char * argv[]){
      SAVING DATA
     ****************************************************************************/
     if(t>=tSave){
-      saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
-      saveLandscape(tofile_land,t,landscape);
-      saveComponents(tofile_clus,t,landscape,naturalComponents);
+      // saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+      // saveLandscape(tofile_land,t,landscape);
+      // saveComponents(tofile_clus,t,landscape,naturalComponents);
+
       tSave+=dtSave;
       // cout << "P : " << population[0] << ", N : " << natCells << ", D : " << degCells << "\n";
     }
@@ -470,8 +477,17 @@ int main(int argc, const char * argv[]){
   // saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
 
 
+  // saving uniquely the fragmentation metrics for PSE
+  natCells = 0;
+  for(i=0;i<landscape.size();i++){
+    if(landscape[i]==0){
+      natCells+=1;
+    }
+  }  
+  tofile_output << population[0] << " " << nat_cells <<"\n";
+
   // careful I commented the standard output!!
-  saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+  // saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
   // saveLandscapeMetrics(tofile_out,nSide,landscape,ecosystemServices);
 
   // saveLandscape(tofile_land,t,landscape);

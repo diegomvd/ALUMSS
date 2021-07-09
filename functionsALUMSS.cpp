@@ -1219,6 +1219,65 @@ double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n)
   return radiusOfGyration;
 }
 
+double getMeanEdgeToAreaRatio(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<unsigned int> &neighbourMatrixES)
+{
+
+  double meanEdgeToAreaRatio=0;
+  double edges, area;
+  unsigned int ix;
+  vector<unsigned int> nonNaturalNeighbours;
+  vector<int>::const_iterator it;
+
+  if (naturalComponent.size()>0){
+
+    // iterate over the natural components
+    for(ix=0; ix<naturalComponents.size(); ++ix){
+      edges=0;
+      area = naturalComponents[ix].size();
+      for(it=naturalComponents[ix].begin();it!=naturalComponents[ix].end();++it){
+        nonNaturalNeighbours.clear();
+        getNeighboursStateSup(nonNaturalNeighbours,neighbourMatrixES,landscape,*it,0);
+        edges+=nonNaturalNeighbours.size();
+      }
+      meanEdgeToAreaRatio+=edges/area;
+    }
+
+    meanEdgeToAreaRatio/=naturalComponents.size();
+
+    return meanEdgeToAreaRatio;
+  }
+}
+
+double getMaximumFragmentSize(const vector<vector<int>> &naturalComponents)
+{
+  double maximumFragmentSize = 0;
+  unsigned int ix;
+
+  if (naturalComponent.size()>0){
+    for(ix=0; ix<naturalComponents.size(); ++ix){
+      if(naturalComponents[ix].size()>maximumFragmentSize){
+        maximumFragmentSize = naturalComponents[ix].size();
+      }
+    }
+  }
+  return maximumFragmentSize;
+}
+
+double getNumberOfFragments(const vector<vector<int>> &naturalComponents)
+{
+
+  double numberOfFragments = naturalComponents.size();
+  return numberOfFragments;
+
+}
+
+double getLandCoverArea(const vector<unsigned int> &landscape, unsigned int landCover)
+{
+  double area = count(landscape.begin(), landscape.end(), landCover);
+  return area;
+
+}
+
 void saveAggregated(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int nn, double ripleyDistance, double nMax, double nMin, double pMax, double pMin)
 {
   unsigned long numComponents = naturalComponents.size();

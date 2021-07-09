@@ -13,8 +13,8 @@ val myPCEnvironment = LocalEnvironment(4)
 val eukaryoteEnvironment = LocalEnvironment(40)
 
 // Definition of hooks to name the data file and fill it with data from several replications
-val copyHook = CopyFileHook(f,workDirectory/"replications_T_${T}_n_${L}_a0_${a0}_d0_${d0}_nF_${nF}_a_${a}_sAT_${mS}_wS_${wS}_z_${z}_dES_${dES}_y0_${y0}_y1_${y1}_sFL_${sFL}_sR_${sR}_sD_${sD}_dtSave_${dtSave}.csv" )
-val hookAppend = AppendToFileHook(workDirectory/"replications_T_${T}_n_${L}_a0_${a0}_d0_${d0}_nF_${nF}_a_${a}_sAT_${mS}_wS_${wS}_z_${z}_dES_${dES}_y0_${y0}_y1_${y1}_sFL_${sFL}_sR_${sR}_sD_${sD}_dtSave_${dtSave}.csv", "${output.content}")
+val copyHook = CopyFileHook(f,workDirectory/"replications_T_${T}_n_${L}_a0_${a0}_d0_${d0}_nF_${nF}_a_${a}_mS_${mS}_wS_${wS}_z_${z}_dES_${dES}_y0_${y0}_y1_${y1}_sFL_${sFL}_sR_${sR}_sD_${sD}_dtSave_${dtSave}.csv" )
+val hookAppend = AppendToFileHook(workDirectory/"replications_T_${T}_n_${L}_a0_${a0}_d0_${d0}_nF_${nF}_a_${a}_mS_${mS}_wS_${wS}_z_${z}_dES_${dES}_y0_${y0}_y1_${y1}_sFL_${sFL}_sR_${sR}_sD_${sD}_dtSave_${dtSave}.csv", "${output.content}")
 
 // Creation of a file to store the data from the replications
 val createFile = ScalaTask("""
