@@ -232,8 +232,8 @@ int main(int argc, const char * argv[]){
   // tofile_conf.setf(ios::scientific,ios::floatfield);
 
   // this file is to output the fragmentation metrics for PSE with sparing
-  string filename ="output.dat";
-  ofstream tofile_output(filename);
+  string filenameOut ="output.dat";
+  ofstream tofile_output(filenameOut);
   tofile_output.precision(5);
   tofile_output.setf(ios::scientific,ios::floatfield);
 
@@ -483,8 +483,8 @@ int main(int argc, const char * argv[]){
     if(landscape[i]==0){
       natCells+=1;
     }
-  }  
-  tofile_output << population[0] << " " << nat_cells <<"\n";
+  }
+  tofile_output << population[0] << " " << natCells <<"\n";
 
   // careful I commented the standard output!!
   // saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
