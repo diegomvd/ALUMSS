@@ -555,18 +555,34 @@ double getResourceDeficit(const vector<double> &agriculturalProduction, const ve
   return resourceDeficit;
 }
 
-double getTotalManagementPropensity(const vector<unsigned int> &landscape, double sAT, double resourceDeficit)
+double getTotalManagementPropensity(const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &farms, const vector<double> &farmSensitivity, double sAT, double resourceDeficit)
 {
   unsigned int oneNatural = 0;
   double totalManagementPropensity=0;
-
-  // if there is no natural land left, then there is no possible land conversion
-  if( find( landscape.begin(), landscape.end(), 0) != landscape.end() ){
-    oneNatural = 1;
-  }
+  unsigned int ix;
+  vector<unsigned int>::const_iterator it;
+  double maxSensitivity = 0;
 
   if (resourceDeficit>0){
-    totalManagementPropensity = oneNatural * resourceDeficit * sAT;
+
+    // if there is no natural land left, then there is no possible land conversion
+    if( find( landscape.begin(), landscape.end(), 0) != landscape.end() ){
+
+      // get the maximum sensitivity across the farms that still have room for conversion
+      for(ix=0;ix<farms.size();++ix){
+        for(it=farms[ix].begin();it!=farms[ix].end();++it){
+          if(landscape[*it]==0){ // i.e. there's a natural cell
+            if(farmSensitivity[ix]>maxSensitivity){
+              maxSensitivity = farmSensitivity[ix];
+            }
+            // move to the next farm
+            break;
+          }
+        }
+      }
+
+      totalManagementPropensity = oneNatural * resourceDeficit * sAT * maxSensitivity;
+    }
   }
 
   return totalManagementPropensity;

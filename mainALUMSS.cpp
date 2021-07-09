@@ -339,7 +339,7 @@ int main(int argc, const char * argv[]){
     getNeighbourMatrix(neighbourMatrix,nSide,1.1);
     initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,wS,y1,y0,z,dES,nFarms,r);
     resourceDeficit = getResourceDeficit(agriculturalProduction, population);
-    totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
+    totalManagementPropensity = getTotalManagementPropensity(landscape, farms, farmSensitivity, sAT, resourceDeficit);
     getDemographicPropensities(demographicPropensities,agriculturalProduction,population);
     partial_sum(demographicPropensities.begin(),demographicPropensities.end(),demographicCumulativePropensities.begin());
     getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
@@ -422,7 +422,7 @@ int main(int argc, const char * argv[]){
 
     // update total management propensity
     resourceDeficit = getResourceDeficit(agriculturalProduction,population);
-    totalManagementPropensity = getTotalManagementPropensity(landscape, sAT, resourceDeficit);
+    totalManagementPropensity = getTotalManagementPropensity(landscape, farms, farmSensitivity, sAT, resourceDeficit);
 
     // increment the time and update timestep for ODE solving
     t+=dtg;
