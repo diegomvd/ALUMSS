@@ -52,7 +52,7 @@ val setParameters = ScalaTask("""
 val replicationDynamics = Replication(
   evaluation = modelPluginEuka hook hookAppend on eukaryoteEnvironment,
   seed = mySeed,
-  sample = 5
+  sample = 3
 )
 
 // Definition of the values for the exploration
