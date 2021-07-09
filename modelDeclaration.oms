@@ -67,10 +67,10 @@ val modelPluginEuka =
     resources+= "/home/AD.LSM.CNRS.FR/diego.bengochea-paz/multi-farming/ALUMSS/alumss-exec",
 
     // default parameter and initialization values
-    T:=3000.0,
+    T:=1500.0,
     L:=40,
-    a0:=0.1,
-    d0:=0.0,
+    a0:=0.15,
+    d0:=0.15,
     nF:=1.0,
     a:=0.0,
     mS:=1.0,
