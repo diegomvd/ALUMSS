@@ -102,7 +102,7 @@ int main(int argc, const char * argv[]){
 
   unsigned int nFarms; // number of farms in the landscape
   double a; // fraction of managers doing land-sparing
-  double sAT; // total sensitivity to resource demand
+  double mS; // mean sensitivity to resource demand
   double wS; // relative width of the farms' sensitivity weight distribution
 
   double z; // saturation exponent of the ES-Area relationship
@@ -138,7 +138,7 @@ int main(int argc, const char * argv[]){
         // management parameters
         nFarms = (unsigned int) strtod(argv[5], &pEnd);
         a = strtod(argv[6], &pEnd);
-        sAT = strtod(argv[7], &pEnd);
+        mS = strtod(argv[7], &pEnd);
         wS = strtod(argv[8], &pEnd);
 
         //ES-provision parameters
@@ -188,7 +188,7 @@ int main(int argc, const char * argv[]){
     filename += "_d0_"+allArgs[4];
     filename += "_nF_"+allArgs[5];
     filename += "_a_"+allArgs[6];
-    filename += "_sAT_"+allArgs[7];
+    filename += "_mS_"+allArgs[7];
     filename += "_wS_"+allArgs[8];
     filename += "_z_"+allArgs[9];
     filename += "_dES_"+allArgs[10];
@@ -337,9 +337,9 @@ int main(int argc, const char * argv[]){
   else{ // WITH ARGV PARAMETERS
     getNeighbourMatrix(neighbourMatrixES,nSide,dES);
     getNeighbourMatrix(neighbourMatrix,nSide,1.1);
-    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,wS,y1,y0,z,dES,nFarms,r);
+    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,mS,wS,y1,y0,z,dES,nFarms,r);
     resourceDeficit = getResourceDeficit(agriculturalProduction, population);
-    totalManagementPropensity = getTotalManagementPropensity(landscape, farms, farmSensitivity, sAT, resourceDeficit);
+    totalManagementPropensity = getTotalManagementPropensity(landscape, farms, farmSensitivity, resourceDeficit);
     getDemographicPropensities(demographicPropensities,agriculturalProduction,population);
     partial_sum(demographicPropensities.begin(),demographicPropensities.end(),demographicCumulativePropensities.begin());
     getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
@@ -422,7 +422,7 @@ int main(int argc, const char * argv[]){
 
     // update total management propensity
     resourceDeficit = getResourceDeficit(agriculturalProduction,population);
-    totalManagementPropensity = getTotalManagementPropensity(landscape, farms, farmSensitivity, sAT, resourceDeficit);
+    totalManagementPropensity = getTotalManagementPropensity(landscape, farms, farmSensitivity, resourceDeficit);
 
     // increment the time and update timestep for ODE solving
     t+=dtg;

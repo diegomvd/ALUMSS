@@ -555,9 +555,9 @@ double getResourceDeficit(const vector<double> &agriculturalProduction, const ve
   return resourceDeficit;
 }
 
-double getTotalManagementPropensity(const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &farms, const vector<double> &farmSensitivity, double sAT, double resourceDeficit)
+double getTotalManagementPropensity(const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &farms, const vector<double> &farmSensitivity, double resourceDeficit)
 {
-  unsigned int oneNatural = 0;
+
   double totalManagementPropensity=0;
   unsigned int ix;
   vector<unsigned int>::const_iterator it;
@@ -581,8 +581,9 @@ double getTotalManagementPropensity(const vector<unsigned int> &landscape, const
         }
       }
 
-      totalManagementPropensity = oneNatural * resourceDeficit * sAT * maxSensitivity;
+      totalManagementPropensity = resourceDeficit * maxSensitivity;
     }
+    // else just return 0 since there cannot be any conversion
   }
 
   return totalManagementPropensity;
@@ -1001,17 +1002,22 @@ void initializeFarmStrategy( vector<vector<double>> &farmStrategy, unsigned int 
   return;
 }
 
-void initializeFarmSensitivity( vector<double> &farmSensitivity, double wS, gsl_rng *r)
+void initializeFarmSensitivity( vector<double> &farmSensitivity, unsigned int nFarms, double mS, double wS, gsl_rng *r)
 {
   /*
   the weigths for each farm sensitivity are drawn uniformly with widht relative to the mean = wS
   */
 
   vector<double>::iterator it;
+  double sensitivity;
+  double totalSensitivity = 0;
+  double wSEffective = (nFarms-1)/nFarms;
 
   // fill the vector with weights drawn from a uniform distribution with mean 1 and width wS
   for(it=farmSensitivity.begin();it!=farmSensitivity.end();++it){
-    *it = gsl_ran_flat(r,1-wS,1+wS);
+    sensitivity = gsl_ran_flat(r,mS*(1-wSEffective),mS*(1+wSEffective));
+    totalSensitivity+=sensitivity;
+    *it = sensitivity;
   }
 
   return;
@@ -1157,11 +1163,11 @@ void initializePopulation( vector<unsigned int> &population, const vector<double
   return;
 }
 
-void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<unsigned int> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double wS, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
+void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<unsigned int> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double mS, double wS, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
 {
   initializeVoronoiFarms(farms,neighbourMatrix,nSide,nFarms,r);
   initializeFarmStrategy(farmStrategy,nFarms,a,r);
-  initializeFarmSensitivity(farmSensitivity,wS,r);
+  initializeFarmSensitivity(farmSensitivity,nFarms,mS,wS,r);
   initializeLandscape(landscape,farms,farmSensitivity,farmStrategy,neighbourMatrix,nSide,nFarms,a0,d0,r);
   getNaturalConnectedComponents(naturalComponents,landscape,dES);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z);

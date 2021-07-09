@@ -13,15 +13,15 @@ val myPCEnvironment = LocalEnvironment(4)
 val eukaryoteEnvironment = LocalEnvironment(40)
 
 // Definition of hooks to name the data file and fill it with data from several replications
-val copyHook = CopyFileHook(f,workDirectory/"replications_T_${T}_n_${L}_a0_${a0}_d0_${d0}_nF_${nF}_a_${a}_sAT_${sAT}_wS_${wS}_z_${z}_dES_${dES}_y0_${y0}_y1_${y1}_sFL_${sFL}_sR_${sR}_sD_${sD}_dtSave_${dtSave}.csv" )
-val hookAppend = AppendToFileHook(workDirectory/"replications_T_${T}_n_${L}_a0_${a0}_d0_${d0}_nF_${nF}_a_${a}_sAT_${sAT}_wS_${wS}_z_${z}_dES_${dES}_y0_${y0}_y1_${y1}_sFL_${sFL}_sR_${sR}_sD_${sD}_dtSave_${dtSave}.csv", "${output.content}")
+val copyHook = CopyFileHook(f,workDirectory/"replications_T_${T}_n_${L}_a0_${a0}_d0_${d0}_nF_${nF}_a_${a}_sAT_${mS}_wS_${wS}_z_${z}_dES_${dES}_y0_${y0}_y1_${y1}_sFL_${sFL}_sR_${sR}_sD_${sD}_dtSave_${dtSave}.csv" )
+val hookAppend = AppendToFileHook(workDirectory/"replications_T_${T}_n_${L}_a0_${a0}_d0_${d0}_nF_${nF}_a_${a}_sAT_${mS}_wS_${wS}_z_${z}_dES_${dES}_y0_${y0}_y1_${y1}_sFL_${sFL}_sR_${sR}_sD_${sD}_dtSave_${dtSave}.csv", "${output.content}")
 
 // Creation of a file to store the data from the replications
 val createFile = ScalaTask("""
   val f = newFile()
   f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1 meanR stdR corrLen\n"
 """) set(
-    (inputs,outputs)+=(T,L,a0,d0,nF,a,sAT,wS,z,dES,y0,y1,sFL,sR,sD,dtSave),
+    (inputs,outputs)+=(T,L,a0,d0,nF,a,mS,wS,z,dES,y0,y1,sFL,sR,sD,dtSave),
     outputs+=f
 )
 
@@ -33,7 +33,7 @@ val setParameters = ScalaTask("""
   val d0 = 0.1
   // val nF = 1.0
   val a = 1.0
-  val sAT = 1.0
+  val mS = 1.0
   val wS = 1.0
   val z = 0.25
   val dES = 1.1
@@ -45,7 +45,7 @@ val setParameters = ScalaTask("""
   val dtSave = 1.0
 """) set(
     inputs += nF,
-    outputs += (T,L,a0,d0,nF,a,sAT,wS,z,dES,y0,y1,sFL,sR,sD,dtSave)
+    outputs += (T,L,a0,d0,nF,a,mS,wS,z,dES,y0,y1,sFL,sR,sD,dtSave)
 )
 
 // Definition of the replication experiment with number of samples
