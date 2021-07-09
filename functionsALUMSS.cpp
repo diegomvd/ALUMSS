@@ -1219,7 +1219,7 @@ double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n)
   return radiusOfGyration;
 }
 
-double getMeanEdgeToAreaRatio(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<unsigned int> &neighbourMatrixES)
+double getMeanEdgeToAreaRatio(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrixES)
 {
 
   double meanEdgeToAreaRatio=0;
@@ -1228,7 +1228,7 @@ double getMeanEdgeToAreaRatio(const vector<vector<int>> &naturalComponents, cons
   vector<unsigned int> nonNaturalNeighbours;
   vector<int>::const_iterator it;
 
-  if (naturalComponent.size()>0){
+  if (naturalComponents.size()>0){
 
     // iterate over the natural components
     for(ix=0; ix<naturalComponents.size(); ++ix){
@@ -1243,9 +1243,8 @@ double getMeanEdgeToAreaRatio(const vector<vector<int>> &naturalComponents, cons
     }
 
     meanEdgeToAreaRatio/=naturalComponents.size();
-
-    return meanEdgeToAreaRatio;
   }
+  return meanEdgeToAreaRatio;
 }
 
 double getMaximumFragmentSize(const vector<vector<int>> &naturalComponents)
@@ -1253,7 +1252,7 @@ double getMaximumFragmentSize(const vector<vector<int>> &naturalComponents)
   double maximumFragmentSize = 0;
   unsigned int ix;
 
-  if (naturalComponent.size()>0){
+  if (naturalComponents.size()>0){
     for(ix=0; ix<naturalComponents.size(); ++ix){
       if(naturalComponents[ix].size()>maximumFragmentSize){
         maximumFragmentSize = naturalComponents[ix].size();
