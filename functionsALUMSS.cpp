@@ -1066,11 +1066,13 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   vector<unsigned int> availableCells;
   // vector to store neibhours in clustering calculation
   vector<unsigned int> agriculturalNeighbours;
-  // cumulative farm sensitivity
-  vector<double> cumFarmSensitivity(nFarms);
+  // farm propensities
+  vector<double> farmPropensity(nFarms);
+  vector<double> farmCumulativePropensity(nFarms);
   double xRand;
 
   // start the degradation process until all the required cells are degraded
+
   for (ix=0; ix<nd0; ++ix){
     jx=0;
 
@@ -1086,17 +1088,33 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     // update the degradation probability
     probDegradation[jx]=0.0;
   }
+
   // adding of degraded cells done
 
   // now add the agricultural cells: this is done in two steps, first choose the
   // farm based on the farm's sensitivity to demand and then perform an action
   // based on the farm's strategy
   for (ix=0; ix<na0; ++ix){
-    // select the farm
+
+    // discard the farms with no natural land
     jx=0;
-    partial_sum(farmSensitivity.begin(),farmSensitivity.end(),cumFarmSensitivity.begin());
-    xRand = gsl_rng_uniform(r)*cumFarmSensitivity.back();
-    while ( xRand > cumFarmSensitivity[jx]){
+    // reinitialize the farm propensities at 0
+    fill(farmPropensity.begin(),farmPropensity.end(),0.0);
+    for(jx=0;jx<farms.size();++jx){
+      // if there is no natural land in a farm then there is no conversion
+      for(it1 = farms[jx].begin(); it1!=farms[jx].end(); ++it1){
+        if(landscape[*it1]==0){
+          farmPropensity[jx]=farmSensitivity[jx];
+          break;
+        }
+      }
+    }
+
+    // select the farm
+    partial_sum(farmPropensity.begin(),farmPropensity.end(),farmCumulativePropensity.begin());
+    jx=0;
+    xRand = gsl_rng_uniform(r)*farmCumulativePropensity.back();
+    while (xRand > farmCumulativePropensity[jx]){
       jx++;
     }
 
@@ -1111,8 +1129,6 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
         availableCells.push_back(*it1);
       }
     }
-
-
     // clear and resize the probability of conversion vector
     probConversion.clear();
     probConversion.resize(availableCells.size());
@@ -1145,6 +1161,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
       lx++;
       it2++;
     }
+
     // update the landscape
     if(farmStrategy[jx][0]==0){
       landscape[*it2]=2;
@@ -1178,6 +1195,7 @@ void initializePopulation( vector<unsigned int> &population, const vector<double
 
 void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<unsigned int> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double mS, double wS, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
 {
+
   initializeVoronoiFarms(farms,neighbourMatrix,nSide,nFarms,r);
   initializeFarmStrategy(farmStrategy,nFarms,a,r);
   initializeFarmSensitivity(farmSensitivity,nFarms,mS,wS,r);

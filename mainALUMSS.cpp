@@ -341,6 +341,7 @@ int main(int argc, const char * argv[]){
     }
   }
   else{ // WITH ARGV PARAMETERS
+
     getNeighbourMatrix(neighbourMatrixES,nSide,dES);
     getNeighbourMatrix(neighbourMatrix,nSide,1.1);
     initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,mS,wS,y1,y0,z,dES,nFarms,r);
