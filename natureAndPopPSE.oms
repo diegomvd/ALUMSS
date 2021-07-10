@@ -33,14 +33,14 @@ val naturePopPSE = PSEEvolution(
   parallelism = 35,
   termination = 5000,
   genome = Seq(
-    nF in (1.0,100.0),
+    nF in (1.0,200.0),
     a in (0.0,1.0),
-    mS in (0.5,2.0),
+    mS in (0.5,1.5),
     wS in (0.0,1.0),
   ),
   objective = Seq(
     P in (0.0 to 1000.0 by 100.0),
-    N in (0.0 to 1.0)
+    N in (0.0 to 1.0 by 0.1)
   ),
   stochastic = Stochastic(seed = mySeed)
 )
