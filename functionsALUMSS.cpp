@@ -589,13 +589,26 @@ double getTotalManagementPropensity(const vector<unsigned int> &landscape, const
   return totalManagementPropensity;
 }
 
-void getDemographicPropensities(vector<double> &demographicPropensities, const vector<double> &agriculturalProduction, const vector<unsigned int> &population)
+void getDemographicPropensities(vector<double> &demographicPropensities, const vector<double> &agriculturalProduction, vector<unsigned int> &population)
 {
 
   double totalAgriculturalProduction = accumulate(agriculturalProduction.begin(),agriculturalProduction.end(),0.0,plus<double>());
 
-  demographicPropensities[0] = (double) population[0];
-  demographicPropensities[1] = (double) population[0]*population[0]/totalAgriculturalProduction;
+  demographicPropensities[0] = 0;
+  demographicPropensities[1] = 0;
+
+  if(population[0]>0){
+    if (totalAgriculturalProduction > 0){
+      // this is to avoid a division by zero
+      demographicPropensities[0] = (double) population[0];
+      demographicPropensities[1] = (double) population[0]*population[0]/totalAgriculturalProduction;
+    }
+    else{
+      // if there is no production just set population to zero, not the best solution but it is hard
+      // to do better with logistic growth
+      population[0]=0;
+    }
+  }
 
   return;
 }
