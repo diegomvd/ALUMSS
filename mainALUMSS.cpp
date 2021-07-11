@@ -485,7 +485,7 @@ int main(int argc, const char * argv[]){
       natCells+=1;
     }
   }
-  natCells /= landscape.size();
+  natCells = (double) natCells/landscape.size();
   tofile_output << population[0] << " " << natCells <<"\n";
 
   // careful I commented the standard output!!
