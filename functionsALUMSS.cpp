@@ -1268,12 +1268,12 @@ double getMeanEdgeToAreaRatio(const vector<vector<int>> &naturalComponents, cons
       for(it=naturalComponents[ix].begin();it!=naturalComponents[ix].end();++it){
         nonNaturalNeighbours.clear();
         getNeighboursStateSup(nonNaturalNeighbours,neighbourMatrixES,landscape,*it,0);
-        edges+=nonNaturalNeighbours.size();
+        edges+=(double)nonNaturalNeighbours.size();
       }
-      meanEdgeToAreaRatio+=edges/area;
+      meanEdgeToAreaRatio+=(double)edges/(double)area;
     }
 
-    meanEdgeToAreaRatio/=naturalComponents.size();
+    meanEdgeToAreaRatio/=(double)naturalComponents.size();
   }
   return meanEdgeToAreaRatio;
 }
@@ -1286,7 +1286,7 @@ double getMaximumFragmentSize(const vector<vector<int>> &naturalComponents)
   if (naturalComponents.size()>0){
     for(ix=0; ix<naturalComponents.size(); ++ix){
       if(naturalComponents[ix].size()>maximumFragmentSize){
-        maximumFragmentSize = naturalComponents[ix].size();
+        maximumFragmentSize = (double)naturalComponents[ix].size();
       }
     }
   }
@@ -1296,7 +1296,7 @@ double getMaximumFragmentSize(const vector<vector<int>> &naturalComponents)
 double getNumberOfFragments(const vector<vector<int>> &naturalComponents)
 {
 
-  double numberOfFragments = naturalComponents.size();
+  double numberOfFragments = (double) naturalComponents.size();
   return numberOfFragments;
 
 }
@@ -1304,8 +1304,33 @@ double getNumberOfFragments(const vector<vector<int>> &naturalComponents)
 double getLandCoverArea(const vector<unsigned int> &landscape, unsigned int landCover)
 {
   double area = count(landscape.begin(), landscape.end(), landCover);
+  area/=(double)landscape.size();
   return area;
 
+}
+
+void getESMetrics(vector<double> &metrics, const vector<double> &ecosystemServices)
+{
+  double meanES=0;
+  double giniES=0;
+  vector<double>::const_iterator it,it2;
+  // check if the vector is not empty: it shoudn't but just in case...
+  if (ecosystemServices.size()>0){
+    for (it=ecosystemServices.begin();it!=ecosystemServices.end();++it){
+      // here we calculate the mean
+      meanES+=*it;
+      for (it2=ecosystemServices.begin();it2!=ecosystemServices.end();it2++){
+        // we add a loop to calculate the gini
+        giniES += abs(*it-*it2);
+      }
+    }
+    meanES/=ecosystemServices.size();
+    giniES/=ecosystemServices.size()*ecosystemServices.size()*2*meanES;
+  }
+  metrics[0] = meanES;
+  metrics[1] = giniES;
+
+  return;
 }
 
 void saveAggregated(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int nn, double ripleyDistance, double nMax, double nMin, double pMax, double pMin)

@@ -267,8 +267,6 @@ int main(int argc, const char * argv[]){
   unsigned int i;
   // number of natural and degraded cells to stop the simulation in case the landscape is in an absorbant state
   unsigned int natCells, degCells;
-  // fraction of natural land
-  double natFraction;
   // minimum natural land in the simulation after the transient
   unsigned int nMin=0;
   // maximum natural land in the simulation after the transient
@@ -480,16 +478,21 @@ int main(int argc, const char * argv[]){
   // saveAggregated(tofile_sens,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
 
 
-  // saving uniquely the fragmentation metrics for PSE
-  natCells = 0;
-  for(i=0;i<landscape.size();i++){
-    if(landscape[i]==0){
-      natCells+=1;
-    }
-  }
-  natFraction = (double)natCells/(double)landscape.size();
+  // saving fragmentation and es metrics for sampling
+  double nFrag = getNumberOfFragments(naturalComponents);
+  double maxSize = getMaximumFragmentSize(naturalComponents);
+  double meanEdgeToArea = getMeanEdgeToAreaRatio(naturalComponents,landscape,neighbourMatrixES);
+  vector<double> metricsES(2);
+  getESMetrics(metricsES,ecosystemServices);
+  double natFraction = getLandCoverArea(landscape,0);
+  tofile_output << nFrag << " " << maxSize << " " << meanEdgeToArea << " " << metricsES[0] << " " << metricsES[1] << " " << natFraction << "\n";
 
-  tofile_output << population[0] << " " << natFraction <<"\n";
+  // natCells = 0;
+  // for(i=0;i<landscape.size();i++){
+  //   if(landscape[i]==0){
+  //     natCells+=1;
+  //   }
+  // }
 
   // careful I commented the standard output!!
   // saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
