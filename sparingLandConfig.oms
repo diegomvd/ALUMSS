@@ -54,6 +54,7 @@ val sampling2D = DirectSampling(
     (T is 0.0) x
     (L is 100.0) x
     (d0 is 0.0) x
+    (a is 1.0) x
     (a0 in (0.01 to 0.99 by 0.01 ))x
     (nF in Seq(1.0,10.0,100.0,1000.0)),
 )
