@@ -479,13 +479,13 @@ int main(int argc, const char * argv[]){
 
 
   // saving fragmentation and es metrics for sampling
-  double nFrag = getNumberOfFragments(naturalComponents);
-  double maxSize = getMaximumFragmentSize(naturalComponents);
-  double meanEdgeToArea = getMeanEdgeToAreaRatio(naturalComponents,landscape,neighbourMatrixES);
-  vector<double> metricsES(2);
-  getESMetrics(metricsES,ecosystemServices);
+  // double nFrag = getNumberOfFragments(naturalComponents);
+  // double maxSize = getMaximumFragmentSize(naturalComponents);
+  // double meanEdgeToArea = getMeanEdgeToAreaRatio(naturalComponents,landscape,neighbourMatrixES);
+  // vector<double> metricsES(2);
+  // getESMetrics(metricsES,ecosystemServices);
   double natFraction = getLandCoverArea(landscape,0);
-  tofile_output << nFrag << " " << maxSize << " " << meanEdgeToArea << " " << metricsES[0] << " " << metricsES[1] << " " << natFraction << "\n";
+  tofile_output << population[0] << " " << natFraction << "\n";
 
   // natCells = 0;
   // for(i=0;i<landscape.size();i++){
