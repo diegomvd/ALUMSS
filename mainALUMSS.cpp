@@ -267,6 +267,8 @@ int main(int argc, const char * argv[]){
   unsigned int i;
   // number of natural and degraded cells to stop the simulation in case the landscape is in an absorbant state
   unsigned int natCells, degCells;
+  // fraction of natural land
+  double natFraction;
   // minimum natural land in the simulation after the transient
   unsigned int nMin=0;
   // maximum natural land in the simulation after the transient
@@ -485,8 +487,9 @@ int main(int argc, const char * argv[]){
       natCells+=1;
     }
   }
-  natCells = (double) natCells/landscape.size();
-  tofile_output << population[0] << " " << natCells <<"\n";
+  natFraction = (double)natCells/(double)landscape.size();
+
+  tofile_output << population[0] << " " << natFraction <<"\n";
 
   // careful I commented the standard output!!
   // saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
