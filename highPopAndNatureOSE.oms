@@ -39,8 +39,8 @@ val naturePopOSE = OSEEvolution(
     wS in (0.0 to 1.0 by 0.25),
   ),
   objective = Seq(
-    P under -250.0,
-    N under -0.5
+    -P under -250.0,
+    -N under -0.5
   ),
   stochastic = Stochastic(seed = mySeed)
 )
