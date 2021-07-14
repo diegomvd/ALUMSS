@@ -1,0 +1,50 @@
+/*
+This script launches a Pattern Space Exploration on the human population-natural area phase space.
+It is a preliminary analysis on the possible combinations of human and nature outputs before digging
+on details of landscape structure and origins of suitable human nature combinations
+*/
+
+// Import the model plugin
+import _file_.modelDeclaration._
+
+val P = Val[Double]
+val N = Val[Double]
+
+val eukaryoteEnvironment = LocalEnvironment(40)
+
+val readModelOutput =
+    ScalaTask("""
+    // read file as an array of lines and get last line
+    val lastLine = scala.io.Source.fromFile(output).getLines.toList.last.mkString
+    // split the string and store it in an array
+    val values = lastLine.split(" ")
+    val P = values(0).toDouble
+    val N = values(1).toDouble
+    """
+    )set(
+        inputs+=output,
+        outputs+=(P,N)
+    )
+
+val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
+
+val naturePopOSE = OSEEvolution(
+  evaluation = modelRunAndRead,
+  parallelism = 35,
+  termination = 5000,
+  origin = Seq(
+    nF in LogRange(1.0,200.0,10),
+    a is 1.0,
+    mS in (0.5 to 1.25 by 0.25),
+    wS in (0.0 to 1.0 by 0.25),
+  ),
+  objective = Seq(
+    P under -250.0,
+    N under -0.5
+  ),
+  stochastic = Stochastic(seed = mySeed)
+)
+
+(naturePopOSE on eukaryoteEnvironment hook (workDirectory / "resultsHighNaturePopOSE", frequency = 100) )
+
+// these are 120 origin patterns
