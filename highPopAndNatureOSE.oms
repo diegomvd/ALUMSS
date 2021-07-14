@@ -33,8 +33,8 @@ val naturePopOSE = OSEEvolution(
   parallelism = 35,
   termination = 5000,
   origin = Seq(
-    nF in LogRange(1.0,200.0,10),
-    a is 1.0,
+    nF in Seq(1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0),
+    a in (0.0 to 1.0 by 0.25),
     mS in (0.5 to 1.25 by 0.25),
     wS in (0.0 to 1.0 by 0.25),
   ),
