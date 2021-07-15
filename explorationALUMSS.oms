@@ -76,8 +76,8 @@ val scriptTask =
       // outputFiles += ("DATA_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_dtsave_${dtsave}_expid_${mySeed}.dat",agreOut),
       outputFiles += ("DATA_AGRE",agreOut),
       // resources is the path to the executable that runs the simulations
-      resources+="/home/AD.LSM.CNRS.FR/diego.bengochea-paz/ALUMSS/ALUMSS/alumss-exec",
-      // resources+="/home/karpouzi/Research/Chapter2/gillespie-land-use/alumss-exec",
+      resources += "/home/AD.LSM.CNRS.FR/diego.bengochea-paz/ALUMSS/ALUMSS/alumss-exec",
+      // resources += "/home/karpouzi/Research/Chapter2/gillespie-land-use/alumss-exec",
 
       // default parameter and initialization values
       T:=3000.0,
@@ -114,6 +114,7 @@ val hookAppend = AppendToFileHook(workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_$
 // be previously created in a scalaTask
 // the name of the replication file contains the information on the parameter
 // values
+
 val copyHook = CopyFileHook(f, workDirectory/"REPS_AGRE_T_${T}_dtp_${dtp}_n_${L}_a0_${a0}_d0_${d0}_ksi_${ksi}_y0_${y0}_sar_${sar}_a_${a}_w_${w}_Tag_${Tag}_Tab_${Tab}_Tr_${Tr}_Td_${Td}_d_${d}_mdc_${mdc}_ndc_${ndc}_dtsave_${dtsave}.csv")
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,7 +153,7 @@ val parameterSet = ScalaTask("""
     f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1 meanR stdR corrLen\n"
 """) set(
     inputs += a0,
-    outputs +=(f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,y0,Td,d,mdc,ndc,dtsave)
+    outputs += (f,T,dtp,L,a0,d0,ksi,sar,a,w,Tag,Tab,Tr,y0,Td,d,mdc,ndc,dtsave)
 )
 
 val replications =
@@ -963,7 +964,7 @@ explorationA0 -< (parameterSet hook copyHook) -- replications
 //
 //
 // // a0Exploration2 -< ( a0OSE hook (workDirectory / "resultsOSE") )
-// // longTerm4 hook (workDirectory / "experiment4-010521.csv")
+// longTerm4 hook (workDirectory / "experiment4-010521.csv")
 // // longTermNoPop hook (workDirectory / "experimentNoPop-2-140521.csv")
 // // a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
 // // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
