@@ -1365,18 +1365,15 @@ void saveAggregatedMetrics(ofstream &file, double t, const vector<unsigned int> 
 
   // number of fragments
   double nFrag = getNumberOfFragments(naturalComponents);
-
   // maximum fragment size
   double maxFragSize = getMaximumFragmentSize(naturalComponents);
 
   // edge to area ratio
   double meanEdgeToArea = getMeanEdgeToAreaRatio(naturalComponents, landscape, neighbourMatrixES);
-
   // correlation length of natural cover
   double correlationLength = getCorrelationLength(naturalComponents,landscape,nSide);
-
   // ecosystem service metrics
-  vector<double> metricsES;
+  vector<double> metricsES(2);
   getESMetrics(metricsES, ecosystemServices);
   double meanES = metricsES[0];
   double giniES = metricsES[1];
