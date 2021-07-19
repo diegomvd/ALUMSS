@@ -82,6 +82,6 @@ val modelPluginEuka =
     sFL:=0.02,
     sR:=0.2,
     sD:=0.02,
-    dtSave:=1.0,
+    dtSave:=1600.0,
     mySeed:=21358495
   )

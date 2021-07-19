@@ -19,7 +19,7 @@ val hookAppend = AppendToFileHook(workDirectory/"explo_T_${T}_n_${L}_a0_${a0}_d0
 // Creation of a file to store the data from the replications
 val createFile = ScalaTask("""
   val f = newFile()
-  f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1 meanR stdR corrLen\n"
+  f.content = "t P N D A0 A1 Y nFrag maxSize e2a corrLen meanES giniES\n"
 """) set(
     (inputs,outputs)+=(T,L,a0,d0,nF,a,mS,wS,z,dES,y0,y1,sFL,sR,sD,dtSave),
     outputs+=f

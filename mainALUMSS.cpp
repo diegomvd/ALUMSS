@@ -375,7 +375,9 @@ int main(int argc, const char * argv[]){
       }
     }
     if(natCells==landscape.size() || degCells==landscape.size()){
-      break;
+      if(population[0]<1){
+        break;
+      }
     }
 
     /****************************************************************************
@@ -409,6 +411,7 @@ int main(int argc, const char * argv[]){
     /****************************************************************************
      SAVING DATA
     ****************************************************************************/
+
     if(t>=tSave){
       saveAggregatedMetrics(tofile_output, t, population, landscape, agriculturalProduction, naturalComponents, neighbourMatrixES, ecosystemServices, nSide);
 
