@@ -1217,7 +1217,7 @@ void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSen
 //       - saveComponents
 ////////////////////////////////////////////////////////////////////////////////
 
-double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n)
+double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int nSide)
 {
 
   vector<int>::const_iterator it;
@@ -1230,8 +1230,8 @@ double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n)
     yMean=0;
     // iterate over the cells of the natural component to get their mean position
     for(it=naturalComponent.begin();it!=naturalComponent.end();++it){
-      xi=(int)*it%n;
-      yi=(int)*it/n;
+      xi=(int)*it%nSide;
+      yi=(int)*it/nSide;
       xMean+=xi;
       yMean+=yi;
     }
@@ -1240,14 +1240,29 @@ double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n)
 
     // now iterate again to calculate the radius of gyration
     for(it=naturalComponent.begin();it!=naturalComponent.end();++it){
-      xi=(int)*it%n;
-      yi=(int)*it/n;
+      xi=(int)*it%nSide;
+      yi=(int)*it/nSide;
       radiusOfGyration+=sqrt((xi-xMean)*(xi-xMean)+(yi-yMean)*(yi-yMean));
     }
     radiusOfGyration/= (double) naturalComponent.size();
   }
 
   return radiusOfGyration;
+}
+
+double getCorrelationLength(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int nSide)
+{
+  vector<vector<int>>::const_iterator it;
+  double correlationLength = 0;
+
+  if (naturalComponents.size()>0){
+    for(it=naturalComponents.begin();it!=naturalComponents.end();++it){
+      correlationLength += (*it).size() * getRadiusOfGyration(*it,nSide);
+    }
+    correlationLength /= (double) (getLandCoverArea(landscape,0)*nSide);
+  }
+
+  return correlationLength;
 }
 
 double getMeanEdgeToAreaRatio(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrixES)
@@ -1331,6 +1346,45 @@ void getESMetrics(vector<double> &metrics, const vector<double> &ecosystemServic
   metrics[1] = giniES;
 
   return;
+}
+
+void saveAggregatedMetrics(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrixES, const vector<double> &ecosystemServices, unsigned int nSide)
+{
+
+  // population Size
+  double populationSize = population[0];
+
+  // fraction of land cover
+  double naturalLand = getLandCoverArea(landscape,0);
+  double degradedLand = getLandCoverArea(landscape,1);
+  double lowIntenseLand = getLandCoverArea(landscape,2);
+  double highIntenseLand = getLandCoverArea(landscape,3);
+
+  // resource production
+  double totalResource = accumulate(agriculturalProduction.begin(),agriculturalProduction.end(),0.0,plus<double>());
+
+  // number of fragments
+  double nFrag = getNumberOfFragments(naturalComponents);
+
+  // maximum fragment size
+  double maxFragSize = getMaximumFragmentSize(naturalComponents);
+
+  // edge to area ratio
+  double meanEdgeToArea = getMeanEdgeToAreaRatio(naturalComponents, landscape, neighbourMatrixES);
+
+  // correlation length of natural cover
+  double correlationLength = getCorrelationLength(naturalComponents,landscape,nSide);
+
+  // ecosystem service metrics
+  vector<double> metricsES;
+  getESMetrics(metricsES, ecosystemServices);
+  double meanES = metricsES[0];
+  double giniES = metricsES[1];
+
+  file << t << " " << populationSize << " " << naturalLand << " " << degradedLand << " " << lowIntenseLand << " " << highIntenseLand << " " << totalResource << " " << nFrag << " " << maxFragSize << " " << meanEdgeToArea << " " << correlationLength << " " << meanES << " " << giniES << "\n";
+
+  return;
+
 }
 
 void saveAggregated(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int nn, double ripleyDistance, double nMax, double nMin, double pMax, double pMin)
@@ -1496,7 +1550,7 @@ void saveAggregated(ofstream &file, double t, const vector<unsigned int> &popula
     squaredRadiusOfGyration /= (double) naturalComponents.size();
     meanRadiusOfGyration /= (double) naturalComponents.size();
     stdRadiusOfGyration = squaredRadiusOfGyration - meanRadiusOfGyration*meanRadiusOfGyration;
-    // use the fact that we already calculated the number of natural cells and rescale it by landscape size nn
+    // use the fact that we already calculated the fraction of natural cells and rescale it by landscape size nn
     if (nN>0){
       correlationLength /= (double) (nN*nn);
     }

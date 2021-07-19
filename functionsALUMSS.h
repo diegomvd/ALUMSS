@@ -83,11 +83,13 @@ void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSen
 ////////////////////////////////////////////////////////////////////////////////
 
 double getRadiusOfGyration(const vector<int> &naturalComponent, unsigned int n);
+double getCorrelationLength(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, unsigned int n);
 double getMeanEdgeToAreaRatio(const vector<vector<int>> &naturalComponents, const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrixES);
 double getMaximumFragmentSize(const vector<vector<int>> &naturalComponents);
 double getNumberOfFragments(const vector<vector<int>> &naturalComponents);
 double getLandCoverArea(const vector<unsigned int> &landscape, unsigned int landCover);
 void getESMetrics(vector<double> &metrics, const vector<double> &ecosystemServices);
+void saveAggregatedMetrics(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrixES, const vector<double> &ecosystemServices, unsigned int n);
 void saveAggregated(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int n, double ripleyDistance, double nMax, double nMin, double pMax, double pMin);
 void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape);
 void saveComponents(ofstream &file, double t, const vector<unsigned int> &landscape, const vector<vector<int>> &naturalComponents);

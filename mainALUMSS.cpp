@@ -410,7 +410,8 @@ int main(int argc, const char * argv[]){
      SAVING DATA
     ****************************************************************************/
     if(t>=tSave){
-      // saveAggregated(tofile_agre,t,population,landscape,agriculturalProduction,naturalComponents,ecosystemServices,nSide,2,(double)nMax/landscape.size(),(double)nMin/landscape.size(),pMax,pMin);
+      saveAggregatedMetrics(tofile_output, t, population, landscape, agriculturalProduction, naturalComponents, neighbourMatrixES, ecosystemServices, nSide);
+
       // saveLandscape(tofile_land,t,landscape);
       // saveComponents(tofile_clus,t,landscape,naturalComponents);
 
@@ -436,6 +437,8 @@ int main(int argc, const char * argv[]){
     t+=dtg;
 
   }
+
+  saveAggregatedMetrics(tofile_output, t, population, landscape, agriculturalProduction, naturalComponents, neighbourMatrixES, ecosystemServices, nSide);
 
   // print the landscape and the farms to check if it is ok
   // unsigned int ix,jx,lx;
@@ -484,8 +487,8 @@ int main(int argc, const char * argv[]){
   // double meanEdgeToArea = getMeanEdgeToAreaRatio(naturalComponents,landscape,neighbourMatrixES);
   // vector<double> metricsES(2);
   // getESMetrics(metricsES,ecosystemServices);
-  double natFraction = getLandCoverArea(landscape,0);
-  tofile_output << population[0] << " " << natFraction << "\n";
+  // double natFraction = getLandCoverArea(landscape,0);
+  // tofile_output << population[0] << " " << natFraction << "\n";
 
   // natCells = 0;
   // for(i=0;i<landscape.size();i++){
