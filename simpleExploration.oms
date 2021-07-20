@@ -27,8 +27,8 @@ val createFile = ScalaTask("""
 
 // Definition of parameter values for the replication experiment
 val setParameters = ScalaTask("""
-  val T = 1500.0
-  val L = 40.0
+  val T = 3000.0
+  val L = 32.0
   val a0 = 0.15
   val d0 = 0.15
   // val nF = 200.0
