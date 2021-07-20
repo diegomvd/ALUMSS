@@ -18,8 +18,8 @@ val readModelOutput =
     val lastLine = scala.io.Source.fromFile(output).getLines.toList.last.mkString
     // split the string and store it in an array
     val values = lastLine.split(" ")
-    val P = values(0).toDouble
-    val N = values(1).toDouble
+    val P = values(1).toDouble
+    val N = values(2).toDouble
     """
     )set(
         inputs+=output,
