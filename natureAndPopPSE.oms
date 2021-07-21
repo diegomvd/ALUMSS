@@ -18,8 +18,8 @@ val readModelOutput =
     val lastLine = scala.io.Source.fromFile(output).getLines.toList.last.mkString
     // split the string and store it in an array
     val values = lastLine.split(" ")
-    val P = values(0).toDouble
-    val N = values(1).toDouble
+    val P = values(1).toDouble
+    val N = values(2).toDouble
     """
     )set(
         inputs+=output,
@@ -31,18 +31,20 @@ val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
 val naturePopPSE = PSEEvolution(
   evaluation = modelRunAndRead,
   parallelism = 35,
-  termination = 5000,
+  termination = 20000,
   genome = Seq(
-    nF in (1.0,200.0),
+    nF in (1.0,500.0),
     a in (0.0,1.0),
     mS in (0.5,1.5),
     wS in (0.0,1.0),
   ),
   objective = Seq(
-    P in (0.0 to 1000.0 by 100.0),
-    N in (0.0 to 1.0 by 0.1)
+    P in (0.0 to 650.0 by 50.0),
+    N in (0.0 to 1.0 by 0.05)
   ),
   stochastic = Stochastic(seed = mySeed)
 )
 
-(naturePopPSE on eukaryoteEnvironment hook (workDirectory / "resultsNaturePopPSE", frequency = 100) )
+(naturePopPSE on eukaryoteEnvironment hook (workDirectory / "resultsNaturePopPSE2", frequency = 100) )
+
+// comment: should have removed the case P=0 to avoid the transients
