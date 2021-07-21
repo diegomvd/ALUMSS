@@ -1008,7 +1008,7 @@ void initializeFarmStrategy( vector<vector<double>> &farmStrategy, unsigned int 
     // update probSparing
     probSparing[jx]=0;
     // update farmStrategy
-    farmStrategy[ix][0]=1; // intensification
+    farmStrategy[jx][0]=1; // intensification
   }
 
   return;
