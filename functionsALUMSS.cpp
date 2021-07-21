@@ -652,6 +652,7 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
   vector<double> farmCumulativePropensity(nFarms);
   vector<unsigned int> availableCells;
   vector<unsigned int> agriculturalNeighbours;
+  vector<unsigned int> naturalNeighbours;
   vector<double> conversionPropensity, conversionCumulativePropensity;
   unsigned int ix,jx;
   unsigned int transition,cell;
@@ -695,13 +696,25 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
         availableCells.push_back(*it1);
       }
     }
+
     // clear and resize the probability of conversion vector
     conversionPropensity.resize(availableCells.size());
     conversionCumulativePropensity.resize(availableCells.size());
     // check the strategy of the farm
-    if(farmStrategy[ix][1]==0){ // if there is no clustering
-      //... give the same probability to each one = cumulative propensity of the farm / total number of cells to be converted
-      fill(conversionPropensity.begin(),conversionPropensity.end(),farmCumulativePropensity[ix]/availableCells.size());
+    if(farmStrategy[ix][0]==0){ // if it is sharing
+      jx=0; // counter to fill probConversion
+      for (it2=availableCells.begin();it2!=availableCells.end();++it2){
+        // calculate the number of natural neighbours
+        naturalNeighbours.clear();
+        getNeighboursState(naturalNeighbours,neighbourMatrix,landscape,*it2,0);
+        conversionPropensity[jx]=pow( max(0.1 , (double)naturalNeighbours.size() ) , farmStrategy[ix][1] );
+        conversionCumSum += conversionPropensity[jx];
+        jx+=1;
+      }
+      for(jx=0;jx<conversionPropensity.size();++jx){
+        // creating the 0-1 weights accordign to clustering and multiplying by total farm cumulative sensitivity to get converion propensity
+        conversionPropensity[jx] = conversionPropensity[jx] * farmCumulativePropensity[ix] / conversionCumSum;
+      }
     }
     else{ // if there is clustering
       jx=0; // counter to fill probConversion
@@ -1022,13 +1035,11 @@ void initializeFarmSensitivity( vector<double> &farmSensitivity, unsigned int nF
 
   vector<double>::iterator it;
   double sensitivity;
-  double totalSensitivity = 0;
-  double wSEffective = (nFarms-1)/nFarms;
+  double wSEffective = wS*(nFarms-1)/nFarms;
 
   // fill the vector with weights drawn from a uniform distribution with mean 1 and width wS
   for(it=farmSensitivity.begin();it!=farmSensitivity.end();++it){
     sensitivity = gsl_ran_flat(r,mS*(1-wSEffective),mS*(1+wSEffective));
-    totalSensitivity+=sensitivity;
     *it = sensitivity;
   }
 
