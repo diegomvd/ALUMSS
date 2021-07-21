@@ -994,7 +994,7 @@ void initializeFarmStrategy( vector<vector<double>> &farmStrategy, unsigned int 
   // initialize all the farms as sharing and then change nSparing to sparing
   for(ix=0;ix<farmStrategy.size();++ix){
     farmStrategy[ix].push_back(0); // intensification
-    farmStrategy[ix].push_back(0); // clustering
+    farmStrategy[ix].push_back(5); // clustering
   }
 
   for(ix=0;ix<nSparing;++ix){
@@ -1009,7 +1009,6 @@ void initializeFarmStrategy( vector<vector<double>> &farmStrategy, unsigned int 
     probSparing[jx]=0;
     // update farmStrategy
     farmStrategy[ix][0]=1; // intensification
-    farmStrategy[ix][1]=5; // clustering
   }
 
   return;
@@ -1042,6 +1041,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   initializes the landscape given a fraction of initial agricultural patches a0
   and degraded patches d0 considering the farm distribution and farmers strategies
   */
+
   //unsigned int number_cropped_patches = 1;
 
   unsigned long ix,jx,lx;
@@ -1066,6 +1066,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   vector<unsigned int> availableCells;
   // vector to store neibhours in clustering calculation
   vector<unsigned int> agriculturalNeighbours;
+  vector<unsigned int> naturalNeighbours;
   // farm propensities
   vector<double> farmPropensity(nFarms);
   vector<double> farmCumulativePropensity(nFarms);
@@ -1135,9 +1136,15 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
     cumProbConversion.clear();
     cumProbConversion.resize(availableCells.size());
     // check the strategy of the farm
-    if(farmStrategy[jx][1]==0){ // if there is no clustering
-      //... give the same probability to each one
-      fill(probConversion.begin(),probConversion.end(),1.0);
+    if(farmStrategy[jx][0]==0){ // if it is sharing
+      lx=0; // counter to fill probConversion
+      for (it2=availableCells.begin();it2!=availableCells.end();++it2){
+        // calculate the number of natural neighbours
+        naturalNeighbours.clear();
+        getNeighboursState(naturalNeighbours,neighbourMatrix,landscape,*it2,0);
+        probConversion[lx]=pow( max(0.1 , (double)naturalNeighbours.size() ) , farmStrategy[jx][1] ) ;
+        lx+=1;
+      }
     }
     else{ // if there is clustering
       lx=0; // counter to fill probConversion
