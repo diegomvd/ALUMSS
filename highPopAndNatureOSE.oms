@@ -28,23 +28,27 @@ val readModelOutput =
 
 val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
 
+def collapseCount(population: Array[Double]): Double = (population.groupBy(identity).mapValues(_.map(_ =>1).reduce(_+_))(0.0).toDouble)/(population.size.toDouble)
+
 val naturePopOSE = OSEEvolution(
   evaluation = modelRunAndRead,
-  parallelism = 35,
+  parallelism = 20,
   termination = 20000,
   origin = Seq(
-    nF in Seq(1.0,4.0,16.0,64.0,256.0,1024.0),
+    nF in Seq(1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0,512.0),
     a in (0.0 to 1.0 by 0.2),
     mS in (0.5 to 1.5 by 0.2),
-    wS in (0.0 to 1.0 by 0.5),
+    wS in (0.0 to 1.0 by 0.2),
   ),
   objective = Seq(
     -P under -250.0,
-    -N under -0.5
+    -N under -0.5,
+    P aggregate collapseCount(_) under 0.1
   ),
-  stochastic = Stochastic(seed = mySeed, sample = 10)
+  stochastic = Stochastic(seed = mySeed, sample = 50)
 )
 
-(naturePopOSE on eukaryoteEnvironment hook (workDirectory / "resultsHighNaturePopOSE3", frequency = 100) )
+(naturePopOSE on eukaryoteEnvironment hook (workDirectory / "resultsHighNaturePopOSE4", frequency = 100) )
 
-// these are 120 origin patterns
+
+// 5*5*5*10 = 1250 origins

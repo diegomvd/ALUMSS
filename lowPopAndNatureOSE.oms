@@ -30,19 +30,21 @@ val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
 
 val naturePopOSE = OSEEvolution(
   evaluation = modelRunAndRead,
-  parallelism = 35,
-  termination = 10000,
+  parallelism = 20,
+  termination = 20000,
   origin = Seq(
-    nF in Seq(1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0),
+    nF in Seq(1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0,512.0),
     a in (0.0 to 1.0 by 0.2),
     mS in (0.5 to 1.5 by 0.2),
-    wS in (0.0 to 1.0 by 0.5),
+    wS in (0.0 to 1.0 by 0.2),
   ),
   objective = Seq(
     P under 250.0,
     N under 0.5
   ),
-  stochastic = Stochastic(seed = mySeed)
+  stochastic = Stochastic(seed = mySeed, sample = 50)
 )
 
-(naturePopOSE on eukaryoteEnvironment hook (workDirectory / "resultsLowNaturePopOSE", frequency = 100) )
+(naturePopOSE on eukaryoteEnvironment hook (workDirectory / "resultsLowNaturePopOSE2", frequency = 100) )
+
+// 5*5*5*10 = 1250 patterns
