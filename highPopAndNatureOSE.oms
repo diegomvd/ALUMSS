@@ -43,7 +43,7 @@ val naturePopOSE = OSEEvolution(
   objective = Seq(
     -P under -250.0,
     -N under -0.5,
-    P aggregate collapseCount(_) under 0.1
+    P aggregate collapseCount _ under 0.1
   ),
   stochastic = Stochastic(seed = mySeed, sample = 50)
 )
