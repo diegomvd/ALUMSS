@@ -45,6 +45,6 @@ val naturePopOSE = OSEEvolution(
   stochastic = Stochastic(seed = mySeed, sample = 50)
 )
 
-(naturePopOSE on eukaryoteEnvironment hook (workDirectory / "resultsLowNaturePopOSE2", frequency = 100) )
+(naturePopOSE on eukaryoteEnvironment hook (workDirectory / "resultsLowNaturePopOSE3", frequency = 100) )
 
 // 5*5*5*10 = 1250 patterns
