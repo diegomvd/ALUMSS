@@ -17,7 +17,8 @@ def dfStringToList(string_):
     return string_
 
 # path for the data files
-path = "/home/karpouzi/Research/Eukaryote-mountdir/experiment4-010521.csv"
+# path = "/home/karpouzi/Research/Eukaryote-mountdir/experiment4-010521.csv"
+path = "/home/karpouzi/Research/Eukaryote-mountdir/experiment4-027521.csv"
 
 sns.set_context("paper")
 
@@ -89,6 +90,6 @@ axs.annotate('   Land \n sparing',xy=(5.75,7.25),size=14)
 axs.annotate('   Land \n sharing',xy=(1.0,2.5),size=14)
 
 plt.tight_layout()
-plt.savefig('Figure4-sharing-sparing.pdf', format='pdf', dpi = 600, bbox_inches='tight')
+plt.savefig('Figure4-sharing-sparing2.pdf', format='pdf', dpi = 600, bbox_inches='tight')
 
 plt.show()
