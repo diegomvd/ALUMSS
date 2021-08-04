@@ -17,7 +17,8 @@ def dfStringToList(string_):
     return string_
 
 # path for the data files
-path = "/home/karpouzi/Research/Eukaryote-mountdir/experiment4-010521.csv"
+# path = "/home/karpouzi/Research/Eukaryote-mountdir/experiment4-010521.csv"
+path = "/home/karpouzi/Research/Eukaryote-mountdir/experiment4-027521.csv"
 
 sns.set_context("paper")
 

@@ -428,7 +428,7 @@ val replicationsFinalStateClustering2 =
   Replication(
     evaluation = finalStateClusteringTask2,
     seed = mySeed,
-    sample = 20,
+    sample = 40,
     aggregation = Seq (
       T aggregate average,
       dtp aggregate average,
@@ -826,7 +826,7 @@ DirectSampling(
 
 
 // a0Exploration2 -< ( a0OSE hook (workDirectory / "resultsOSE") )
-longTerm4 hook (workDirectory / "experiment4-027521.csv")
+// longTerm4 hook (workDirectory / "experiment4-027521.csv")
 // longTermNoPop hook (workDirectory / "experimentNoPop-2-140521.csv")
 // a0Exploration -< (setParamA0Exp hook copyHook) -- replicationsA0
 // clusteringExploration -< (setParamClusteringExp hook copyHook) -- replicationsClustering
@@ -834,7 +834,7 @@ longTerm4 hook (workDirectory / "experiment4-027521.csv")
 // (setParamZoomPerco hook copyHook) -- replicationsZoomPerco
 // longTermIntensification hook (workDirectory / "experimentTagA-290421-2Dbif-3.csv")
 // longTermClustering hook (workDirectory / "experimentTagW-280421.csv")
-// longTermClustering2 hook (workDirectory / "experimentA0W-220421.csv")
+longTermClustering2 hook (workDirectory / "experimentA0W-040821.csv")
 
 // samplingPercoMeasure hook (workDirectory / "experimentPercoMeasure-280521.csv")
 
