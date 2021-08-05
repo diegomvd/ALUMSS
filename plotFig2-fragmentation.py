@@ -51,7 +51,7 @@ print(replicationData)
 # 2- plotting the fragmentation and ecosystem service metrics
 
 # initialize the axis
-fig, axs = plt.subplots(nrows=2, ncols=3, figsize=(12,8))
+fig, axs = plt.subplots(nrows=2, ncols=3, figsize=(7.5,4.5))
 
 sns.set_palette("deep")
 sns.set_color_codes("deep")
@@ -92,7 +92,7 @@ sns.lineplot(x=binN, y=conversionProb, color="r",linewidth=3.0,ax=axs[1,2], data
 # axs[0,2].set_xlim(left=1.0, right = 0.0)
 
 axs[0,0].set_title(r"$\bf{a}$   Fragmentation measures")
-axs[0,1].set_title(r"$\bf{b}$   Ecosystem service")
+axs[0,1].set_title(r"$\bf{b}$   Ecosystem services (ES)")
 axs[0,2].set_title(r"$\bf{c}$   Societal feedback")
 
 axs[0,0].invert_xaxis()
@@ -105,23 +105,25 @@ axs[1,0].axvline(0.59,linewidth=4, color='k', alpha=0.4)
 axs[0,2].axvline(0.59,linewidth=4, color='k', alpha=0.4)
 axs[1,2].axvline(0.59,linewidth=4, color='k', alpha=0.4)
 
+axs[0,0].annotate('Percolation \n threshold', xy=(0.55, 0.55),xytext=(0.45, 0.74),arrowprops=dict(facecolor='black', shrink=1.1, width=2.0, headwidth=6.5, alpha=0.7))
 
-axs[0,0].set_ylabel("Size of the largest natural fragment")
+
+axs[0,0].set_ylabel("Largest fragment size")
 axs[0,0].set_xlabel("")
-axs[1,0].set_ylabel("Number of natural fragments")
+axs[1,0].set_ylabel("Number of fragments")
 axs[1,0].set_xlabel("Fraction of natural land")
 
-axs[0,1].set_ylabel("Mean ecosystem service provision")
+axs[0,1].set_ylabel("Mean ES provision")
 axs[0,1].set_xlabel("")
-axs[1,1].set_ylabel("SD in ecosystem service provision")
-axs[1,1].set_xlabel("Size of the largest natural fragment")
+axs[1,1].set_ylabel("SD of ES provision")
+axs[1,1].set_xlabel("Largest fragment size")
 
-axs[0,2].set_ylabel("Total resource production per unit time")
+axs[0,2].set_ylabel("Total resource \n production per unit time")
 axs[0,2].set_xlabel("")
-axs[1,2].set_ylabel("Agricultural expansion propensity")
+axs[1,2].set_ylabel("Agricultural \n expansion propensity")
 axs[1,2].set_xlabel("Fraction of natural land")
 
 plt.tight_layout()
-plt.savefig('Figure2-fragmentation.pdf', format='pdf', dpi = 600, bbox_inches='tight')
+plt.savefig('Figure2-fragmentation-revision.pdf', format='pdf', dpi = 1200, bbox_inches='tight')
 
 plt.show()

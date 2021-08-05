@@ -54,6 +54,8 @@ samplingData=samplingData.apply(pd.Series.explode)
 samplingData["N"] = samplingData["N"].astype('float')
 samplingData["P"] = samplingData["P"].astype('float')
 
+samplingData['a'] = np.around(samplingData['a'], decimals=1)
+
 print(samplingData)
 # select the points where irreversible collapses happened
 df = samplingData.loc[(samplingData["P"]<10.0) & (samplingData["N"]<0.01)]
@@ -75,21 +77,24 @@ for a in aList:
 
 dfA0 = pd.DataFrame(data=a0Mat, index=None, columns=['w','a','a0'])
 dfA0 = dfA0.pivot("a", "w", "a0")
-fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(6,5))
+fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(4,3))
 # sns.scatterplot(x=a0Mat[:,0],y=a0Mat[:,1],hue=a0Mat[:,2],ax=axs)
 cmap1 = sns.color_palette("rocket", as_cmap=True)
 cmap2 = sns.color_palette("Reds", as_cmap=True)
-sns.heatmap(data=dfA0,cmap=cmap2,cbar_kws={'label': 'Minimum fraction of natural land \n to avoid irreversible collapse'},ax=axs)
+heat_map=sns.heatmap(data=dfA0,cmap=cmap2,cbar_kws={'label': '\nMinimum fraction of natural land \n to avoid irreversible collapse'},ax=axs)
+heat_map.set_yticklabels(heat_map.get_yticklabels(), rotation=0)
 # sns.heatmap(data=dfA0,center=0.05,cmap=cmap1,ax=axs)
-axs.set_xlabel('Agricultural clustering')
-axs.set_ylabel('Preference for intensification')
+axs.set_xlabel('Agricultural clustering '+r"$\omega$")
+axs.xaxis.labelpad = 10
+axs.set_ylabel('Preference for intensification '+r"$\alpha$")
+axs.yaxis.labelpad = 10
 axs.invert_yaxis()
 axs.axvline(4.5,linewidth=1,linestyle='-',color='k', alpha=0.8)
 axs.axhline(5.0,linewidth=1,linestyle='-',color='k', alpha=0.8)
-axs.annotate('   Land \n sparing',xy=(5.75,7.25),size=14)
-axs.annotate('   Land \n sharing',xy=(1.0,2.5),size=14)
+axs.annotate('   Land \n sparing',xy=(5.15,6.8),size=12)
+axs.annotate('   Land \n sharing',xy=(0.8,2.0),size=12)
 
 plt.tight_layout()
-plt.savefig('Figure4-sharing-sparing.pdf', format='pdf', dpi = 600, bbox_inches='tight')
+plt.savefig('Figure4-sharing-sparing-revision.pdf', format='pdf', dpi = 1200, bbox_inches='tight')
 
 plt.show()

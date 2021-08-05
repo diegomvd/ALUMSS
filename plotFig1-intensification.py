@@ -28,7 +28,7 @@ sns.set_palette("colorblind")
 sns.set_color_codes("colorblind")
 
 # initialize the axis
-fig = plt.figure(constrained_layout=True, figsize=(12,10))
+fig = plt.figure(constrained_layout=True, figsize=(9.5,7.5))
 gs = GridSpec(4, 2, figure=fig)
 ax00 = fig.add_subplot(gs[0, 0])
 ax10 = fig.add_subplot(gs[1, 0])
@@ -38,34 +38,37 @@ ax01 = fig.add_subplot(gs[0, 1])
 ax11 = fig.add_subplot(gs[1, 1])
 ax231 = fig.add_subplot(gs[2:, 1])
 
+
 # plot population dynamics
-sns.lineplot(x="t",y="P", color='b', ax=ax00, data=replicationData1[replicationData1["t"]<2600])
-land_types1=["N","D","A0"]
+sns.lineplot(x="t",y="P", color='b', ax=ax00, linewidth=3.0, data=replicationData1[replicationData1["t"]<2600])
+land_types1=['N','D','A0']
 land_colors1=["g", "r", "y"]
 for ix, land_type in enumerate(land_types1):
-    sns.lineplot(x='t',y=land_type,color=land_colors1[ix],label=land_type,ax=ax10, data=replicationData1[replicationData1["t"]<2600])
+    sns.lineplot(x='t',y=land_type,color=land_colors1[ix],label=land_types1,ax=ax10, linewidth=3.0, data=replicationData1[replicationData1["t"]<2600])
 ax00.set_xlabel("")
 ax10.set_xlabel("Time")
 ax00.set_ylabel("Population density")
 ax10.set_ylabel("Fraction of land")
 ax00.set_title(r"$\bf{a}$" + "      No intensification "+ r"$(\alpha=0)$")
 # ax10.axhline(0.6,linewidth=4, color='k', alpha=0.4)
-ax10.legend()
+# ax10.legend(['N','D','A0'])
+ax10.legend([r'$N$',r'$D$',r'$A_L$'])
 
 # fig, axs = plt.subplots(nrows=2, ncols=1)
-sns.lineplot(x="t",y="P", color='b', ax=ax20, data=replicationData2)
+sns.lineplot(x="t",y="P", color='b', ax=ax20, linewidth=3.0, data=replicationData2)
 # plot land dynamics
-land_types2=["N","D","A0","A1"]
+land_types2=['N','D','A0','A1']
 land_colors2=["g", "r", "y", "m"]
 for ix, land_type in enumerate(land_types2):
-    sns.lineplot(x='t',y=land_type,color=land_colors2[ix],label=land_type,ax=ax30, data=replicationData2)
+    sns.lineplot(x='t',y=land_type,color=land_colors2[ix],label=land_type,ax=ax30, linewidth=3.0, data=replicationData2)
 ax20.set_xlabel("")
 ax30.set_xlabel("Time")
 ax20.set_ylabel("Population density")
 ax30.set_ylabel("Fraction of land")
 ax20.set_title(r"$\bf{c}$" + "      Low intensification "+ r"$(\alpha=0.2)$")
 # ax10.axhline(0.6,linewidth=4, color='k', alpha=0.4)
-ax20.legend()
+# ax20.legend(['N','D','A0','A1'])
+ax30.legend([r'$N$',r'$D$',r'$A_L$',r'$A_H$'])
 
 ###############################################################################
 
@@ -103,7 +106,7 @@ plotData["P"] = plotData["P"].astype('float')
 plotData=plotData[(plotData['a']==0.0) & (plotData['Tag']>=0.25)]
 plotData["Tag"]=1/plotData["Tag"]
 
-sns.lineplot(x="Tag",y="P",ax=ax01,color='b',label='Steady State',linewidth=2,data=plotData)
+sns.lineplot(x="Tag",y="P",ax=ax01,color='b',label='Steady State',linewidth=3,data=plotData)
 
 # # plot the LC for P
 plotData = samplingData  #[(samplingData['a']==0.0) & (samplingData['Tag']<0.25) & (samplingData['Tag']>0.025)]
@@ -113,7 +116,7 @@ plotData["P"] = plotData["P"].astype('float')
 plotData=plotData[(plotData['a']==0.0) & (plotData['Tag']>0.025) & (plotData['Tag']<=0.25) ]
 plotData["Tag"]=1/plotData["Tag"]
 
-sns.lineplot(x="Tag",y="P",ax=ax01,color='m',label='Cycles',linewidth=2,data=plotData)
+sns.lineplot(x="Tag",y="P",ax=ax01,color='m',label='Cycles',linewidth=3,data=plotData)
 
 plotData = samplingData
 plotData.loc[(plotData["Tag"]<=0.25),'P'] = plotData.loc[(plotData["Tag"]<=0.25),'pMax']
@@ -121,27 +124,27 @@ plotData = plotData.explode("P",ignore_index=True)
 plotData["P"] = plotData["P"].astype('float')
 plotData=plotData[(plotData['a']==0.0) & (plotData['Tag']>0.025) & (plotData['Tag']<=0.25) ]
 plotData["Tag"]=1/plotData["Tag"]
-sns.lineplot(x="Tag",y="P",ax=ax01,color='m',linewidth=2,data=plotData)
+sns.lineplot(x="Tag",y="P",ax=ax01,color='m',linewidth=3,data=plotData)
 
 # plot the SS for N
 plotData = samplingData[(samplingData['a']==0.0) & (samplingData['Tag']>=0.25)]
 plotData = plotData.explode("N",ignore_index=True)
 plotData["N"] = plotData["N"].astype('float')
 plotData["Tag"]=1/plotData["Tag"]
-sns.lineplot(x="Tag",y="N",ax=ax11,color='b',linewidth=2,data=plotData)
+sns.lineplot(x="Tag",y="N",ax=ax11,color='b',linewidth=3,data=plotData)
 # # plot the LC for N
 plotData = samplingData[(samplingData['a']==0.0) & (samplingData['Tag']<0.25) & (samplingData['Tag']>0.025)]
 # plotData.loc[(plotData["Tag"]<0.25),'nMin'] = plotData.loc[(plotData["Tag"]<0.25),'N']
 plotData = plotData.explode("nMin",ignore_index=True)
 plotData["nMin"] = plotData["nMin"].astype('float')
 plotData["Tag"]=1/plotData["Tag"]
-sns.lineplot(x="Tag",y="nMin",ax=ax11,color='m',linewidth=2,data=plotData)
+sns.lineplot(x="Tag",y="nMin",ax=ax11,color='m',linewidth=3,data=plotData)
 plotData = samplingData[(samplingData['a']==0.0) & (samplingData['Tag']<0.25) & (samplingData['Tag']>0.025)]
 # plotData.loc[(plotData["Tag"]<=0.25),'N'] = plotData.loc[(plotData["Tag"]<=0.25),'nMax']
 plotData = plotData.explode("nMax",ignore_index=True)
 plotData["nMax"] = plotData["nMax"].astype('float')
 plotData["Tag"]=1/plotData["Tag"]
-sns.lineplot(x="Tag",y="nMax",ax=ax11,color='m',linewidth=2,data=plotData)
+sns.lineplot(x="Tag",y="nMax",ax=ax11,color='m',linewidth=3,data=plotData)
 
 ax01.legend(title= 'Equilibria')
 # ax01.annotate(r'$\alpha=0$',xy=(1,320))
@@ -150,8 +153,8 @@ ax01.set_xscale("log")
 ax11.set_xscale("log")
 
 ax01.set_xlabel('')
-ax11.set_xlabel('Sensitivity to resource deficit '+r"$\sigma$")
-ax11.set_ylabel('Fraction of natural land')
+ax11.set_xlabel('Responsiveness to resource demand '+r"$\sigma$")
+ax11.set_ylabel('Natural land fraction')
 ax01.set_ylabel('Population density')
 
 ax01.set_title(r"$\bf{b}$"+"        Bifurcation diagrams for "+r"$\alpha=0$")
@@ -198,13 +201,13 @@ alist = np.append(alist,0.0)
 
 tag_th=1/tag_th
 
-sns.set_palette("colorblind")
-sns.set_color_codes("colorblind")
-
+icefire=sns.color_palette("icefire",2)
+sns.set_palette(icefire)
+# sns.set(palette='icefire',color_codes=True)
 # plot the scatter points
 # fig, axs = plt.subplots(nrows=1, ncols=1)
 sns.scatterplot(x=tag_th,y=alist,color='k',ax=ax231)
-sns.lineplot(x=[1/0.0178,1/0.19],y=[0.0,0.0],color='m',linewidth=3,ax=ax231)
+sns.lineplot(x=[1/0.0178,1/0.19],y=[0.0,0.0],color='m',linewidth=4,ax=ax231)
 
 
 f = interpolate.interp1d(tag_th, alist)
@@ -217,14 +220,14 @@ ax231.fill_between(tag_new,a_new,color='r',alpha=0.7)
 ax231.fill_between(tag_new,a_new,0.9,color='b',alpha=0.7)
 
 ax231.annotate("Sustainable steady state",xy=(2.0,0.5))
-ax231.annotate("Irreversible collapse",xy=(10,0.15))
-ax231.annotate("Reversible collapses \n         (cycles)",xy=(8.0,0.0),xytext=(1.5,0.15),arrowprops=dict(arrowstyle="->"))
+ax231.annotate("Irreversible \n  collapse",xy=(16,0.15))
+ax231.annotate("Reversible collapses \n         (cycles)",xy=(9.0,0.0),xytext=(1.1,0.1),arrowprops=dict(facecolor='black', shrink=1.0, width=2.0, headwidth=6.5, alpha=0.7))
 ax231.set_xscale('log')
-ax231.set_xlabel('Sensitivity to resource deficit '+r"$\sigma$")
-ax231.set_ylabel('Preference for intense agriculture '+r"$\alpha$")
+ax231.set_xlabel('Responsiveness to resource demand '+r"$\sigma$")
+ax231.set_ylabel('Preference for intensification '+r"$\alpha$")
 ax231.set_title(r"$\bf{d}$" + "      2D Bifurcation diagram")
 #
-# # plot for a>0
+# plot for a>0
 # fig, axs = plt.subplots(nrows=2, ncols=1)
 #
 # palette=sns.color_palette("flare")
@@ -251,13 +254,13 @@ ax231.set_title(r"$\bf{d}$" + "      2D Bifurcation diagram")
 # axs[1].set_xscale("log")
 #
 # axs[0].set_xlabel('')
-# axs[1].set_xlabel('Sensitivity to resource deficit')
+# axs[1].set_xlabel('Responsiveness to resource demand')
 # axs[1].set_ylabel('Fraction of natural land')
 # axs[0].set_ylabel('Population density')
 #
 # axs[0].set_title(r"$\bf{d}$" + "      Intensification")
 # axs[1].axhline(0.6,linewidth=4, color='k', alpha=0.4)
 
-plt.savefig('Figure1-intensification.pdf', format='pdf', dpi = 600, bbox_inches='tight')
+plt.savefig('Figure1-intensification-revision.pdf', format='pdf', dpi = 1200, bbox_inches='tight')
 
 plt.show()
