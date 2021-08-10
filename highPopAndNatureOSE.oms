@@ -37,7 +37,7 @@ val naturePopOSE = OSEEvolution(
   origin = Seq(
     nF in Seq(1.0,10.0,100.0,1000.0),
     a in (0.0 to 1.0 by 0.2),
-    ms in (0.25 to 1.0 by 0.25),
+    mS in (0.25 to 1.0 by 0.25),
     wS in (0.0 to 1.0 by 0.333),
   ),
   objective = Seq(
