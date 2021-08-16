@@ -51,4 +51,4 @@ val naturePopOSE = OSEEvolution(
 
 // P aggregate collapseCount _ under 0.1
 
-// 5*4*10 = 200 origins
+// 3*3*5*3 = 135 origins
