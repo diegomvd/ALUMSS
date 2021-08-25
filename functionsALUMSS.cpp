@@ -755,7 +755,7 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
     // update natural components
     updateNCCremoving(naturalComponents,landscape,*it2,dES);
     // update ecosystem service provision
-    getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z); // update ES
+    getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,z); // update ES
     // update the propensity of spontaneous transitions
     getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
     partial_sum(spontaneousPropensities.begin(),spontaneousPropensities.end(),spontaneousCumulativePropensities.begin());
@@ -777,7 +777,7 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
       landscape[cell]=0; // update the landscape
       countTransitions[0]+=1; // update the transitions' count
       updateNCCadding(naturalComponents,neighbourMatrixES,landscape,cell); // update the NCC
-      getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z); // update ES
+      getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,z); // update ES
       // update the propensity of spontaneous transitions
       getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
       partial_sum(spontaneousPropensities.begin(),spontaneousPropensities.end(),spontaneousCumulativePropensities.begin());
@@ -788,7 +788,7 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
       landscape[cell]=1;
       countTransitions[1]+=1;
       updateNCCremoving(naturalComponents,landscape,cell,dES);
-      getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z);
+      getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,z);
       // update the propensity of spontaneous transitions
       getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
       partial_sum(spontaneousPropensities.begin(),spontaneousPropensities.end(),spontaneousCumulativePropensities.begin());
@@ -802,7 +802,7 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
         countTransitions[2]+=1;
 
         updateNCCadding(naturalComponents,neighbourMatrixES,landscape,cell);
-        getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z);
+        getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,z);
         // update the propensity of spontaneous transitions
         getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
         partial_sum(spontaneousPropensities.begin(),spontaneousPropensities.end(),spontaneousCumulativePropensities.begin());
@@ -1219,7 +1219,7 @@ void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSen
   initializeFarmSensitivity(farmSensitivity,nFarms,mS,wS,r);
   initializeLandscape(landscape,farms,farmSensitivity,farmStrategy,neighbourMatrix,nSide,nFarms,a0,d0,r);
   getNaturalConnectedComponents(naturalComponents,landscape,dES);
-  getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrixES,landscape,z);
+  getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,z);
   getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, y1, y0);
   initializePopulation(population,agriculturalProduction);
 
