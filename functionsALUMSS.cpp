@@ -1342,6 +1342,69 @@ double getLandCoverArea(const vector<unsigned int> &landscape, unsigned int land
 
 }
 
+double getAverageFertilityLossPropensity(const vector<unsigned int> &landscape, const vector<double> &ecosystemServices)
+{
+  double averageFertilityLossPropensity=0;
+  unsigned int nAgricultural = 0;
+  unsigned int ix;
+
+  for(ix=0;ix<landscape.size();++ix){
+    if (landscape[ix]==2 || landscape[ix]==3){
+      averageFertilityLossPropensity += (1-ecosystemServices[ix]);
+      nAgricultural+=1;
+    }
+  }
+
+  averageFertilityLossPropensity /= (double)nAgricultural;
+  return averageFertilityLossPropensity;
+}
+
+double getMoranI(const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix)
+{
+  unsigned int ix;
+  // vector to store neighbours of each cell
+  vector<unsigned int> neighboursVector;
+  vector<unsigned int>::iterator it;
+
+  double sumDenom = 0;
+  double sumNumer = 0;
+  double moranI;
+
+  // create a vector where 0 is natural and 1 is non-natural to represent the landscape
+  vector<unsigned int> naturalLandscape(landscape.size(),0);
+  for(ix=0;ix<landscape.size();++ix){
+    if(landscape[ix]>0){
+      naturalLandscape[ix]=1;
+    }
+  }
+
+  double naturalLand = getLandCoverArea(naturalLandscape,0);
+  unsigned int nNeighbours = neighbourMatrix[0].size();
+
+  for(ix=0;ix<naturalLandscape.size();++ix){
+    sumDenom += (naturalLandscape[ix]-naturalLand)*(naturalLandscape[ix]-naturalLand);
+    getNeighbours(neighboursVector,neighbourMatrix,ix);
+    for(it=neighboursVector.begin();it!=neighboursVector.end();++it){
+      sumNumer += (naturalLandscape[ix]-naturalLand)*(naturalLandscape[*it]-naturalLand);
+    }
+    neighboursVector.clear();
+  }
+
+  moranI = sumNumer/sumDenom/(double)nNeighbours;
+
+  return moranI;
+}
+
+void saveLandStructFertLoss(ofstream &file, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, const vector<double> &ecosystemServices )
+{
+  double moranI = getMoranI(landscape,neighbourMatrix);
+  double averageFertilityLossPropensity = getAverageFertilityLossPropensity(landscape,ecosystemServices);
+  double populationSize = population[0];
+
+  file << moranI << " " << averageFertilityLossPropensity << " " << populationSize << "\n";
+
+}
+
 void getESMetrics(vector<double> &metrics, const vector<double> &ecosystemServices)
 {
   double meanES=0;
