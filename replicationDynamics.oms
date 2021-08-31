@@ -27,7 +27,7 @@ val createFile = ScalaTask("""
 
 // Definition of parameter values for the replication experiment
 val setParameters = ScalaTask("""
-  val T = 2010.0
+  val T = 2100.0
   val L = 30.0
   val a0 = 0.2
   val d0 = 0.0
@@ -57,7 +57,7 @@ val replicationDynamics = Replication(
 
 // Definition of the values for the exploration
 val explorationNF = ExplorationTask(
-  mS in Seq(0.005,0.01,0.05,0.1,0.5)
+  mS in Seq(0.25,0.5,0.75,1.0,1.25)
 )
 
 // Workflow
