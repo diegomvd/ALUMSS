@@ -547,7 +547,7 @@ double getResourceDeficit(const vector<double> &agriculturalProduction, const ve
 
   totalAgriculturalProduction=accumulate(agriculturalProduction.begin(),agriculturalProduction.end(),0.0,plus<double>());
   if(population[0]>0){
-    resourceDeficit = (double) population[0] - totalAgriculturalProduction;
+    resourceDeficit = (double) population[0]/10 - totalAgriculturalProduction;
   }
   else{
     resourceDeficit=0;
@@ -1206,7 +1206,7 @@ void initializePopulation( vector<unsigned int> &population, const vector<double
   for(ix=0; ix<agriculturalProduction.size(); ++ix){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  population.push_back((unsigned int)totalAgriculturalProduction);
+  population.push_back((unsigned int)totalAgriculturalProduction*10);
 
   return;
 }
