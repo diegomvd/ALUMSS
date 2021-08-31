@@ -16,6 +16,8 @@ val edge2Area = Val[Double]
 val corrLen = Val[Double]
 val meanES = Val[Double]
 val giniES = Val[Double]
+val Pstd = Val[Double]
+val Nstd = Val[Double]
 
 val eukaryoteEnvironment = LocalEnvironment(40)
 
@@ -76,4 +78,4 @@ val sampling =
       (dES in Seq(1.1,2.1,4.1,8.1,16.1) ),
   )
 
-(sampling on eukaryoteEnvironment hook hook (workDirectory / "experimentAlphaScale-310821.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-310821.csv") )
