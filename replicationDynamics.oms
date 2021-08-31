@@ -32,8 +32,8 @@ val setParameters = ScalaTask("""
   val a0 = 0.1
   val d0 = 0.1
   val nF = 1.0
-  val a = 0.0
-  // val mS = 1.0
+  // val a = 0.0
+  val mS = 0.25
   val wS = 0.0
   val z = 0.25
   val dES = 1.1
@@ -44,7 +44,7 @@ val setParameters = ScalaTask("""
   val sD = 0.01
   val dtSave = 2.0
 """) set(
-    inputs += mS,
+    inputs += a,
     outputs += (T,L,a0,d0,nF,a,mS,wS,z,dES,y0,y1,sFL,sR,sD,dtSave)
 )
 
@@ -57,7 +57,7 @@ val replicationDynamics = Replication(
 
 // Definition of the values for the exploration
 val explorationNF = ExplorationTask(
-  mS in Seq(0.25,0.5,0.75,1.0,1.25)
+  mS in Seq(0.0,0.25,0.5,0.75,1.0)
 )
 
 // Workflow
