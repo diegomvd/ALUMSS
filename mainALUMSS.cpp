@@ -441,8 +441,8 @@ int main(int argc, const char * argv[]){
 
   }
 
-  // saveAggregatedMetrics(tofile_output, t, population, landscape, agriculturalProduction, naturalComponents, neighbourMatrixES, ecosystemServices, nSide);
-  saveLandStructFertLoss(tofile_output, population, landscape, neighbourMatrix, ecosystemServices);
+  saveAggregatedMetrics(tofile_output, t, population, landscape, agriculturalProduction, naturalComponents, neighbourMatrixES, ecosystemServices, nSide);
+  // saveLandStructFertLoss(tofile_output, population, landscape, neighbourMatrix, ecosystemServices);
   // print the landscape and the farms to check if it is ok
   // unsigned int ix,jx,lx;
   // cout << "Natural Landscape:\n";
