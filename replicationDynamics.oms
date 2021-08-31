@@ -32,7 +32,7 @@ val setParameters = ScalaTask("""
   val a0 = 0.1
   val d0 = 0.1
   // val nF = 1.0
-  val a = 0.5
+  val a = 1.0
   val mS = 0.25
   val wS = 0.0
   val z = 0.25
@@ -44,7 +44,7 @@ val setParameters = ScalaTask("""
   val sD = 0.01
   val dtSave = 2.0
 """) set(
-    inputs += a,
+    inputs += nF,
     outputs += (T,L,a0,d0,nF,a,mS,wS,z,dES,y0,y1,sFL,sR,sD,dtSave)
 )
 
