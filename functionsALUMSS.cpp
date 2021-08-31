@@ -601,7 +601,7 @@ void getDemographicPropensities(vector<double> &demographicPropensities, const v
     if (totalAgriculturalProduction > 0){
       // this is to avoid a division by zero
       demographicPropensities[0] = (double) population[0];
-      demographicPropensities[1] = (double) population[0]*population[0]/totalAgriculturalProduction/5;
+      demographicPropensities[1] = (double) population[0]*population[0]/totalAgriculturalProduction/2;
     }
     else{
       // if there is no production just set population to zero, not the best solution but it is hard
