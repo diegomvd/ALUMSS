@@ -1459,7 +1459,9 @@ void saveAggregatedMetrics(ofstream &file, double t, const vector<unsigned int> 
   double meanES = metricsES[0];
   double giniES = metricsES[1];
 
-  file << t << " " << populationSize << " " << naturalLand << " " << degradedLand << " " << lowIntenseLand << " " << highIntenseLand << " " << totalResource << " " << nFrag << " " << maxFragSize << " " << meanEdgeToArea << " " << correlationLength << " " << meanES << " " << giniES << "\n";
+  double moranI = getMoranI(landscape, neighbourMatrixES);
+
+  file << t << " " << populationSize << " " << naturalLand << " " << degradedLand << " " << lowIntenseLand << " " << highIntenseLand << " " << totalResource << " " << nFrag << " " << maxFragSize << " " << meanEdgeToArea << " " << correlationLength << " " << meanES << " " << giniES << " " << moranI << "\n";
 
   return;
 
