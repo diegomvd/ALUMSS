@@ -27,18 +27,18 @@ val createFile = ScalaTask("""
 
 // Definition of parameter values for the replication experiment
 val setParameters = ScalaTask("""
-  val T = 2000.0
+  val T = 2500.0
   val L = 40.0
   val a0 = 0.1
   val d0 = 0.1
-  val nF = 1000.0
+  val nF = 1024.0
   // val a = 1.0
-  val mS = 1.0
+  val mS = 1.25
   val wS = 0.0
   val z = 0.25
   val dES = 1.1
-  val ye = 0.5
-  val k0 = 8.0
+  val ye = 0.8
+  val k0 = 12.0
   val sFL = 0.01
   val sR = 0.1
   val sD = 0.01
@@ -52,7 +52,7 @@ val setParameters = ScalaTask("""
 val replicationDynamics = Replication(
   evaluation = modelPluginEuka hook hookAppend on eukaryoteEnvironment,
   seed = mySeed,
-  sample = 1
+  sample = 10
 )
 
 // Definition of the values for the exploration
