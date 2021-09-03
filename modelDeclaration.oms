@@ -14,8 +14,8 @@ val mS = Val[Double]
 val wS = Val[Double]
 val z = Val[Double]
 val dES = Val[Double]
-val y0 = Val[Double]
-val y1 = Val[Double]
+val ye = Val[Double]
+val k0 = Val[Double]
 val sFL = Val[Double]
 val sR = Val[Double]
 val sD = Val[Double]
@@ -28,10 +28,10 @@ val output = Val[File]
 val modelPluginLocal =
   SystemExecTask(
     command = Seq(
-      "./alumss-exec ${T} ${L} ${a0} ${d0} ${nF} ${a} ${mS} ${wS} ${z} ${dES} ${y0} ${y1} ${sFL} ${sR} ${sD} ${dtSave} ${mySeed}"
+      "./alumss-exec ${T} ${L} ${a0} ${d0} ${nF} ${a} ${mS} ${wS} ${z} ${dES} ${ye} ${k0} ${sFL} ${sR} ${sD} ${dtSave} ${mySeed}"
     ),
   )set(
-    (inputs, outputs) += (T,L,a0,d0,nF,a,mS,wS,z,dES,y0,y1,sFL,sR,sD,dtSave,mySeed),
+    (inputs, outputs) += (T,L,a0,d0,nF,a,mS,wS,z,dES,ye,k0,sFL,sR,sD,dtSave,mySeed),
     outputFiles += ("output.dat",output),
     resources += "/home/karpouzi/Research/Chapter2/ALUMSS/alumss-exec",
 
@@ -46,8 +46,8 @@ val modelPluginLocal =
     wS:=0.0,
     z:=0.25,
     dES:=1.1,
-    y0:=0.2,
-    y1:=1.2,
+    ye:=0.5,
+    k0:=10.0,
     sFL:=0.01,
     sR:=0.1,
     sD:=0.01,
@@ -58,10 +58,10 @@ val modelPluginLocal =
 val modelPluginEuka =
   SystemExecTask(
     command = Seq(
-      "./alumss-exec ${T} ${L} ${a0} ${d0} ${nF} ${a} ${mS} ${wS} ${z} ${dES} ${y0} ${y1} ${sFL} ${sR} ${sD} ${dtSave} ${mySeed} "
+      "./alumss-exec ${T} ${L} ${a0} ${d0} ${nF} ${a} ${mS} ${wS} ${z} ${dES} ${ye} ${k0} ${sFL} ${sR} ${sD} ${dtSave} ${mySeed} "
     ),
   )set(
-    (inputs, outputs) += (T,L,a0,d0,nF,a,mS,wS,z,dES,y0,y1,sFL,sR,sD,dtSave,mySeed),
+    (inputs, outputs) += (T,L,a0,d0,nF,a,mS,wS,z,dES,ye,k0,sFL,sR,sD,dtSave,mySeed),
 
     outputFiles += ("output.dat",output),
     resources+= "/home/AD.LSM.CNRS.FR/diego.bengochea-paz/multi-farming/ALUMSS/alumss-exec",
@@ -77,8 +77,8 @@ val modelPluginEuka =
     wS:=0.0,
     z:=0.25,
     dES:=1.1,
-    y0:=0.2,
-    y1:=1.2,
+    ye:=0.5,
+    k0:=10.0,
     sFL:=0.01,
     sR:=0.1,
     sD:=0.01,

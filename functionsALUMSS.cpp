@@ -511,7 +511,7 @@ void getEcosystemServiceProvision(vector<double> &ecosystemServices, const vecto
 //       - getPropensityVector
 ////////////////////////////////////////////////////////////////////////////////
 
-void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double y1, double y0)
+void getAgriculturalProduction(vector<double> &agriculturalProduction, const vector<unsigned int> &landscape, const vector<double> &ecosystemServices, double ye)
 {
   /*
   returns the total agricultural production for a given "landscape" and
@@ -526,16 +526,16 @@ void getAgriculturalProduction(vector<double> &agriculturalProduction, const vec
   for (ix=0 ; ix<landscape.size() ; ++ix){
     if(landscape[ix]==2){ // cropped patches
       // putting baseline production 0.5 as a test...
-      agriculturalProduction[ix] = y0 + ecosystemServices[ix];
+      agriculturalProduction[ix] = (1-ye) + ye*ecosystemServices[ix];
     }
     else if(landscape[ix]==3){ //intense
-      agriculturalProduction[ix] =  y1 ;
+      agriculturalProduction[ix] =  1 ;
     }
   }
   return;
 }
 
-double getResourceDeficit(const vector<double> &agriculturalProduction, const vector<unsigned int> &population)
+double getResourceDeficit(const vector<double> &agriculturalProduction, const vector<unsigned int> &population, double k0)
 {
   /*
   Given a total production the function returns the resource deficit experienced
@@ -547,7 +547,7 @@ double getResourceDeficit(const vector<double> &agriculturalProduction, const ve
 
   totalAgriculturalProduction=accumulate(agriculturalProduction.begin(),agriculturalProduction.end(),0.0,plus<double>());
   if(population[0]>0){
-    resourceDeficit = (double) population[0]/10 - totalAgriculturalProduction;
+    resourceDeficit = (double) population[0]/k0 - totalAgriculturalProduction;
   }
   else{
     resourceDeficit=0;
@@ -589,7 +589,7 @@ double getTotalManagementPropensity(const vector<unsigned int> &landscape, const
   return totalManagementPropensity;
 }
 
-void getDemographicPropensities(vector<double> &demographicPropensities, const vector<double> &agriculturalProduction, vector<unsigned int> &population)
+void getDemographicPropensities(vector<double> &demographicPropensities, const vector<double> &agriculturalProduction, vector<unsigned int> &population, double k0)
 {
 
   double totalAgriculturalProduction = accumulate(agriculturalProduction.begin(),agriculturalProduction.end(),0.0,plus<double>());
@@ -601,7 +601,7 @@ void getDemographicPropensities(vector<double> &demographicPropensities, const v
     if (totalAgriculturalProduction > 0){
       // this is to avoid a division by zero
       demographicPropensities[0] = (double) population[0];
-      demographicPropensities[1] = (double) population[0]*population[0]/totalAgriculturalProduction/10;
+      demographicPropensities[1] = (double) population[0]*population[0]/totalAgriculturalProduction/k0;
     }
     else{
       // if there is no production just set population to zero, not the best solution but it is hard
@@ -645,7 +645,7 @@ void getSpontaneousPropensities(vector<double> &spontaneousPropensities, const v
     return;
 }
 
-void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices, vector<double> &agriculturalProduction, const vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, const vector<vector<unsigned int>> &neighbourMatrixES, vector<unsigned int> &population, const vector<double> &farmSensitivity, const vector<vector<double>> &farmStrategy, vector<double> &spontaneousPropensities, vector<double> &spontaneousCumulativePropensities, vector<double> &demographicPropensities, vector<double> &demographicCumulativePropensities, double totalManagementPropensity, double resourceDeficit, unsigned int nFarms, unsigned int nSide, double y1, double y0, double sR, double sD, double sFL, double z, double dES, gsl_rng  *r, vector<unsigned int> &countTransitions)
+void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalComponents, vector<double> &ecosystemServices, vector<double> &agriculturalProduction, const vector<vector<unsigned int>> &farms, const vector<vector<unsigned int>> &neighbourMatrix, const vector<vector<unsigned int>> &neighbourMatrixES, vector<unsigned int> &population, const vector<double> &farmSensitivity, const vector<vector<double>> &farmStrategy, vector<double> &spontaneousPropensities, vector<double> &spontaneousCumulativePropensities, vector<double> &demographicPropensities, vector<double> &demographicCumulativePropensities, double totalManagementPropensity, double resourceDeficit, unsigned int nFarms, unsigned int nSide, double ye, double k0, double sR, double sD, double sFL, double z, double dES, gsl_rng  *r, vector<unsigned int> &countTransitions)
 {
 
   vector<double> farmPropensity(nFarms,0);
@@ -760,7 +760,7 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
     getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
     partial_sum(spontaneousPropensities.begin(),spontaneousPropensities.end(),spontaneousCumulativePropensities.begin());
     // updating agricultural production after the management LUC transition
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, y1, y0);
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ye);
 
   }
   else if(xRand < totalManagementPropensity + spontaneousCumulativePropensities.back()){ // if it is a spontaneous transition
@@ -827,7 +827,7 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
       cout << "Error: functionsALUMSS.cpp : solveSSA: spontaneous transition "<< transition << " does not exist.\n";
     }
     // updating agricultural production after the spontaneous LUC transition
-    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, y1, y0);
+    getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ye);
   }
   else{
     // it is a population event
@@ -842,7 +842,7 @@ void solveSSA(vector<unsigned int> &landscape, vector<vector<int>> &naturalCompo
     // demographic propensities are updated below
   }
   // updating demographic propensities after LUC transition or population event
-  getDemographicPropensities(demographicPropensities,agriculturalProduction,population);
+  getDemographicPropensities(demographicPropensities,agriculturalProduction,population,k0);
   partial_sum(demographicPropensities.begin(),demographicPropensities.end(),demographicCumulativePropensities.begin());
 
   return;
@@ -1196,7 +1196,7 @@ void initializeLandscape( vector<unsigned int> &landscape, const vector<vector<u
   return;
 }
 
-void initializePopulation( vector<unsigned int> &population, const vector<double> &agriculturalProduction)
+void initializePopulation( vector<unsigned int> &population, const vector<double> &agriculturalProduction, double k0)
 {
   /*given an agricultural production, it sets the population at an equilibrium
   level
@@ -1206,12 +1206,12 @@ void initializePopulation( vector<unsigned int> &population, const vector<double
   for(ix=0; ix<agriculturalProduction.size(); ++ix){
     totalAgriculturalProduction+=agriculturalProduction[ix];
   }
-  population.push_back((unsigned int)totalAgriculturalProduction*10);
+  population.push_back((unsigned int)totalAgriculturalProduction*k0);
 
   return;
 }
 
-void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<unsigned int> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double mS, double wS, double y1, double y0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
+void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSensitivity, vector<vector<double>> &farmStrategy, vector<unsigned int> &landscape, vector<unsigned int> &population, vector<vector<int>> &naturalComponents, vector<double> &agriculturalProduction, vector<double> &ecosystemServices, vector<vector<unsigned int>> &neighbourMatrix, vector<vector<unsigned int>> &neighbourMatrixES, unsigned int nSide, double a0, double d0, double a, double mS, double wS, double ye, double k0, double z, double dES, unsigned int nFarms, gsl_rng  *r)
 {
 
   initializeVoronoiFarms(farms,neighbourMatrix,nSide,nFarms,r);
@@ -1220,8 +1220,8 @@ void initializeSES( vector<vector<unsigned int>> &farms, vector<double> &farmSen
   initializeLandscape(landscape,farms,farmSensitivity,farmStrategy,neighbourMatrix,nSide,nFarms,a0,d0,r);
   getNaturalConnectedComponents(naturalComponents,landscape,dES);
   getEcosystemServiceProvision(ecosystemServices,naturalComponents,neighbourMatrix,landscape,z);
-  getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, y1, y0);
-  initializePopulation(population,agriculturalProduction);
+  getAgriculturalProduction(agriculturalProduction, landscape, ecosystemServices, ye);
+  initializePopulation(population,agriculturalProduction,k0);
 
   return;
 

@@ -8,7 +8,7 @@ can be found in the first line of the program.
 
 0- EQUIVALENCE BETWEEN PARAMTER NAMES IN CODE AND IN PAPER
       CODE    -   PAPER   -   MEANING
-      y1     -   y1      -   productivity of intensive agriculture
+      ye     -   ye      -   productivity of intensive agriculture
       z     -   z       -   saturation exponent of ecosystem servicaes with area
       a       -   alpha   -   preference for intensification
       w       -   omega   -   clustering parameter
@@ -108,8 +108,8 @@ int main(int argc, const char * argv[]){
   double z; // saturation exponent of the ES-Area relationship
   double dES; // distance at which ES flow and 2 natural cells are considered connected from a EF point of view
 
-  double y1; // productivity of intense agriculture per es productivity
-  double y0; // baseline productivity of low intense agri per es productivity
+  double ye; // fraction of low-intensity production accounted by ecosystem services
+  double k0; // number of households that can be sustained by the production of an intense patch
 
   double sFL; // sensitivity of average fertility loss time with respect to decrease in ES provision
   double sR; // sensitivity of average land recovery time with respect to increases in ES provision
@@ -146,8 +146,8 @@ int main(int argc, const char * argv[]){
         dES = strtod(argv[10], &pEnd);
 
         // agricultural production parameters
-        y0 = strtod(argv[11], &pEnd);
-        y1 = strtod(argv[12], &pEnd);
+        ye = strtod(argv[11], &pEnd);
+        k0 = strtod(argv[12], &pEnd);
 
         // spontaneous land-cover transitions
         sFL = strtod(argv[13], &pEnd);
@@ -192,8 +192,8 @@ int main(int argc, const char * argv[]){
     filename += "_wS_"+allArgs[8];
     filename += "_z_"+allArgs[9];
     filename += "_dES_"+allArgs[10];
-    filename += "_y0_"+allArgs[11];
-    filename += "_y1_"+allArgs[12];
+    filename += "_ye_"+allArgs[11];
+    filename += "_k0_"+allArgs[12];
     filename += "_sFL_"+allArgs[13];
     filename += "_sR_"+allArgs[14];
     filename += "_sD_"+allArgs[15];
@@ -344,10 +344,10 @@ int main(int argc, const char * argv[]){
 
     getNeighbourMatrix(neighbourMatrixES,nSide,dES);
     getNeighbourMatrix(neighbourMatrix,nSide,1.1);
-    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,mS,wS,y1,y0,z,dES,nFarms,r);
-    resourceDeficit = getResourceDeficit(agriculturalProduction, population);
+    initializeSES(farms,farmSensitivity,farmStrategy,landscape,population,naturalComponents,agriculturalProduction,ecosystemServices,neighbourMatrix,neighbourMatrixES,nSide,a0,d0,a,mS,wS,ye,k0,z,dES,nFarms,r);
+    resourceDeficit = getResourceDeficit(agriculturalProduction, population,k0);
     totalManagementPropensity = getTotalManagementPropensity(landscape, farms, farmSensitivity, resourceDeficit);
-    getDemographicPropensities(demographicPropensities,agriculturalProduction,population);
+    getDemographicPropensities(demographicPropensities,agriculturalProduction,population,k0);
     partial_sum(demographicPropensities.begin(),demographicPropensities.end(),demographicCumulativePropensities.begin());
     getSpontaneousPropensities(spontaneousPropensities,landscape,ecosystemServices,nSide,sR,sD,sFL);
     partial_sum(spontaneousPropensities.begin(),spontaneousPropensities.end(),spontaneousCumulativePropensities.begin());
@@ -430,10 +430,10 @@ int main(int argc, const char * argv[]){
     ****************************************************************************/
 
     // making the LUC transition happen, spontaneous propensities are updated inside
-    solveSSA(landscape,naturalComponents,ecosystemServices, agriculturalProduction, farms,neighbourMatrix,neighbourMatrixES,population,farmSensitivity,farmStrategy,spontaneousPropensities,spontaneousCumulativePropensities,demographicPropensities,demographicCumulativePropensities,totalManagementPropensity,resourceDeficit,nFarms,nSide,y1,y0,sR,sD,sFL,z,dES,r,countTransitions);
+    solveSSA(landscape,naturalComponents,ecosystemServices, agriculturalProduction, farms,neighbourMatrix,neighbourMatrixES,population,farmSensitivity,farmStrategy,spontaneousPropensities,spontaneousCumulativePropensities,demographicPropensities,demographicCumulativePropensities,totalManagementPropensity,resourceDeficit,nFarms,nSide,ye,k0,sR,sD,sFL,z,dES,r,countTransitions);
 
     // update total management propensity
-    resourceDeficit = getResourceDeficit(agriculturalProduction,population);
+    resourceDeficit = getResourceDeficit(agriculturalProduction,population,k0);
     totalManagementPropensity = getTotalManagementPropensity(landscape, farms, farmSensitivity, resourceDeficit);
 
     // increment the time and update timestep for ODE solving
