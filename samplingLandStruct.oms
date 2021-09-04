@@ -43,7 +43,7 @@ val readModelOutput =
     )set(
         inputs+=output,
         (inputs, outputs)+=(a,nF,a0),
-        outputs+=(P,N,D,Al,Ah,maxN,edge2Area,corrLen,meanES,giniES)
+        outputs+=(P,N,D,Al,Ah,maxN,edge2Area,corrLen,meanES,giniES,moranI)
     )
 
 val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
