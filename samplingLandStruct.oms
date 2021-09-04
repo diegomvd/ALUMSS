@@ -33,12 +33,12 @@ val readModelOutput =
     val D = values(3).toDouble
     val Al = values(4).toDouble
     val Ah = values(5).toDouble
-    val maxN = values(6).toDouble
-    val edge2Area = values(7).toDouble
-    val corrLen = values(8).toDouble
-    val meanES = values(9).toDouble
-    val giniES = values(10).toDouble
-    val moranI = values(11).toDouble
+    val maxN = values(8).toDouble
+    val edge2Area = values(9).toDouble
+    val corrLen = values(10).toDouble
+    val meanES = values(11).toDouble
+    val giniES = values(12).toDouble
+    val moranI = values(13).toDouble
     """
     )set(
         inputs+=output,
@@ -82,4 +82,4 @@ val sampling =
       (a0 in (0.05 to 1.0 by 0.05) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-040921.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-040921-2.csv") )
