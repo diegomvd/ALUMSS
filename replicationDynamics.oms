@@ -19,26 +19,28 @@ val hookAppend = AppendToFileHook(workDirectory/"replications_T_${T}_n_${L}_a0_$
 // Creation of a file to store the data from the replications
 val createFile = ScalaTask("""
   val f = newFile()
-  f.content = "t P N D A0 A1 Y nFrag meanSize stdSize maxSize meanES stdES connectance nMax nMin pMax pMin ripleyN ripleyD ripleyA0 ripleyA1 meanR stdR corrLen\n"
+  f.content = "t P N D A0 A1 Y nFrag maxSize e2a corrLen meanES ginES moranI\n"
 """) set(
     (inputs,outputs)+=(T,L,a0,d0,nF,a,mS,wS,z,dES,ye,k0,sFL,sR,sD,dtSave),
     outputs+=f
 )
+
+// e << t << " " << populationSize << " " << naturalLand << " " << degradedLand << " " << lowIntenseLand << " " << highIntenseLand << " " << totalResource << " " << nFrag << " " << maxFragSize << " " << meanEdgeToArea << " " << correlationLength << " " << meanES << " " << giniES << " " << moranI << "\n";
 
 // Definition of parameter values for the replication experiment
 val setParameters = ScalaTask("""
   val T = 2500.0
   val L = 40.0
   val a0 = 0.1
-  val d0 = 0.1
-  val nF = 1.0
+  val d0 = 0.
+  val nF = 1024.0
   // val a = 1.0
   val mS = 1.25
   val wS = 0.0
   val z = 0.25
   val dES = 1.1
-  val ye = 0.8
-  val k0 = 12.0
+  val ye = 0.5
+  val k0 = 15
   val sFL = 0.01
   val sR = 0.1
   val sD = 0.01
@@ -52,7 +54,7 @@ val setParameters = ScalaTask("""
 val replicationDynamics = Replication(
   evaluation = modelPluginEuka hook hookAppend on eukaryoteEnvironment,
   seed = mySeed,
-  sample = 10
+  sample = 1
 )
 
 // Definition of the values for the exploration
