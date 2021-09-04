@@ -17,8 +17,8 @@ val corrLen = Val[Double]
 val meanES = Val[Double]
 val giniES = Val[Double]
 val moranI = Val[Double]
-val Pstd = Val[Double]
-val Nstd = Val[Double]
+val mIstd = Val[Double]
+
 
 val eukaryoteEnvironment = LocalEnvironment(40)
 
