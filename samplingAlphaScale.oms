@@ -16,6 +16,7 @@ val edge2Area = Val[Double]
 val corrLen = Val[Double]
 val meanES = Val[Double]
 val giniES = Val[Double]
+val moranI = Val[Double]
 val Pstd = Val[Double]
 val Nstd = Val[Double]
 
@@ -37,6 +38,7 @@ val readModelOutput =
     val corrLen = values(8).toDouble
     val meanES = values(9).toDouble
     val giniES = values(10).toDouble
+    val moranI = values(11).toDouble
     """
     )set(
         inputs+=output,
@@ -65,6 +67,7 @@ val replications =
       corrLen aggregate average,
       meanES aggregate average,
       giniES aggregate average,
+      moranI aggregate average,
       P aggregate meanSquaredError as Pstd,
       N aggregate meanSquaredError as Nstd)
   )
@@ -73,9 +76,9 @@ val sampling =
   DirectSampling(
     evaluation = replications,
     sampling =
-      (a in Seq(0.0,0.2,0.4,0.6,0.8,1.0) )x
+      (a in Seq(0.0,0.5,1.0) )x
       (nF in Seq(2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0,512.0,1024.0) )x
       (dES in Seq(1.1,2.1,4.1,8.1,16.1) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-310821.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-040921.csv") )
