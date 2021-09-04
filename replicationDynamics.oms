@@ -25,11 +25,9 @@ val createFile = ScalaTask("""
     outputs+=f
 )
 
-// e << t << " " << populationSize << " " << naturalLand << " " << degradedLand << " " << lowIntenseLand << " " << highIntenseLand << " " << totalResource << " " << nFrag << " " << maxFragSize << " " << meanEdgeToArea << " " << correlationLength << " " << meanES << " " << giniES << " " << moranI << "\n";
-
 // Definition of parameter values for the replication experiment
 val setParameters = ScalaTask("""
-  val T = 2500.0
+  val T = 1500.0
   val L = 40.0
   val a0 = 0.1
   val d0 = 0.
