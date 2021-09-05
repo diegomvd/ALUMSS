@@ -8,15 +8,15 @@ import _file_.modelDeclaration._
 
 val P = Val[Double]
 val N = Val[Double]
-val D = Val[Double]
-val Al = Val[Double]
-val Ah = Val[Double]
-val maxN = Val[Double]
-val edge2Area = Val[Double]
-val corrLen = Val[Double]
-val meanES = Val[Double]
-val giniES = Val[Double]
-val moranI = Val[Double]
+// val D = Val[Double]
+// val Al = Val[Double]
+// val Ah = Val[Double]
+// val maxN = Val[Double]
+// val edge2Area = Val[Double]
+// val corrLen = Val[Double]
+// val meanES = Val[Double]
+// val giniES = Val[Double]
+// val moranI = Val[Double]
 val Pstd = Val[Double]
 val Nstd = Val[Double]
 
@@ -30,20 +30,20 @@ val readModelOutput =
     val values = lastLine.split(" ")
     val P = values(1).toDouble
     val N = values(2).toDouble
-    val D = values(3).toDouble
-    val Al = values(4).toDouble
-    val Ah = values(5).toDouble
-    val maxN = values(8).toDouble
-    val edge2Area = values(9).toDouble
-    val corrLen = values(10).toDouble
-    val meanES = values(11).toDouble
-    val giniES = values(12).toDouble
-    val moranI = values(13).toDouble
+    // val D = values(3).toDouble
+    // val Al = values(4).toDouble
+    // val Ah = values(5).toDouble
+    // val maxN = values(8).toDouble
+    // val edge2Area = values(9).toDouble
+    // val corrLen = values(10).toDouble
+    // val meanES = values(11).toDouble
+    // val giniES = values(12).toDouble
+    // val moranI = values(13).toDouble
     """
     )set(
         inputs+=output,
         (inputs, outputs)+=(a,nF,dES),
-        outputs+=(P,N,D,Al,Ah,maxN,edge2Area,corrLen,meanES,giniES,moranI)
+        outputs+=(P,N) //,D,Al,Ah,maxN,edge2Area,corrLen,meanES,giniES,moranI)
     )
 
 val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
@@ -59,15 +59,15 @@ val replications =
       dES aggregate average,
       P aggregate average,
       N aggregate average,
-      D aggregate average,
-      Al aggregate average,
-      Ah aggregate average,
-      maxN aggregate average,
-      edge2Area aggregate average,
-      corrLen aggregate average,
-      meanES aggregate average,
-      giniES aggregate average,
-      moranI aggregate average,
+      // D aggregate average,
+      // Al aggregate average,
+      // Ah aggregate average,
+      // maxN aggregate average,
+      // edge2Area aggregate average,
+      // corrLen aggregate average,
+      // meanES aggregate average,
+      // giniES aggregate average,
+      // moranI aggregate average,
       P aggregate meanSquaredError as Pstd,
       N aggregate meanSquaredError as Nstd)
   )
@@ -81,4 +81,4 @@ val sampling =
       (dES in Seq(1.1,2.1,4.1,8.1,16.1) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-040921.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-050921.csv") )
