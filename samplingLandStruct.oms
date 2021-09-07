@@ -77,7 +77,7 @@ val replications =
   Replication(
     evaluation = modelRunAndRead,
     seed = mySeed,
-    sample = 50
+    sample = 100
   )
 
 val sampling =
@@ -87,8 +87,8 @@ val sampling =
       (T is 0.0)x
       (L is 40.0)x
       (a in Seq(0.0,0.5,1.0) )x
-      (nF in LogRange(2.0,1024.0,50) )x
-      (a0 in Seq(0.2,0.4) ),
+      (nF in LogRange(2.0,1024.0,100) )x
+      (a0 in Seq(0.3333) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-070921-4.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-070921-5.csv") )
