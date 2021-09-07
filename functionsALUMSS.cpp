@@ -1429,6 +1429,42 @@ void getESMetrics(vector<double> &metrics, const vector<double> &ecosystemServic
   return;
 }
 
+void getESMetricsAgri(vector<double> &metrics, const vector<double> &ecosystemServices, const vector<unsigned int> &landscape)
+{
+  double meanES=0;
+  double giniES=0;
+  unsigned int countAgricultural=0;
+  unsigned int ix,jx;
+  vector<unsigned int> agriculturalLandscape(landscape.size(),0);
+
+  if (landscape.size()>0){
+    for(ix=0;ix<landscape.size();++ix){
+      if(landscape[ix]>1){
+        agriculturalLandscape[ix]=1; // fill the locations with agricultural cells
+        countAgricultural+=1;
+      }
+    }
+  }
+
+  // check if the vector is not empty: it shoudn't but just in case...
+  if (ecosystemServices.size()>0){
+    for(ix=0;ix<ecosystemServices.size();++ix){
+      meanES+=ecosystemServices[ix]*agriculturalLandscape[ix]; // if non agricultural do not count it
+      for (jx=0;jx<ecosystemServices.size();++jx){
+        giniES += abs(ecosystemServices[ix]-ecosystemServices[jx])*agriculturalLandscape[ix]*agriculturalLandscape[jx]; // both need to be agricultural
+      }
+    }
+    if(countAgricultural>0){
+      meanES/=countAgricultural;
+      giniES/=countAgricultural*countAgricultural*2*meanES;
+    }
+  }
+  metrics[0] = meanES;
+  metrics[1] = giniES;
+
+  return;
+}
+
 void saveAggregatedMetrics(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrixES, const vector<double> &ecosystemServices, unsigned int nSide)
 {
 
@@ -1455,7 +1491,8 @@ void saveAggregatedMetrics(ofstream &file, double t, const vector<unsigned int> 
   double correlationLength = getCorrelationLength(naturalComponents,landscape,nSide);
   // ecosystem service metrics
   vector<double> metricsES(2);
-  getESMetrics(metricsES, ecosystemServices);
+  // getESMetrics(metricsES, ecosystemServices);
+  getESMetricsAgri(metricsES, ecosystemServices,landscape);
   double meanES = metricsES[0];
   double giniES = metricsES[1];
 

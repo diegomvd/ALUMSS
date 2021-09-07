@@ -92,6 +92,7 @@ double getAverageFertilityLossPropensity(const vector<unsigned int> &landscape, 
 double getMoranI(const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix);
 void saveLandStructFertLoss(ofstream &file, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<vector<unsigned int>> &neighbourMatrix, const vector<double> &ecosystemServices );
 void getESMetrics(vector<double> &metrics, const vector<double> &ecosystemServices);
+void getESMetricsAgri(vector<double> &metrics, const vector<double> &ecosystemServices, const vector<unsigned int> &landscape);
 void saveAggregatedMetrics(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<vector<unsigned int>> &neighbourMatrixES, const vector<double> &ecosystemServices, unsigned int n);
 void saveAggregated(ofstream &file, double t, const vector<unsigned int> &population, const vector<unsigned int> &landscape, const vector<double> &agriculturalProduction, const vector<vector<int>> &naturalComponents, const vector<double> &ecosystemServices, unsigned int n, double ripleyDistance, double nMax, double nMin, double pMax, double pMin);
 void saveLandscape(ofstream &file, double t, const vector<unsigned int> &landscape);

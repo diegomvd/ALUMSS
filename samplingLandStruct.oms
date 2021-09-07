@@ -48,28 +48,35 @@ val readModelOutput =
 
 val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
 
-val replications =
-  Replication(
-    evaluation = modelRunAndRead,
-    seed = mySeed,
-    sample = 10,
-    aggregation = Seq (
-      a aggregate average,
-      nF aggregate average,
-      a0 aggregate average,
-      P aggregate average,
-      N aggregate average,
-      D aggregate average,
-      Al aggregate average,
-      Ah aggregate average,
-      maxN aggregate average,
-      edge2Area aggregate average,
-      corrLen aggregate average,
-      meanES aggregate average,
-      giniES aggregate average,
-      moranI aggregate average,
-      moranI aggregate meanSquaredError as mIstd)
-  )
+// val replications =
+//   Replication(
+//     evaluation = modelRunAndRead,
+//     seed = mySeed,
+//     sample = 10,
+//     aggregation = Seq (
+//       a aggregate average,
+//       nF aggregate average,
+//       a0 aggregate average,
+//       P aggregate average,
+//       N aggregate average,
+//       D aggregate average,
+//       Al aggregate average,
+//       Ah aggregate average,
+//       maxN aggregate average,
+//       edge2Area aggregate average,
+//       corrLen aggregate average,
+//       meanES aggregate average,
+//       giniES aggregate average,
+//       moranI aggregate average,
+//       moranI aggregate meanSquaredError as mIstd)
+//   )
+
+  val replications =
+    Replication(
+      evaluation = modelRunAndRead,
+      seed = mySeed,
+      sample = 20
+    )
 
 val sampling =
   DirectSampling(
@@ -77,9 +84,9 @@ val sampling =
     sampling =
       (T is 0.0)x
       (L is 40.0)x
-      (a in Seq(0.0,1.0) )x
-      (nF in Seq(1.0,1024.0) )x
-      (a0 in (0.05 to 0.95 by 0.05) ),
+      (a in Seq(0.0,0.5,1.0) )x
+      (nF in Seq(1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0,512.0,1024.0) )x
+      (a0 in Seq(0.2,0.4) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-040921-2.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-070921.csv") )
