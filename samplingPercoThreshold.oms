@@ -1,0 +1,60 @@
+/*
+This script launches a 3D sampling on the alpha, nF, dES space to explore the effects of land-use
+strategy and spatial scale on P, N and maxFragSize/N
+*/
+
+// Import the model plugin
+import _file_.modelDeclaration._
+
+val N = Val[Double]
+val maxN = Val[Double]
+val edge2Area = Val[Double]
+val corrLen = Val[Double]
+val meanES = Val[Double]
+val giniES = Val[Double]
+val moranI = Val[Double]
+
+val eukaryoteEnvironment = LocalEnvironment(40)
+
+val readModelOutput =
+    ScalaTask("""
+    // read file as an array of lines and get last line
+    val lastLine = scala.io.Source.fromFile(output).getLines.toList.last.mkString
+    // split the string and store it in an array
+    val values = lastLine.split(" ")
+    val N = values(2).toDouble
+    val maxN = values(8).toDouble
+    val edge2Area = values(9).toDouble
+    val corrLen = values(10).toDouble
+    val meanES = values(11).toDouble
+    val giniES = values(12).toDouble
+    val moranI = values(13).toDouble
+    """
+    )set(
+        inputs+=output,
+        (inputs, outputs)+=(a,nF,a0),
+        outputs+=(N,maxN,edge2Area,corrLen,meanES,giniES,moranI)
+    )
+
+val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
+
+val replications =
+  Replication(
+    evaluation = modelRunAndRead,
+    seed = mySeed,
+    sample = 30
+  )
+
+val sampling =
+  DirectSampling(
+    evaluation = replications,
+    sampling =
+      (T is 0.0)x
+      (L is 40.0)x
+      (a in Seq(0.0,1.0) )x
+      (dES in Seq(1.1,2.1,4.1,8.1,16.1))
+      (nF in LogRange(1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0,512.0,1024.0) )x
+      (a0 in (0.1 to 0.9 by 0.01) ),
+  )
+
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentPercThreshold-070921.csv") )
