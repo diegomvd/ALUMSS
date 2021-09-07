@@ -32,7 +32,7 @@ val readModelOutput =
     """
     )set(
         inputs+=output,
-        (inputs, outputs)+=(a,nF,a0),
+        (inputs, outputs)+=(a,nF,a0,L),
         outputs+=(N,maxN,edge2Area,corrLen,meanES,giniES,moranI)
     )
 
