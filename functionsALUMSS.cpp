@@ -1498,7 +1498,9 @@ void saveAggregatedMetrics(ofstream &file, double t, const vector<unsigned int> 
 
   double moranI = getMoranI(landscape, neighbourMatrixES);
 
-  file << t << " " << populationSize << " " << naturalLand << " " << degradedLand << " " << lowIntenseLand << " " << highIntenseLand << " " << totalResource << " " << nFrag << " " << maxFragSize << " " << meanEdgeToArea << " " << correlationLength << " " << meanES << " " << giniES << " " << moranI << "\n";
+  double averageFertilityLossPropensity = getAverageFertilityLossPropensity(landscape,ecosystemServices);
+
+  file << t << " " << populationSize << " " << naturalLand << " " << degradedLand << " " << lowIntenseLand << " " << highIntenseLand << " " << totalResource << " " << nFrag << " " << maxFragSize << " " << meanEdgeToArea << " " << correlationLength << " " << meanES << " " << giniES << " " << moranI << " " << averageFertilityLossPropensity << "\n";
 
   return;
 
