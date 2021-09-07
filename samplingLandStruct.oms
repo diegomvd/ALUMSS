@@ -18,6 +18,7 @@ val meanES = Val[Double]
 val giniES = Val[Double]
 val moranI = Val[Double]
 val mIstd = Val[Double]
+val fertLoss = Val[Double]
 
 
 val eukaryoteEnvironment = LocalEnvironment(40)
@@ -39,11 +40,12 @@ val readModelOutput =
     val meanES = values(11).toDouble
     val giniES = values(12).toDouble
     val moranI = values(13).toDouble
+    val fertLoss = values(14).toDouble
     """
     )set(
         inputs+=output,
         (inputs, outputs)+=(a,nF,a0),
-        outputs+=(P,N,D,Al,Ah,maxN,edge2Area,corrLen,meanES,giniES,moranI)
+        outputs+=(P,N,D,Al,Ah,maxN,edge2Area,corrLen,meanES,giniES,moranI,fertLoss)
     )
 
 val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
@@ -89,4 +91,4 @@ val sampling =
       (a0 in Seq(0.2,0.4) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-070921-2.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-070921-3.csv") )
