@@ -47,30 +47,37 @@ val readModelOutput =
     )
 
 val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
+//
+// val replications =
+//   Replication(
+//     evaluation = modelRunAndRead,
+//     seed = mySeed,
+//     sample = 10,
+//     aggregation = Seq (
+//       a aggregate average,
+//       nF aggregate average,
+//       dES aggregate average,
+//       P aggregate average,
+//       N aggregate average,
+//       // D aggregate average,
+//       // Al aggregate average,
+//       // Ah aggregate average,
+//       // maxN aggregate average,
+//       // edge2Area aggregate average,
+//       // corrLen aggregate average,
+//       // meanES aggregate average,
+//       // giniES aggregate average,
+//       // moranI aggregate average,
+//       P aggregate meanSquaredError as Pstd,
+//       N aggregate meanSquaredError as Nstd)
+//   )
 
 val replications =
-  Replication(
-    evaluation = modelRunAndRead,
-    seed = mySeed,
-    sample = 10,
-    aggregation = Seq (
-      a aggregate average,
-      nF aggregate average,
-      dES aggregate average,
-      P aggregate average,
-      N aggregate average,
-      // D aggregate average,
-      // Al aggregate average,
-      // Ah aggregate average,
-      // maxN aggregate average,
-      // edge2Area aggregate average,
-      // corrLen aggregate average,
-      // meanES aggregate average,
-      // giniES aggregate average,
-      // moranI aggregate average,
-      P aggregate meanSquaredError as Pstd,
-      N aggregate meanSquaredError as Nstd)
-  )
+    Replication(
+      evaluation = modelRunAndRead,
+      seed = mySeed,
+      sample = 10
+    )
 
 val sampling =
   DirectSampling(
@@ -81,4 +88,4 @@ val sampling =
       (dES in Seq(1.1,2.1,4.1,8.1,16.1) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-050921.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-070921.csv") )

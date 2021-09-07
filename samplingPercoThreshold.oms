@@ -42,7 +42,19 @@ val replications =
   Replication(
     evaluation = modelRunAndRead,
     seed = mySeed,
-    sample = 30
+    sample = 30,
+    aggregation = Seq (
+        a aggregate average,
+        nF aggregate average,
+        a0 aggregate average,
+        L aggregate average,
+        N aggregate average,
+        maxN aggregate average,
+        edge2Area aggregate average,
+        corrLen aggregate average,
+        meanES aggregate average,
+        giniES aggregate average,
+        moranI aggregate average)
   )
 
 val sampling =
@@ -57,4 +69,4 @@ val sampling =
       (a0 in (0.1 to 0.9 by 0.01) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentPercThreshold-070921.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentPercThreshold-070921-2.csv") )
