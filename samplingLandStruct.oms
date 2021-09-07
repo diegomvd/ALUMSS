@@ -87,8 +87,8 @@ val sampling =
       (T is 0.0)x
       (L is 40.0)x
       (a in Seq(0.0,0.5,1.0) )x
-      (nF in LogRange(1.0,1024.0,20) )x
+      (nF in LogRange(2.0,1024.0,50) )x
       (a0 in Seq(0.2,0.4) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-070921-3.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentLandStruct-070921-4.csv") )
