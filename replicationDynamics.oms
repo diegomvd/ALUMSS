@@ -29,11 +29,11 @@ val createFile = ScalaTask("""
 val setParameters = ScalaTask("""
   val T = 1500.0
   val L = 40.0
-  val a0 = 0.1
+  val a0 = 0.15
   val d0 = 0.0
   val nF = 1024.0
   // val a = 0.0
-  val mS = 1.5
+  val mS = 2.0
   val wS = 0.0
   val z = 0.25
   val dES = 1.1
@@ -57,7 +57,7 @@ val replicationDynamics = Replication(
 
 // Definition of the values for the exploration
 val explorationNF = ExplorationTask(
-  a in Seq(0.0,0.5,1.0)
+  a in Seq(0.0,0.25,0.5,0.75,1.0)
 )
 
 // Workflow
