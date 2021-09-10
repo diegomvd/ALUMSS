@@ -57,7 +57,7 @@ val replicationDynamics = Replication(
 
 // Definition of the values for the exploration
 val explorationNF = ExplorationTask(
-  nf in Seq(1.0,1024.0)
+  nF in Seq(1.0,1024.0)
 )
 
 // Workflow
