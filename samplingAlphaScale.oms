@@ -88,4 +88,4 @@ val sampling =
       (dES in Seq(8.1,16.1) ),
   )
 
-(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-100921.csv") )
+(sampling on eukaryoteEnvironment hook (workDirectory / "experimentAlphaScale-110921.csv") )
