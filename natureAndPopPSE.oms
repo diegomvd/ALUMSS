@@ -30,21 +30,21 @@ val modelRunAndRead = MoleTask(modelPluginEuka -- readModelOutput)
 
 val naturePopPSE = PSEEvolution(
   evaluation = modelRunAndRead,
-  parallelism = 35,
+  parallelism = 40,
   termination = 20000,
   genome = Seq(
-    nF in (1.0,500.0),
+    nF in (1.0,1024.0),
     a in (0.0,1.0),
-    mS in (0.5,1.5),
-    wS in (0.0,1.0),
+    mS in (0.75,1.5),
+    dES in (1.1,16.1),
   ),
   objective = Seq(
-    P in (0.0 to 650.0 by 50.0),
+    P in (0.0 to 7000.0 by 500.0),
     N in (0.0 to 1.0 by 0.05)
   ),
   stochastic = Stochastic(seed = mySeed)
 )
 
-(naturePopPSE on eukaryoteEnvironment hook (workDirectory / "resultsNaturePopPSE2", frequency = 100) )
+(naturePopPSE on eukaryoteEnvironment hook (workDirectory / "resultsNaturePopPSE3", frequency = 100) )
 
 // comment: should have removed the case P=0 to avoid the transients
